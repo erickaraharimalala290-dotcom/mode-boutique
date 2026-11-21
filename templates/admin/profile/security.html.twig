@@ -1,0 +1,166 @@
+{% extends 'layouts/admin-layout.html.twig' %}
+
+{% block title %}Sécurité | ModeBoutique{% endblock %}
+
+{% block admin_content %}
+
+<div class="mx-auto max-w-4xl space-y-6">
+
+    {# En-tête de la page #}
+    <div>
+        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#9B7049]">
+            Protection du compte
+        </p>
+
+        <h1 class="mt-2 text-2xl font-bold text-[#292524] sm:text-3xl">
+            Sécurité et mot de passe
+        </h1>
+
+        <p class="mt-2 text-sm leading-6 text-stone-500">
+            Modifiez votre mot de passe afin de protéger votre compte.
+        </p>
+    </div>
+
+    <section class="rounded-2xl border border-[#E5D9CA] bg-white p-5 shadow-sm sm:p-8">
+
+        <div class="mb-6 flex items-start gap-4 border-b border-[#E5D9CA] pb-6">
+
+            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#F5F0E8] text-xl text-[#8C694A]">
+                ♧
+            </div>
+
+            <div>
+                <h2 class="text-lg font-bold text-[#292524]">
+                    Modifier mon mot de passe
+                </h2>
+
+                <p class="mt-1 text-sm leading-6 text-stone-500">
+                    Saisissez votre mot de passe actuel, puis choisissez et confirmez votre nouveau mot de passe.
+                </p>
+            </div>
+
+        </div>
+
+        {# Messages de notification #}
+        {% for message in app.flashes('success') %}
+            <div class="mb-5 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-800" role="status">
+                {{ message }}
+            </div>
+        {% endfor %}
+
+        {% for message in app.flashes('error') %}
+            <div class="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+
+        <form
+            action="{{ path('admin_profile_security') }}"
+            method="POST"
+            class="space-y-5"
+        >
+
+            <input
+                type="hidden"
+                name="_csrf_token"
+                value="{{ csrf_token('change_password') }}"
+            >
+
+            {# Mot de passe actuel #}
+            <div>
+                <label for="currentPassword" class="mb-2 block text-sm font-semibold text-[#292524]">
+                    Mot de passe actuel
+                </label>
+
+                <input
+                    type="password"
+                    id="currentPassword"
+                    name="currentPassword"
+                    autocomplete="current-password"
+                    placeholder="Votre mot de passe actuel"
+                    required
+                    class="w-full rounded-xl border border-[#E5D9CA] bg-white px-4 py-3 text-[#292524] outline-none transition focus:border-[#B08D67] focus:ring-2 focus:ring-[#B08D67]/20"
+                >
+            </div>
+
+            {# Nouveau mot de passe #}
+            <div>
+                <label for="newPassword" class="mb-2 block text-sm font-semibold text-[#292524]">
+                    Nouveau mot de passe
+                </label>
+
+                <input
+                    type="password"
+                    id="newPassword"
+                    name="newPassword"
+                    autocomplete="new-password"
+                    placeholder="Au moins 6 caractères"
+                    minlength="6"
+                    required
+                    class="w-full rounded-xl border border-[#E5D9CA] bg-white px-4 py-3 text-[#292524] outline-none transition focus:border-[#B08D67] focus:ring-2 focus:ring-[#B08D67]/20"
+                >
+
+                <p class="mt-2 text-xs leading-5 text-stone-500">
+                    Choisissez un mot de passe long, unique et difficile à deviner.
+                </p>
+            </div>
+
+            {# Confirmation #}
+            <div>
+                <label for="confirmPassword" class="mb-2 block text-sm font-semibold text-[#292524]">
+                    Confirmer le nouveau mot de passe
+                </label>
+
+                <input
+                    type="password"
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    autocomplete="new-password"
+                    placeholder="Répétez le nouveau mot de passe"
+                    minlength="6"
+                    required
+                    class="w-full rounded-xl border border-[#E5D9CA] bg-white px-4 py-3 text-[#292524] outline-none transition focus:border-[#B08D67] focus:ring-2 focus:ring-[#B08D67]/20"
+                >
+            </div>
+
+            {# Actions #}
+            <div class="flex flex-wrap justify-end gap-3 border-t border-[#E5D9CA] pt-6">
+
+                <a
+                    href="{{ path('admin_dashboard') }}"
+                    class="rounded-full border border-[#E5D9CA] px-5 py-3 text-sm font-semibold text-stone-600 transition hover:bg-[#F5F0E8]"
+                >
+                    Annuler
+                </a>
+
+                <button
+                    type="submit"
+                    class="rounded-full bg-[#B08D67] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#96734F]"
+                >
+                    Modifier mon mot de passe
+                </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
+    {# Conseils de sécurité #}
+    <section class="rounded-2xl border border-[#E5D9CA] bg-[#F5F0E8] p-5 sm:p-6">
+
+        <h3 class="text-sm font-semibold text-[#292524]">
+            Conseils pour protéger votre compte
+        </h3>
+
+        <ul class="mt-3 space-y-2 text-sm leading-6 text-stone-600">
+            <li>• Ne partagez jamais votre mot de passe.</li>
+            <li>• Évitez de réutiliser le mot de passe d'un autre site.</li>
+            <li>• Déconnectez-vous après avoir utilisé un ordinateur partagé.</li>
+        </ul>
+
+    </section>
+
+</div>
+
+{% endblock %}

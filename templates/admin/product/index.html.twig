@@ -1,0 +1,692 @@
+{% extends 'layouts/admin-layout.html.twig' %}
+
+{% block title %}Gestion des produits | ModeBoutique{% endblock %}
+
+{% block admin_content %}
+
+    <div class="space-y-8">
+
+        {# Messages flash #}
+        {% for message in app.flashes('success') %}
+            <div class="rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-sm text-green-700">
+                {{ message }}
+            </div>
+        {% endfor %}
+
+        {% for message in app.flashes('error') %}
+            <div class="rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
+                {{ message }}
+            </div>
+        {% endfor %}
+
+        {# En-tête #}
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <p class="text-sm font-medium text-[#9B7049]">
+                    ADMINISTRATION / CATALOGUE
+                </p>
+
+                <h1 class="mt-2 text-3xl font-bold tracking-tight text-[#292524]">
+                    Nos produits
+                </h1>
+
+                <p class="mt-2 text-sm text-[#78716C]">
+                    Gérez les produits de votre boutique ModeBoutique.
+                </p>
+            </div>
+
+            <a
+                href="{{ path('admin_products_new') }}"
+                class="inline-flex items-center justify-center gap-2 rounded-xl bg-[#292524] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#44403C]"
+            >
+
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                >
+                    <path d="M12 5v14"/>
+                    <path d="M5 12h14"/>
+                </svg>
+
+                Ajouter un produit
+            </a>
+        </div>
+
+        {# Cartes statistiques dynamiques #}
+        {% set totalProducts = products|length %}
+        {% set publishedProducts = products|filter(product => product.isActive)|length %}
+        {% set disabledProducts = totalProducts - publishedProducts %}
+        {% set featuredProducts = products|filter(product => product.isFeatured)|length %}
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+
+            {# Tous les produits #}
+            <div class="rounded-2xl border border-[#E8DED3] bg-white p-5 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-[#78716C]">
+                            Tous les produits
+                        </p>
+
+                        <p class="mt-3 text-3xl font-bold text-[#292524]">
+                            {{ totalProducts }}
+                        </p>
+
+                        <p class="mt-2 text-xs text-[#78716C]">
+                            Produits enregistrés
+                        </p>
+                    </div>
+
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-[#F5F0E8] text-[#8C6038]">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="23"
+                            height="23"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                        >
+                            <path d="m16 10 4-2-8-4-8 4 4 2"/>
+                            <path d="m4 8 8 4 8-4"/>
+                            <path d="M4 8v8l8 4 8-4V8"/>
+                            <path d="M12 12v8"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            {# Produits publiés #}
+            <div class="rounded-2xl border border-[#E8DED3] bg-white p-5 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-[#78716C]">
+                            Produits publiés
+                        </p>
+
+                        <p class="mt-3 text-3xl font-bold text-green-700">
+                            {{ publishedProducts }}
+                        </p>
+
+                        <p class="mt-2 text-xs text-[#78716C]">
+                            Produits actifs
+                        </p>
+                    </div>
+
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-50 text-green-700">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="23"
+                            height="23"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                        >
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="m8 12 3 3 5-6"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            {# Produits désactivés #}
+            <div class="rounded-2xl border border-[#E8DED3] bg-white p-5 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-[#78716C]">
+                            Produits désactivés
+                        </p>
+
+                        <p class="mt-3 text-3xl font-bold text-red-600">
+                            {{ disabledProducts }}
+                        </p>
+
+                        <p class="mt-2 text-xs text-[#78716C]">
+                            Produits inactifs
+                        </p>
+                    </div>
+
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-red-600">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="23"
+                            height="23"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                        >
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="m15 9-6 6"/>
+                            <path d="m9 9 6 6"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            {# Produits en vedette #}
+            <div class="rounded-2xl border border-[#E8DED3] bg-white p-5 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-[#78716C]">
+                            Produits en vedette
+                        </p>
+
+                        <p class="mt-3 text-3xl font-bold text-[#9B7049]">
+                            {{ featuredProducts }}
+                        </p>
+
+                        <p class="mt-2 text-xs text-[#78716C]">
+                            Produits mis en avant
+                        </p>
+                    </div>
+
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-[#F5F0E8] text-[#9B7049]">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="23"
+                            height="23"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                        >
+                            <path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        {# Recherche et filtres #}
+        <div class="rounded-2xl border border-[#E8DED3] bg-white p-5 shadow-sm">
+
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+
+                <div class="md:col-span-1">
+                    <label
+                        for="product-search"
+                        class="mb-2 block text-sm font-medium text-[#44403C]"
+                    >
+                        Rechercher un produit
+                    </label>
+
+                    <div class="relative">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#A8A29E]"
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                        >
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="m21 21-4.35-4.35"/>
+                        </svg>
+
+                        <input
+                            id="product-search"
+                            type="search"
+                            placeholder="Nom, marque..."
+                            class="w-full rounded-xl border border-[#E8DED3] py-3 pl-12 pr-4 text-sm text-[#292524] outline-none transition focus:border-[#B08D67] focus:ring-2 focus:ring-[#B08D67]/20"
+                        >
+                    </div>
+                </div>
+
+                <div>
+                    <label
+                        for="category-filter"
+                        class="mb-2 block text-sm font-medium text-[#44403C]"
+                    >
+                        Catégorie
+                    </label>
+
+                    <select
+                        id="category-filter"
+                        class="w-full rounded-xl border border-[#E8DED3] bg-white px-4 py-3 text-sm text-[#44403C] outline-none focus:border-[#B08D67] focus:ring-2 focus:ring-[#B08D67]/20"
+                    >
+                        <option value="">Toutes les catégories</option>
+
+                        {% set categories = [] %}
+
+                        {% for product in products %}
+                            {% if product.category %}
+                                {% set categoryName = product.category.name %}
+
+                                {% if categoryName not in categories %}
+                                    {% set categories = categories|merge([categoryName]) %}
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+
+                        {% for category in categories|sort %}
+                            <option value="{{ category|lower }}">
+                                {{ category }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label
+                        for="status-filter"
+                        class="mb-2 block text-sm font-medium text-[#44403C]"
+                    >
+                        Statut
+                    </label>
+
+                    <select
+                        id="status-filter"
+                        class="w-full rounded-xl border border-[#E8DED3] bg-white px-4 py-3 text-sm text-[#44403C] outline-none focus:border-[#B08D67] focus:ring-2 focus:ring-[#B08D67]/20"
+                    >
+                        <option value="">Tous les statuts</option>
+                        <option value="actif">Publié</option>
+                        <option value="inactif">Désactivé</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[#F0E7DE] pt-4">
+                <p class="text-sm text-[#78716C]">
+                    Résultats :
+                    <span id="visible-count" class="font-semibold text-[#292524]">
+                        {{ totalProducts }}
+                    </span>
+                    produit(s)
+                </p>
+
+                <button
+                    id="reset-filters"
+                    type="button"
+                    class="text-sm font-semibold text-[#8C6038] transition hover:text-[#292524]"
+                >
+                    Réinitialiser les filtres
+                </button>
+            </div>
+
+        </div>
+
+        {# Tableau des produits #}
+        <div class="overflow-hidden rounded-2xl border border-[#E8DED3] bg-white shadow-sm">
+
+            <div class="flex flex-col gap-2 border-b border-[#E8DED3] px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
+                <h2 class="text-lg font-bold text-[#292524]">
+                    Liste des produits
+                </h2>
+
+                <p class="text-sm text-[#78716C]">
+                    Gestion du catalogue
+                </p>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[1000px] text-left text-sm">
+
+                    <thead class="bg-[#F5F0E8] text-xs uppercase tracking-wide text-[#57534E]">
+                        <tr>
+                            <th class="px-5 py-4 font-semibold">Produit</th>
+                            <th class="px-5 py-4 font-semibold">Catégorie</th>
+                            <th class="px-5 py-4 font-semibold">Prix</th>
+                            <th class="px-5 py-4 font-semibold">Marque</th>
+                            <th class="px-5 py-4 font-semibold">Statut</th>
+                            <th class="px-5 py-4 font-semibold">Type</th>
+                            <th class="px-5 py-4 text-right font-semibold">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="product-table-body" class="divide-y divide-[#F0E7DE]">
+
+                        {% for product in products %}
+                            <tr
+                                class="product-row transition hover:bg-[#FAF8F5]"
+                                data-name="{{ product.name|lower }}"
+                                data-brand="{{ product.brand|default('')|lower }}"
+                                data-category="{{ product.category ? product.category.name|lower : '' }}"
+                                data-status="{{ product.isActive ? 'actif' : 'inactif' }}"
+                            >
+
+                                {# Produit et image #}
+                                <td class="px-5 py-4">
+                                    <div class="flex items-center gap-3">
+
+                                        {% if product.mainImage %}
+                                            <img
+                                                src="{{ asset(product.mainImage) }}"
+                                                alt="{{ product.name }}"
+                                                loading="lazy"
+                                                class="h-14 w-14 rounded-xl border border-[#E8DED3] bg-[#F5F0E8] object-cover"
+                                            >
+                                        {% else %}
+                                            <div class="flex h-14 w-14 items-center justify-center rounded-xl bg-[#F5F0E8] text-[#A8A29E]">
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    width="23"
+                                                    height="23"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    stroke-width="1.6"
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    aria-hidden="true"
+                                                >
+                                                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                                                    <path d="m21 15-5-5L5 21"/>
+                                                </svg>
+                                            </div>
+                                        {% endif %}
+
+                                        <div>
+                                            <p class="font-semibold text-[#292524]">
+                                                {{ product.name }}
+                                            </p>
+
+                                            <p class="mt-1 text-xs text-[#A8A29E]">
+                                                Réf. #{{ product.id }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                {# Catégorie #}
+                                <td class="px-5 py-4 text-[#57534E]">
+                                    {{ product.category ? product.category.name : 'Sans catégorie' }}
+                                </td>
+
+                                {# Prix #}
+                                <td class="whitespace-nowrap px-5 py-4">
+                                    <span class="font-semibold text-[#292524]">
+                                        {{ product.price|number_format(0, ',', ' ') }}
+                                    </span>
+                                    <span class="text-xs text-[#78716C]"> Ar</span>
+                                </td>
+
+                                {# Marque #}
+                                <td class="px-5 py-4 text-[#57534E]">
+                                    {{ product.brand|default('—') }}
+                                </td>
+
+                                {# Statut #}
+                                <td class="px-5 py-4">
+                                    {% if product.isActive %}
+                                        <span class="inline-flex items-center gap-1.5 rounded-full bg-green-50 px-3 py-1.5 text-xs font-semibold text-green-700">
+                                            <span class="h-1.5 w-1.5 rounded-full bg-green-600"></span>
+                                            Publié
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700">
+                                            <span class="h-1.5 w-1.5 rounded-full bg-red-500"></span>
+                                            Désactivé
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                {# Type #}
+                                <td class="px-5 py-4">
+                                    {% if product.isFeatured %}
+                                        <span class="inline-flex items-center gap-1.5 rounded-full bg-[#F5F0E8] px-3 py-1.5 text-xs font-semibold text-[#8C6038]">
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                width="13"
+                                                height="13"
+                                                viewBox="0 0 24 24"
+                                                fill="currentColor"
+                                                aria-hidden="true"
+                                            >
+                                                <path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z"/>
+                                            </svg>
+                                            En vedette
+                                        </span>
+                                    {% else %}
+                                        <span class="text-xs text-[#78716C]">
+                                            Standard
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                {# Actions : modifier et supprimer #}
+                                <td class="whitespace-nowrap px-5 py-4">
+                                    <div class="flex items-center justify-end gap-2">
+
+                                        <a
+                                            href="{{ path('admin_products_edit', {id: product.id}) }}"
+                                            title="Modifier le produit"
+                                            aria-label="Modifier {{ product.name }}"
+                                            class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#E8DED3] bg-white text-[#8C6038] transition hover:bg-[#F5F0E8] hover:text-[#292524]"
+                                        >
+
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                width="18"
+                                                height="18"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                stroke-width="1.8"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                aria-hidden="true"
+                                            >
+                                                <path d="M12 20h9"/>
+                                                <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/>
+                                            </svg>
+                                        </a>
+
+                                        <form
+                                            method="post"
+                                            action="{{ path('admin_products_delete', {id: product.id}) }}"
+                                            onsubmit="return confirm('Voulez-vous vraiment supprimer ce produit ?');"
+                                        >
+
+                                            <input
+                                                type="hidden"
+                                                name="_token"
+                                                value="{{ csrf_token('delete-product-' ~ product.id) }}"
+                                            >
+
+                                            <button
+                                                type="submit"
+                                                title="Supprimer le produit"
+                                                aria-label="Supprimer {{ product.name }}"
+                                                class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-red-200 bg-white text-red-600 transition hover:bg-red-50 hover:text-red-700"
+                                            >
+
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    width="18"
+                                                    height="18"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    stroke-width="1.8"
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    aria-hidden="true"
+                                                >
+                                                    <path d="M3 6h18"/>
+                                                    <path d="M8 6V4h8v2"/>
+                                                    <path d="m19 6-1 14H6L5 6"/>
+                                                    <path d="M10 11v5"/>
+                                                    <path d="M14 11v5"/>
+                                                </svg>
+                                            </button>
+                                        </form>
+
+                                    </div>
+                                </td>
+
+                            </tr>
+
+                        {% else %}
+                            <tr>
+                                <td colspan="7" class="px-5 py-12 text-center">
+                                    <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#F5F0E8] text-[#8C6038]">
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            width="25"
+                                            height="25"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="1.7"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            aria-hidden="true"
+                                        >
+                                            <path d="m16 10 4-2-8-4-8 4 8 4"/>
+                                            <path d="M4 8v8l8 4 8-4V8"/>
+                                            <path d="M12 12v8"/>
+                                        </svg>
+                                    </div>
+
+                                    <p class="mt-4 font-semibold text-[#292524]">
+                                        Aucun produit enregistré
+                                    </p>
+
+                                    <p class="mt-1 text-sm text-[#78716C]">
+                                        Ajoutez votre premier produit pour commencer.
+                                    </p>
+
+                                    <a
+                                        href="{{ path('admin_products_new') }}"
+                                        class="mt-4 inline-flex rounded-lg bg-[#292524] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#44403C]"
+                                    >
+                                        Ajouter un produit
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+
+                        {# Message lorsqu'aucun résultat ne correspond aux filtres #}
+                        <tr id="no-filter-results" class="hidden">
+                            <td colspan="7" class="px-5 py-10 text-center text-sm text-[#78716C]">
+                                Aucun produit ne correspond à votre recherche.
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+    </div>
+
+    {# JavaScript : recherche et filtres #}
+    <script>
+        (function () {
+            function initProductFilters() {
+                const searchInput = document.getElementById("product-search");
+                const categoryFilter = document.getElementById("category-filter");
+                const statusFilter = document.getElementById("status-filter");
+                const resetButton = document.getElementById("reset-filters");
+                const visibleCount = document.getElementById("visible-count");
+                const noResults = document.getElementById("no-filter-results");
+                const rows = document.querySelectorAll(".product-row");
+
+                // Raha tsy eo amin'ny pejy ireo éléments dia ajanona
+                if (
+                    !searchInput ||
+                    !categoryFilter ||
+                    !statusFilter ||
+                    !resetButton ||
+                    !visibleCount
+                ) {
+                    return;
+                }
+
+                function filterProducts() {
+                    const search = searchInput.value.trim().toLocaleLowerCase();
+                    const category = categoryFilter.value.toLocaleLowerCase();
+                    const status = statusFilter.value.toLocaleLowerCase();
+
+                    let count = 0;
+
+                    rows.forEach(function (row) {
+                        const name = (row.dataset.name || "").toLocaleLowerCase();
+                        const brand = (row.dataset.brand || "").toLocaleLowerCase();
+                        const rowCategory = (
+                            row.dataset.category || ""
+                        ).toLocaleLowerCase();
+                        const rowStatus = (row.dataset.status || "").toLowerCase();
+
+                        const matchesSearch =
+                            name.includes(search) || brand.includes(search);
+
+                        const matchesCategory =
+                            category === "" || rowCategory === category;
+
+                        const matchesStatus = status === "" || rowStatus === status;
+
+                        const visible =
+                            matchesSearch && matchesCategory && matchesStatus;
+
+                        row.classList.toggle("hidden", !visible);
+
+                        if (visible) {
+                            count++;
+                        }
+                    });
+
+                    visibleCount.textContent = count;
+
+                    if (noResults) {
+                        noResults.classList.toggle("hidden", count !== 0);
+                    }
+                }
+
+                searchInput.addEventListener("input", filterProducts);
+                categoryFilter.addEventListener("change", filterProducts);
+                statusFilter.addEventListener("change", filterProducts);
+
+                resetButton.addEventListener("click", function () {
+                    searchInput.value = "";
+                    categoryFilter.value = "";
+                    statusFilter.value = "";
+                    filterProducts();
+                });
+
+                filterProducts();
+            }
+
+            // Miasa na dia efa vita aza ny DOMContentLoaded
+            if (document.readyState === "loading") {
+                document.addEventListener("DOMContentLoaded", initProductFilters, {
+                    once: true,
+                });
+            } else {
+                initProductFilters();
+            }
+        })();
+    </script>
+
+{% endblock %}

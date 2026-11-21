@@ -1,0 +1,390 @@
+{% extends 'layouts/base.html.twig' %}
+
+{% block title %}Contact | ModeBoutique{% endblock %}
+
+{% block body %}
+
+    {# ==========================================================
+       SECTION 1 : HERO
+       ========================================================== #}
+    <section class="bg-cream px-5 py-16 sm:px-8 md:py-20">
+        <div class="mx-auto max-w-4xl text-center">
+
+            <p class="text-xs font-semibold uppercase tracking-[0.25em] text-brand">
+                Restons en contact
+            </p>
+
+            <h1 class="mt-4 text-4xl font-bold tracking-tight text-ink sm:text-5xl">
+                Contactez-nous
+            </h1>
+
+            <p class="mx-auto mt-6 max-w-2xl text-base leading-8 text-ink-soft sm:text-lg">
+                Une question sur un produit, votre commande ou notre boutique ?
+                Notre équipe sera ravie de vous accompagner.
+            </p>
+
+        </div>
+    </section>
+
+
+    {# ==========================================================
+       SECTION 2 : CONTACT ET FORMULAIRE
+       ========================================================== #}
+    <section class="bg-white px-5 py-16 sm:px-8 md:py-24">
+        <div class="mx-auto grid max-w-7xl gap-10 lg:grid-cols-3 lg:gap-12">
+
+            {# Informations de contact #}
+            <div class="lg:col-span-1">
+                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
+                    Nos coordonnées
+                </p>
+
+                <h2 class="mt-4 text-2xl font-bold text-ink sm:text-3xl">
+                    Parlons de vos envies.
+                </h2>
+
+                <p class="mt-4 leading-7 text-ink-soft">
+                    Nous sommes à votre écoute pour répondre à vos questions
+                    et vous aider à profiter pleinement de ModeBoutique.
+                </p>
+
+                <div class="mt-8 space-y-6">
+
+                    {# Email #}
+                    <div class="flex gap-4">
+                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-cream text-xl text-brand">
+                            ✉
+                        </div>
+
+                        <div>
+                            <h3 class="font-semibold text-ink">
+                                E-mail
+                            </h3>
+
+                            <p class="mt-1 text-sm leading-6 text-ink-soft">
+                                Pour toute demande d'information.
+                            </p>
+
+                            <a
+                                href="mailto:modeboutique@gmail.com"
+                                class="mt-2 inline-block text-sm font-medium text-brand transition hover:underline"
+                            >
+                                modeboutique@gmail.com
+                            </a>
+                        </div>
+                    </div>
+
+                    {# Téléphone #}
+                    <div class="flex gap-4">
+                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-cream text-xl text-brand">
+                            ☎
+                        </div>
+
+                        <div>
+                            <h3 class="font-semibold text-ink">
+                                Téléphone
+                            </h3>
+
+                            <p class="mt-1 text-sm leading-6 text-ink-soft">
+                                Pour vos questions et demandes d'assistance.
+                            </p>
+
+                            <p class="mt-2 text-sm text-ink-soft">
+                                Contactez-nous par e-mail en attendant
+                                la mise en place de notre ligne téléphonique.
+                            </p>
+                        </div>
+                    </div>
+
+                    {# Horaires #}
+                    <div class="flex gap-4">
+                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-cream text-xl text-brand">
+                            ◷
+                        </div>
+
+                        <div>
+                            <h3 class="font-semibold text-ink">
+                                Disponibilité
+                            </h3>
+
+                            <p class="mt-1 text-sm leading-6 text-ink-soft">
+                                Vous pouvez nous écrire à tout moment.
+                                Nous répondrons dès que possible.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="mt-10 rounded-2xl border border-beige bg-cream p-5">
+                    <h3 class="font-semibold text-ink">
+                        Besoin d'aide ?
+                    </h3>
+
+                    <p class="mt-2 text-sm leading-6 text-ink-soft">
+                        Précisez votre demande dans le formulaire afin que
+                        nous puissions mieux comprendre votre besoin.
+                    </p>
+                </div>
+            </div>
+
+
+            {# Formulaire de contact #}
+            <div class="lg:col-span-2">
+                <div class="rounded-3xl border border-beige bg-white p-6 shadow-sm sm:p-8 lg:p-10">
+
+                    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
+                        Envoyez-nous un message
+                    </p>
+
+                    <h2 class="mt-3 text-2xl font-bold text-ink sm:text-3xl">
+                        Comment pouvons-nous vous aider ?
+                    </h2>
+
+                    <p class="mt-3 text-sm leading-6 text-ink-soft">
+                        Remplissez les champs ci-dessous pour nous transmettre
+                        votre demande.
+                    </p>
+
+                    {# Messages de confirmation et d'erreur #}
+                    {% for message in app.flashes('success') %}
+                        <div
+                            role="alert"
+                            class="mt-6 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-700"
+                        >
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+
+                    {% for message in app.flashes('error') %}
+                        <div
+                            role="alert"
+                            class="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+                        >
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+
+                    {# Formulaire fonctionnel #}
+                    <form
+                        action="{{ path('app_contact') }}"
+                        method="post"
+                        class="mt-8 space-y-6"
+                    >
+                        {# Protection CSRF #}
+                        <input
+                            type="hidden"
+                            name="_token"
+                            value="{{ csrf_token('contact_message') }}"
+                        >
+
+                        <div class="grid gap-6 sm:grid-cols-2">
+
+                            {# Nom complet #}
+                            <div>
+                                <label
+                                    for="contact_name"
+                                    class="mb-2 block text-sm font-medium text-ink"
+                                >
+                                    Nom complet
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="contact_name"
+                                    name="name"
+                                    value="{{ formValues.name }}"
+                                    placeholder="Votre nom"
+                                    autocomplete="name"
+                                    required
+                                    {% if isLoggedIn %}readonly{% endif %}
+                                    class="w-full rounded-xl border border-stone-300 {{ isLoggedIn ? 'bg-stone-50' : 'bg-white' }} px-4 py-3 text-sm text-ink placeholder:text-stone-400 transition focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
+                                >
+
+                                {% if isLoggedIn %}
+                                    <p class="mt-1 text-xs text-ink-soft">
+                                        Informations de votre compte.
+                                    </p>
+                                {% endif %}
+                            </div>
+
+                            {# Adresse e-mail #}
+                            <div>
+                                <label
+                                    for="contact_email"
+                                    class="mb-2 block text-sm font-medium text-ink"
+                                >
+                                    Adresse e-mail
+                                </label>
+
+                                <input
+                                    type="email"
+                                    id="contact_email"
+                                    name="email"
+                                    value="{{ formValues.email }}"
+                                    placeholder="vous@exemple.com"
+                                    autocomplete="email"
+                                    required
+                                    {% if isLoggedIn %}readonly{% endif %}
+                                    class="w-full rounded-xl border border-stone-300 {{ isLoggedIn ? 'bg-stone-50' : 'bg-white' }} px-4 py-3 text-sm text-ink placeholder:text-stone-400 transition focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
+                                >
+
+                                {% if isLoggedIn %}
+                                    <p class="mt-1 text-xs text-ink-soft">
+                                        Adresse e-mail de votre compte.
+                                    </p>
+                                {% endif %}
+                            </div>
+
+                        </div>
+
+                        
+                        {# Sujet du message #}
+                        <div>
+                            <label
+                                for="contact_subject"
+                                class="mb-2 block text-sm font-medium text-ink"
+                            >
+                                Sujet
+                            </label>
+
+                            <select
+                                id="contact_subject"
+                                name="subject"
+                                required
+                                class="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm text-ink transition focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
+                            >
+                                <option
+                                    value=""
+                                    disabled
+                                    {{ formValues.subject == '' ? 'selected' : '' }}
+                                >
+                                    Choisissez un sujet
+                                </option>
+
+                                <option value="product" {{ formValues.subject == 'product' ? 'selected' : '' }}>
+                                    Question sur un produit
+                                </option>
+
+                                <option value="order" {{ formValues.subject == 'order' ? 'selected' : '' }}>
+                                    Question sur une commande
+                                </option>
+
+                                <option value="delivery" {{ formValues.subject == 'delivery' ? 'selected' : '' }}>
+                                    Question sur une livraison
+                                </option>
+
+                                <option value="delivery_not_received" {{ formValues.subject == 'delivery_not_received' ? 'selected' : '' }}>
+                                    Livraison non reçue / Livreur non présenté
+                                </option>
+
+                                <option value="return" {{ formValues.subject == 'return' ? 'selected' : '' }}>
+                                    Retour ou échange
+                                </option>
+
+                                <option value="other" {{ formValues.subject == 'other' ? 'selected' : '' }}>
+                                    Autre demande
+                                </option>
+                            </select>
+                        </div>
+
+                        {# Référence de commande : facultative, mais utile pour les demandes de livraison #}
+                        <div>
+                            <label
+                                for="contact_order_reference"
+                                class="mb-2 block text-sm font-medium text-ink"
+                            >
+                                Référence de commande
+                                <span class="font-normal text-ink-soft">(facultatif)</span>
+                            </label>
+
+                            <input
+                                type="text"
+                                id="contact_order_reference"
+                                name="orderReference"
+                                value="{{ formValues.orderReference }}"
+                                placeholder="Exemple : CMD-2026-001"
+                                class="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm text-ink placeholder:text-stone-400 transition focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
+                            >
+                        </div>
+
+
+                        {# Message #}
+                        <div>
+                            <label
+                                for="contact_message"
+                                class="mb-2 block text-sm font-medium text-ink"
+                            >
+                                Votre message
+                            </label>
+
+                            <textarea
+                                id="contact_message"
+                                name="message"
+                                rows="6"
+                                placeholder="Écrivez votre message ici..."
+                                required
+                                class="w-full resize-y rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm leading-7 text-ink placeholder:text-stone-400 transition focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
+                            >{{ formValues.message }}</textarea>
+                        </div>
+
+                        {# Bouton d'envoi #}
+                        <div class="flex flex-col gap-4 border-t border-beige pt-6 sm:flex-row sm:items-center sm:justify-between">
+
+                            <p class="text-xs leading-5 text-ink-soft">
+                                Les champs marqués comme obligatoires doivent
+                                être remplis.
+                            </p>
+
+                            <twig:Button
+                                variant="primary"
+                                size="lg"
+                                type="submit"
+                            >
+                                Envoyer le message →
+                            </twig:Button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+
+    {# ==========================================================
+       SECTION 3 : APPEL À L'ACTION
+       ========================================================== #}
+    <section class="bg-cream px-5 py-14 sm:px-8 md:py-16">
+        <div class="mx-auto max-w-4xl text-center">
+
+            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
+                ModeBoutique
+            </p>
+
+            <h2 class="mt-4 text-2xl font-bold text-ink sm:text-3xl">
+                Merci de votre confiance.
+            </h2>
+
+            <p class="mx-auto mt-4 max-w-2xl leading-7 text-ink-soft">
+                Découvrez notre sélection de vêtements, chaussures et accessoires
+                et trouvez les pièces qui correspondent à votre style.
+            </p>
+
+            <div class="mt-7">
+                <twig:Button
+                    variant="primary"
+                    size="md"
+                    href="{{ path('app_shop') }}"
+                >
+                    Découvrir la boutique
+                </twig:Button>
+            </div>
+
+        </div>
+    </section>
+
+{% endblock %}

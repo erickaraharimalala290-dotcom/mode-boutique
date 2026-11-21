@@ -1,0 +1,213 @@
+﻿========== SRC ==========
+Structure du dossier
+Le numéro de série du volume est 0000008F EAF5:3A9F
+C:\USERS\WINDOWS 10\DESKTOP\SYMFONY\MODE-BOUTIQUE\SRC
+|   Kernel.php
+|   
++---Controller
+|   |   .gitignore
+|   |   AboutController.php
+|   |   CartController.php
+|   |   CategoryController.php
+|   |   CheckoutController.php
+|   |   ContactController.php
+|   |   FavoritesController.php
+|   |   HomeController.php
+|   |   OrderConfirmationController.php
+|   |   ProductController.php
+|   |   ShopController.php
+|   |   
+|   +---Account
+|   |       AccountController.php
+|   |       
+|   \---Auth
+|           RegistrationController.php
+|           ResetPasswordController.php
+|           SecurityController.php
+|           
++---Entity
+|       .gitignore
+|       ResetPasswordRequest.php
+|       User.php
+|       
++---Form
+|       ChangePasswordFormType.php
+|       RegistrationFormType.php
+|       ResetPasswordRequestFormType.php
+|       
++---Repository
+|       .gitignore
+|       ResetPasswordRequestRepository.php
+|       UserRepository.php
+|       
++---Security
+|       EmailVerifier.php
+|       
+\---Twig
+    \---Components
+            Button.php
+            CategoryCard.php
+            ProductCard.php
+            
+
+========== TEMPLATES ==========
+Structure du dossier
+Le numéro de série du volume est 00000008 EAF5:3A9F
+C:\USERS\WINDOWS 10\DESKTOP\SYMFONY\MODE-BOUTIQUE\TEMPLATES
++---components
+|       Button.html.twig
+|       CategoryCard.html.twig
+|       ProductCard.html.twig
+|       
++---layouts
+|       auth-layout.html.twig
+|       base.html.twig
+|       
++---pages
+|   +---about
+|   |       index.html.twig
+|   |       
+|   +---account
+|   |       cart.html.twig
+|   |       favorites.html.twig
+|   |       index.html.twig
+|   |       orders.html.twig
+|   |       profile.html.twig
+|   |       profile_edit.html.twig
+|   |       security.html.twig
+|   |       _sidebar.html.twig
+|   |       
+|   +---auth
+|   |       confirmation_email.html.twig
+|   |       forgot_password.html.twig
+|   |       login.html.twig
+|   |       register.html.twig
+|   |       reset_password.html.twig
+|   |       
+|   +---cart
+|   |       index.html.twig
+|   |       
+|   +---category
+|   |       index.html.twig
+|   |       
+|   +---checkout
+|   |       index.html.twig
+|   |       
+|   +---contact
+|   |       index.html.twig
+|   |       
+|   +---favorites
+|   |       index.html.twig
+|   |       
+|   +---home
+|   |       index.html.twig
+|   |       
+|   +---order_confirmation
+|   |       index.html.twig
+|   |       
+|   +---product
+|   |       index.html.twig
+|   |       
+|   \---shop
+|           index.html.twig
+|           
++---partials
+|       _footer.html.twig
+|       _nav.html.twig
+|       
++---reset_password
+|       check_email.html.twig
+|       email.html.twig
+|       request.html.twig
+|       reset.html.twig
+|       
+\---security
+
+========== CONFIG ==========
+Structure du dossier
+Le numéro de série du volume est 00000018 EAF5:3A9F
+C:\USERS\WINDOWS 10\DESKTOP\SYMFONY\MODE-BOUTIQUE\CONFIG
+|   bundles.php
+|   preload.php
+|   reference.php
+|   routes.yaml
+|   services.yaml
+|   
++---packages
+|       asset_mapper.yaml
+|       cache.yaml
+|       csrf.yaml
+|       debug.yaml
+|       doctrine.yaml
+|       doctrine_migrations.yaml
+|       framework.yaml
+|       mailer.yaml
+|       messenger.yaml
+|       monolog.yaml
+|       notifier.yaml
+|       property_info.yaml
+|       reset_password.yaml
+|       routing.yaml
+|       security.yaml
+|       symfonycasts_tailwind.yaml
+|       translation.yaml
+|       twig.yaml
+|       twig_component.yaml
+|       ux_icons.yaml
+|       ux_turbo.yaml
+|       validator.yaml
+|       web_profiler.yaml
+|       
+\---routes
+        framework.yaml
+        security.yaml
+        web_profiler.yaml
+        
+
+========== ROUTES ==========
+ ----------------------------- ---------- ----------------------------------- 
+  Name                          Method     Path                               
+ ----------------------------- ---------- ----------------------------------- 
+  _preview_error                ANY        /_error/{code}.{_format}           
+  _wdt_stylesheet               ANY        /_wdt/styles                       
+  _wdt                          ANY        /_wdt/{token}                      
+  _profiler_home                ANY        /_profiler/                        
+  _profiler_search              ANY        /_profiler/search                  
+  _profiler_search_bar          ANY        /_profiler/search_bar              
+  _profiler_phpinfo             ANY        /_profiler/phpinfo                 
+  _profiler_xdebug              ANY        /_profiler/xdebug                  
+  _profiler_font                ANY        /_profiler/font/{fontName}.woff2   
+  _profiler_search_results      ANY        /_profiler/{token}/search/results  
+  _profiler_open_file           ANY        /_profiler/open                    
+  _profiler                     ANY        /_profiler/{token}                 
+  _profiler_router              ANY        /_profiler/{token}/router          
+  _profiler_exception           ANY        /_profiler/{token}/exception       
+  _profiler_exception_css       ANY        /_profiler/{token}/exception.css   
+  app_about                     ANY        /about                             
+  app_account                   ANY        /account                           
+  app_account_profile           ANY        /account/profile                   
+  app_account_profile_edit      GET|POST   /account/profile/edit              
+  app_account_security          GET|POST   /account/security                  
+  app_account_orders            ANY        /account/orders                    
+  app_account_favorites         ANY        /account/favorites                 
+  app_account_cart              ANY        /account/cart                      
+  app_register                  GET|POST   /register                          
+  app_verify_email              ANY        /verify/email                      
+  app_forgot_password_request   ANY        /reset-password                    
+  app_check_email               ANY        /reset-password/check-email        
+  app_reset_password            ANY        /reset-password/reset/{token}      
+  app_login                     ANY        /login                             
+  app_logout                    ANY        /logout                            
+  app_cart                      ANY        /cart                              
+  app_category                  ANY        /category                          
+  app_checkout                  GET|POST   /checkout                          
+  app_contact                   ANY        /contact                           
+  app_favorites                 ANY        /favorites                         
+  home                          ANY        /                                  
+  app_order_confirmation        GET        /commande/confirmation             
+  app_product                   ANY        /product                           
+  app_product_detail            ANY        /product/{slug}                    
+  app_shop                      ANY        /shop                              
+ ----------------------------- ---------- ----------------------------------- 
+
+

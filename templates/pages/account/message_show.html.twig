@@ -1,0 +1,201 @@
+{% extends 'layouts/auth-layout.html.twig' %}
+
+{% block title %}Conversation | ModeBoutique{% endblock %}
+
+{% block body %}
+    <section class="min-h-screen bg-cream px-4 py-8 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-7xl">
+
+            {# En-tête de la page #}
+            <header class="mb-8 flex flex-wrap items-center justify-between gap-4">
+                <div>
+                    <p class="mb-2 text-sm font-medium text-brand">Mon espace client</p>
+                    <h1 class="text-2xl font-bold text-ink sm:text-3xl">
+                        Ma conversation
+                    </h1>
+                    <p class="mt-2 text-sm text-ink-soft">
+                        Consultez les échanges avec notre équipe.
+                    </p>
+                </div>
+
+                <a
+                    href="{{ path('app_account_messages') }}"
+                    class="inline-flex items-center rounded-xl border border-stone-300 bg-white px-4 py-2.5 text-sm font-medium text-ink transition hover:bg-stone-50"
+                >
+                    ← Fermer
+                </a>
+            </header>
+
+            {# Messages flash #}
+            {% for flashMessage in app.flashes('success') %}
+                <div class="mb-5 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+                    {{ flashMessage }}
+                </div>
+            {% endfor %}
+
+            {% for flashMessage in app.flashes('error') %}
+                <div class="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+                    {{ flashMessage }}
+                </div>
+            {% endfor %}
+
+            <div class="grid grid-cols-1 gap-8 lg:grid-cols-4">
+
+                {# Barre latérale du compte #}
+                <aside class="lg:col-span-1">
+                    {% include 'pages/account/_sidebar.html.twig' with {
+                    activePage: 'messages'
+                } %}
+                </aside>
+
+                {# Détail de la conversation #}
+                <div class="lg:col-span-3">
+
+                    {# Traduire le sujet #}
+                    {% set subjectLabel = 'Sans sujet' %}
+
+                    {% if message.subject == 'delivery' %}
+                        {% set subjectLabel = 'Livraison' %}
+                    {% elseif message.subject == 'order' %}
+                        {% set subjectLabel = 'Commande' %}
+                    {% elseif message.subject == 'other' %}
+                        {% set subjectLabel = 'Autre' %}
+                    {% elseif message.subject %}
+                        {% set subjectLabel = message.subject %}
+                    {% endif %}
+
+                    <div class="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
+
+                        {# En-tête de la conversation #}
+                        <div class="border-b border-stone-200 bg-stone-50 px-5 py-5 sm:px-6">
+                            <div class="flex flex-wrap items-center justify-between gap-3">
+                                <div>
+                                    <span class="text-xs font-semibold uppercase tracking-wider text-brand">
+                                        Conversation
+                                    </span>
+                                    <h2 class="mt-1 text-lg font-bold text-ink">
+                                        {{ subjectLabel }}
+                                    </h2>
+                                </div>
+
+                                <span class="text-xs text-stone-500">
+                                    {{ message.createdAt|date('d/m/Y à H:i') }}
+                                </span>
+                            </div>
+                        </div>
+
+                        {# Message initial du client #}
+                        <div class="border-b border-stone-100 px-5 py-6 sm:px-6">
+                            <div class="mb-3 flex items-center justify-between gap-3">
+                                <p class="text-sm font-semibold text-ink">
+                                    Votre message initial
+                                </p>
+                                <span class="text-xs text-stone-500">Vous</span>
+                            </div>
+
+                            <div class="rounded-xl bg-cream p-4 text-sm leading-7 text-ink">
+                                {{ message.message|nl2br }}
+                            </div>
+                        </div>
+
+                        {# Historique des réponses #}
+                        <div class="space-y-5 px-5 py-6 sm:px-6">
+                            <h3 class="text-sm font-semibold text-ink">
+                                Historique de la conversation
+                            </h3>
+
+                            {% if message.messageReplies is empty %}
+                                <p class="rounded-xl bg-stone-50 px-4 py-5 text-center text-sm text-stone-500">
+                                    Aucune réponse pour le moment. Notre équipe vous répondra bientôt.
+                                </p>
+                            {% else %}
+
+                                {% for reply in message.messageReplies|sort((a, b) => a.createdAt <=> b.createdAt) %}
+                                    {% set isAdmin = reply.sender and 'ROLE_ADMIN' in reply.sender.roles %}
+
+                                    <div class="flex {{ isAdmin ? 'justify-start' : 'justify-end' }}">
+                                        <div class="max-w-[90%] sm:max-w-[80%]">
+
+                                            <div class="mb-2 flex items-center gap-2 {{ isAdmin ? '' : 'justify-end' }}">
+                                                <span class="text-xs font-semibold {{ isAdmin ? 'text-brand' : 'text-ink' }}">
+                                                    {{ isAdmin ? 'Équipe ModeBoutique' : 'Vous' }}
+                                                </span>
+
+                                                <span class="text-xs text-stone-400">
+                                                    {{ reply.createdAt|date('d/m/Y à H:i') }}
+                                                </span>
+                                            </div>
+
+                                            <div class="rounded-2xl px-4 py-3 text-sm leading-7 {{ isAdmin ? 'rounded-tl-sm bg-stone-100 text-ink' : 'rounded-tr-sm bg-brand text-white' }}">
+                                                {{ reply.content|nl2br }}
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                {% endfor %}
+
+                            {% endif %}
+                        </div>
+
+                        {# Formulaire de réponse #}
+                        <div class="border-t border-stone-200 bg-stone-50 px-5 py-6 sm:px-6">
+                            <h3 class="mb-2 text-base font-semibold text-ink">
+                                Répondre à la conversation
+                            </h3>
+
+                            <p class="mb-4 text-sm text-ink-soft">
+                                Écrivez votre réponse ci-dessous pour continuer l'échange avec notre équipe.
+                            </p>
+
+                            <form
+                                action="{{ path('app_account_message_reply', {id: message.id}) }}"
+                                method="post"
+                                class="space-y-4"
+                            >
+
+                                <input
+                                    type="hidden"
+                                    name="_csrf_token"
+                                    value="{{ csrf_token('client_reply_' ~ message.id) }}"
+                                >
+
+                                <div>
+                                    <label for="content" class="mb-2 block text-sm font-medium text-ink">
+                                        Votre réponse
+                                    </label>
+
+                                    <textarea
+                                    id="content"
+                                    name="content"
+                                    rows="4"
+                                    maxlength="5000"
+                                    required
+                                    placeholder="Écrivez votre message ici..."
+                                    class="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm text-ink outline-none transition placeholder:text-stone-400 focus:border-brand focus:ring-2 focus:ring-brand/20"
+                                ></textarea>
+                                </div>
+
+                                <div class="flex flex-wrap justify-end gap-3">
+                                    <a
+                                        href="{{ path('app_account_messages') }}"
+                                        class="inline-flex items-center rounded-xl border border-stone-300 bg-white px-5 py-3 text-sm font-semibold text-ink transition hover:bg-stone-100"
+                                    >
+                                        Fermer
+                                    </a>
+
+                                    <button
+                                        type="submit"
+                                        class="inline-flex items-center rounded-xl bg-brand px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+                                    >
+                                        Envoyer ma réponse →
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

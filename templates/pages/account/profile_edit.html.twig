@@ -1,0 +1,221 @@
+{% extends 'layouts/auth-layout.html.twig' %}
+
+{% block title %}Modifier mon profil | ModeBoutique{% endblock %}
+
+{% block body %}
+    <section class="min-h-screen bg-cream px-4 py-8 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-7xl">
+
+            <header class="mb-8 flex flex-wrap items-center justify-between gap-4">
+                <div>
+                    <a href="{{ path('home') }}" class="text-2xl font-bold text-ink">
+                        Mode<span class="text-brand">Boutique</span>
+                    </a>
+                    <p class="mt-1 text-sm text-ink-soft">Mon espace client / Modifier mon profil</p>
+                </div>
+
+                <a
+                    href="{{ path('app_account_profile') }}"
+                    class="rounded-full border border-beige bg-white px-5 py-3 text-sm font-semibold text-ink hover:border-brand hover:text-brand"
+                >
+                    ← Retour au profil
+                </a>
+            </header>
+
+            <div class="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)]">
+                {# Navigation commune #}
+                {% include 'pages/account/_sidebar.html.twig' with {
+                activePage: 'profile'
+            } %}
+
+                {# paramètre du compte #}
+                <main class="min-w-0 space-y-6">
+                    <section class="rounded-3xl border border-beige bg-gradient-to-br from-[#FBF7F1] to-[#E8DCCB] p-7 sm:p-9">
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-dark">
+                            Paramètres du compte
+                        </p>
+
+                        <h1 class="mt-3 text-3xl font-bold text-ink">
+                            Modifier mon profil
+                        </h1>
+
+                        <p class="mt-3 text-sm leading-7 text-ink-soft">
+                            Modifiez votre photo et vos informations personnelles.
+                        </p>
+                    </section>
+
+                    <section class="mt-6 rounded-3xl border border-beige bg-white p-6 shadow-sm sm:p-8">
+
+                        <form
+                            id="editProfileForm"
+                            method="post"
+                            enctype="multipart/form-data"
+                            action="{{ path('app_account_profile_edit') }}"
+                            class="space-y-6"
+                        >
+
+                            {# Photo de profil #}
+                            <div class="flex flex-col gap-5 border-b border-beige pb-6 sm:flex-row sm:items-center">
+                                <div class="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full border-4 border-brand-light bg-cream">
+                                    <span
+                                        id="photoInitials"
+                                        class="{{ app.user.profilePicture ? 'hidden' : '' }} text-2xl font-bold text-brand"
+                                    >
+                                        {{ app.user.firstname|default('M')|first|upper }}{{ app.user.lastname|default('B')|first|upper }}
+                                    </span>
+
+                                    <img
+                                        id="photoPreview"
+                                        src="{{ app.user.profilePicture ? asset('uploads/profile/' ~ app.user.profilePicture) : '' }}"
+                                        alt="Photo de profil"
+                                        class="{{ app.user.profilePicture ? '' : 'hidden' }} h-full w-full object-cover"
+                                    >
+                                </div>
+
+                                <div class="min-w-0">
+                                    <h2 class="font-semibold text-ink">Photo de profil</h2>
+
+                                    <p class="mt-1 text-sm text-ink-soft">
+                                        Choisissez une photo au format JPG, PNG ou WebP.
+                                    </p>
+
+                                    <input
+                                        type="file"
+                                        id="photoInput"
+                                        name="profilePicture"
+                                        accept="image/png,image/jpeg,image/webp"
+                                        class="mt-3 block w-full max-w-xs text-sm text-ink-soft"
+                                    >
+
+                                    <p class="mt-2 text-xs text-ink-soft">
+                                        Taille maximale : 5 Mo.
+                                    </p>
+                                </div>
+                            </div>
+
+
+                            {# Prénom #}
+                            <div>
+                                <label for="firstName" class="mb-2 block text-sm font-semibold text-ink">
+                                    Prénom
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="firstName"
+                                    name="firstName"
+                                    value="{% if app.user %}{{ app.user.firstname|default('') }}{% else %}Prénom de démonstration{% endif %}"
+                                    required
+                                    minlength="2"
+                                    maxlength="100"
+                                    class="w-full rounded-xl border border-beige bg-white px-4 py-3 text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
+                                >
+                            </div>
+
+                            {# Nom #}
+                            <div>
+                                <label for="lastName" class="mb-2 block text-sm font-semibold text-ink">
+                                    Nom
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="lastName"
+                                    name="lastName"
+                                    value="{% if app.user %}{{ app.user.lastname|default('') }}{% else %}Nom de démonstration{% endif %}"
+                                    required
+                                    minlength="2"
+                                    maxlength="100"
+                                    class="w-full rounded-xl border border-beige bg-white px-4 py-3 text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
+                                >
+                            </div>
+
+                            {# E-mail #}
+                            <div>
+                                <label for="email" class="mb-2 block text-sm font-semibold text-ink">
+                                    Adresse e-mail
+                                </label>
+
+                                <input
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    value="{% if app.user %}{{ app.user.email }}{% else %}client@example.com{% endif %}"
+                                    required
+                                    autocomplete="email"
+                                    class="w-full rounded-xl border border-beige bg-white px-4 py-3 text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
+                                >
+
+                                <p class="mt-2 text-xs leading-5 text-ink-soft">
+                                    Une modification réelle de l'adresse e-mail devra être confirmée.
+                                </p>
+                            </div>
+
+                            <div>
+                                
+                                {% for message in app.flashes('error') %}
+                                    <div class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+                                        {{ message }}
+                                    </div>
+                                {% endfor %}
+
+                                {% for message in app.flashes('success') %}
+                                    <div class="rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-800">
+                                        {{ message }}
+                                    </div>
+                                {% endfor %}
+
+                            
+                            </div>
+
+                            <div class="flex flex-wrap justify-end gap-3 border-t border-beige pt-6">
+                                <a
+                                    href="{{ path('app_account_profile') }}"
+                                    class="rounded-full border border-beige px-5 py-3 text-sm font-semibold text-ink-soft hover:bg-cream"
+                                >
+                                    Annuler
+                                </a>
+
+                                <button
+                                    type="submit"
+                                    class="rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-dark"
+                                >
+                                    Enregistrer les modifications
+                                </button>
+                            </div>
+                        </form>
+                    </section>
+                </main>
+            </div>
+        </div>
+    </section>
+
+    
+    <script>
+        const photoInput = document.getElementById("photoInput");
+        const photoPreview = document.getElementById("photoPreview");
+        const photoInitials = document.getElementById("photoInitials");
+
+        photoInput.addEventListener("change", function () {
+            const file = this.files[0];
+
+            if (!file) {
+                return;
+            }
+
+            const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+
+            if (!allowedTypes.includes(file.type) || file.size > 5 * 1024 * 1024) {
+                alert("Choisissez une image JPG, PNG ou WebP de 5 Mo maximum.");
+                this.value = "";
+                return;
+            }
+
+            photoPreview.src = URL.createObjectURL(file);
+            photoPreview.classList.remove("hidden");
+            photoInitials.classList.add("hidden");
+        });
+    </script>
+
+
+{% endblock %}

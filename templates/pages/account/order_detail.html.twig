@@ -1,0 +1,843 @@
+{% extends 'layouts/auth-layout.html.twig' %}
+
+{% block title %}Détail de la commande | ModeBoutique{% endblock %}
+
+{% block body %}
+
+    {# Déterminer le mode de livraison et son libellé. #}
+    {% set deliveryMethod = order.delivery ? order.delivery.deliveryMethod : null %}
+
+    {% set deliveryMethodLabel =
+        deliveryMethod == 'home_delivery'
+            ? 'Livraison à domicile'
+            : (deliveryMethod == 'taxi_brousse'
+                ? 'Envoi en agence'
+                : 'Non renseigné')
+    %}
+
+    <section class="min-h-screen bg-cream px-4 py-8 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-7xl">
+
+            {# En-tête de la page #}
+            <header class="mb-8 flex flex-wrap items-center justify-between gap-4">
+                <div>
+                    <a href="{{ path('home') }}" class="text-2xl font-bold text-ink">
+                        Mode<span class="text-brand">Boutique</span>
+                    </a>
+
+                    <p class="mt-1 text-sm text-ink-soft">
+                        Mon espace client / Mes commandes / Détail
+                    </p>
+                </div>
+
+                <a
+                    href="{{ path('app_account_orders') }}"
+                    class="rounded-full border border-beige bg-white px-5 py-3 text-sm font-semibold text-ink transition hover:border-brand hover:text-brand"
+                >
+                    ← Retour à mes commandes
+                </a>
+            </header>
+
+            <div class="grid gap-6 lg:grid-cols-[220px_1fr]">
+
+                {# Menu latéral commun #}
+                {% include 'pages/account/_sidebar.html.twig' with {
+                    activePage: 'orders'
+                } %}
+
+                <main class="min-w-0 space-y-6">
+
+                    {# Présentation de la commande #}
+                    <section class="rounded-3xl border border-beige bg-gradient-to-br from-[#FBF7F1] to-[#E8DCCB] p-7 sm:p-9">
+
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-dark">
+                            Récapitulatif
+                        </p>
+
+                        <h1 class="mt-3 text-3xl font-bold text-ink">
+                            Commande #{{ order.orderNumber }}
+                        </h1>
+
+                        <p class="mt-3 text-sm text-ink-soft">
+                            Passée le {{ order.createdAt|date('d/m/Y à H:i') }}
+                        </p>
+
+                    </section>
+
+                    {# Informations générales #}
+                    <section class="grid gap-4 sm:grid-cols-2">
+
+                        <article class="rounded-2xl border border-beige bg-white p-5 shadow-sm">
+
+                            <p class="text-sm text-ink-soft">
+                                Statut de la commande
+                            </p>
+
+                            <p class="mt-3 text-lg font-bold text-ink">
+                                {% set statusLabels = {
+                                    'pending': 'En attente',
+                                    'confirmed': 'Confirmée',
+                                    'processing': 'En préparation',
+                                    'shipped': 'Expédiée',
+                                    'delivered': 'Livrée',
+                                    'cancelled': 'Annulée'
+                                } %}
+
+                                {{ statusLabels[order.status|lower]|default(order.status|capitalize) }}
+                            </p>
+
+                        </article>
+
+                        <article class="rounded-2xl border border-beige bg-white p-5 shadow-sm">
+
+                            <p class="text-sm text-ink-soft">
+                                Mode de paiement
+                            </p>
+
+                            <p class="mt-3 text-lg font-bold text-ink">
+                                {{ paymentLabel }}
+                            </p>
+
+                            {% if payment %}
+                                <p class="mt-1 text-xs text-ink-soft">
+                                    Statut de l'acompte :
+                                    {{ payment.status|capitalize }}
+                                </p>
+                            {% endif %}
+
+                        </article>
+
+                    </section>
+
+                    {# Articles commandés #}
+                    <section class="overflow-hidden rounded-3xl border border-beige bg-white shadow-sm">
+
+                        <div class="border-b border-beige p-5 sm:p-6">
+
+                            <h2 class="text-lg font-bold text-ink">
+                                Articles commandés
+                            </h2>
+
+                            <p class="mt-1 text-sm text-ink-soft">
+                                Retrouvez le détail des articles de cette commande.
+                            </p>
+
+                        </div>
+
+                        <div class="divide-y divide-beige">
+
+                            {% for item in order.orderItems %}
+
+                                {% set product = item.product %}
+                                {% set variant = item.variant %}
+
+                                {# Rechercher l'image correspondant à la couleur commandée. #}
+                                {% set matchingImages = [] %}
+
+                                {% if variant and variant.color %}
+                                    {% set matchingImages = product.images|filter(image =>
+                                        image.color
+                                        and image.color|trim|lower == variant.color|trim|lower
+                                    ) %}
+                                {% endif %}
+
+                                {% set variantImage = matchingImages|first %}
+
+                                {# Utiliser l'image de la variante ou l'image principale en secours. #}
+                                {% if variantImage %}
+                                    {% set productImage = variantImage.imagePath %}
+                                {% else %}
+                                    {% set productImage = product.mainImage %}
+                                {% endif %}
+
+                                {% set itemReturnRequests = returnRequestsByItem[item.id] ?? [] %}
+
+                                <article class="flex flex-col gap-4 p-5 sm:flex-row sm:items-center">
+
+                                    <div class="h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-cream">
+
+                                        {% if productImage %}
+
+                                            <img
+                                                src="{{ asset(productImage) }}"
+                                                alt="{{ product.name }}"
+                                                class="h-full w-full object-cover"
+                                            >
+
+                                        {% else %}
+
+                                            <div class="flex h-full items-center justify-center text-2xl text-brand">
+                                                ♡
+                                            </div>
+
+                                        {% endif %}
+
+                                    </div>
+
+                                    <div class="min-w-0 flex-1">
+
+                                        <h3 class="font-bold text-ink">
+                                            {{ product.name }}
+                                        </h3>
+
+                                        {% if item.variant %}
+
+                                            <div class="mt-2 flex flex-wrap gap-2 text-xs text-ink-soft">
+
+                                                {% if item.variant.color %}
+                                                    <span class="rounded-full bg-cream px-3 py-1">
+                                                        Couleur : {{ item.variant.color }}
+                                                    </span>
+                                                {% endif %}
+
+                                                {% if item.variant.size %}
+                                                    <span class="rounded-full bg-cream px-3 py-1">
+                                                        Taille : {{ item.variant.size }}
+                                                    </span>
+                                                {% endif %}
+
+                                            </div>
+
+                                        {% endif %}
+
+                                        <p class="mt-2 text-sm text-ink-soft">
+                                            Quantité : {{ item.quantity }}
+                                        </p>
+
+                                        {# Afficher les demandes d'échange déjà envoyées. #}
+                                        {% if itemReturnRequests is not empty %}
+
+                                            <div class="mt-3 space-y-2">
+
+                                                {% for returnRequest in itemReturnRequests %}
+
+                                                    <div class="rounded-xl border border-beige bg-cream/50 p-3">
+
+                                                        <div class="flex flex-wrap items-center gap-2">
+
+                                                            <span class="text-xs font-semibold text-ink">
+                                                                Échange
+                                                            </span>
+
+                                                            <span class="rounded-full bg-white px-2.5 py-1 text-xs font-medium text-ink-soft">
+                                                                {% if returnRequest.status == 'pending' %}
+                                                                    En attente
+                                                                {% elseif returnRequest.status == 'approved' %}
+                                                                    Acceptée
+                                                                {% elseif returnRequest.status == 'rejected' %}
+                                                                    Refusée
+                                                                {% elseif returnRequest.status == 'received' %}
+                                                                    Produit reçu
+                                                                {% elseif returnRequest.status == 'completed' %}
+                                                                    Traitée
+                                                                {% else %}
+                                                                    {{ returnRequest.status }}
+                                                                {% endif %}
+                                                            </span>
+
+                                                        </div>
+
+                                                        <p class="mt-1 text-xs text-ink-soft">
+                                                            Référence : {{ returnRequest.requestNumber }}
+                                                        </p>
+
+                                                        {% set exchangePayment = exchangePaymentsByRequest[returnRequest.id] ?? null %}
+
+                                                        {# Récapitulatif financier de l'échange accepté. #}
+                                                        {% if returnRequest.status == 'approved' %}
+
+                                                            {% set priceDifference = returnRequest.priceDifference|default(0) %}
+                                                            {% set exchangeDeliveryFee = returnRequest.exchangeDeliveryFee|default(0) %}
+                                                            {% set exchangeTotal = priceDifference + exchangeDeliveryFee %}
+
+                                                            <div class="mt-4 space-y-3 border-t border-beige pt-3">
+
+                                                                <h4 class="font-semibold text-ink">
+                                                                    Récapitulatif de votre échange
+                                                                </h4>
+
+                                                                <div class="flex justify-between gap-3 text-sm">
+
+                                                                    <span class="text-ink-soft">
+                                                                        Différence de prix
+                                                                    </span>
+
+                                                                    <span class="font-medium text-ink">
+                                                                        {{ priceDifference|number_format(0, ',', ' ') }} Ar
+                                                                    </span>
+
+                                                                </div>
+
+                                                                <div class="flex justify-between gap-3 text-sm">
+
+                                                                    <span class="text-ink-soft">
+                                                                        Frais de livraison de l'échange
+                                                                    </span>
+
+                                                                    <span class="font-medium text-ink">
+                                                                        {{ exchangeDeliveryFee|number_format(0, ',', ' ') }} Ar
+                                                                    </span>
+
+                                                                </div>
+
+                                                                <div class="flex justify-between gap-3 border-t border-beige pt-3">
+
+                                                                    <span class="font-bold text-ink">
+                                                                        Total à régler
+                                                                    </span>
+
+                                                                    <span class="text-lg font-bold text-brand">
+                                                                        {{ exchangeTotal|number_format(0, ',', ' ') }} Ar
+                                                                    </span>
+
+                                                                </div>
+
+                                                                {% if exchangePayment and exchangePayment.status == 'paid' %}
+
+                                                                    <div class="rounded-xl bg-green-50 p-3">
+
+                                                                        <p class="text-sm font-semibold text-green-700">
+                                                                            Paiement de l'échange confirmé.
+                                                                        </p>
+
+                                                                        {% if exchangePayment.transactionReference %}
+                                                                            <p class="mt-1 break-all text-xs text-green-700">
+                                                                                Référence : {{ exchangePayment.transactionReference }}
+                                                                            </p>
+                                                                        {% endif %}
+
+                                                                        {% if exchangePayment.paidAt %}
+                                                                            <p class="mt-1 text-xs text-green-700">
+                                                                                Confirmé le :
+                                                                                {{ exchangePayment.paidAt|date('d/m/Y à H:i') }}
+                                                                            </p>
+                                                                        {% endif %}
+
+                                                                    </div>
+
+                                                                    {# Télécharger le reçu PDF du paiement complémentaire de l'échange. #}
+                                                                    <a
+                                                                        href="{{ path('app_account_payment_receipt', {
+                                                                            paymentId: exchangePayment.id
+                                                                        }) }}"
+                                                                        class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-brand bg-white px-4 py-3 text-sm font-semibold text-brand transition hover:bg-cream"
+                                                                    >
+                                                                        <svg
+                                                                            xmlns="http://www.w3.org/2000/svg"
+                                                                            class="h-5 w-5"
+                                                                            viewBox="0 0 24 24"
+                                                                            fill="none"
+                                                                            stroke="currentColor"
+                                                                            stroke-width="1.8"
+                                                                            stroke-linecap="round"
+                                                                            stroke-linejoin="round"
+                                                                        >
+                                                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                                                            <path d="m7 10 5 5 5-5"/>
+                                                                            <path d="M12 15V3"/>
+                                                                        </svg>
+
+                                                                        Télécharger le reçu PDF
+                                                                    </a>
+
+                                                                {% elseif exchangeTotal > 0 %}
+
+                                                                    <p class="text-xs leading-5 text-ink-soft">
+                                                                        Le paiement comprend la différence de prix éventuelle
+                                                                        ainsi que les frais de livraison de l'échange.
+                                                                    </p>
+
+                                                                    <form
+                                                                        method="POST"
+                                                                        action="{{ path('app_account_exchange_payment', {
+                                                                            id: returnRequest.id
+                                                                        }) }}"
+                                                                        data-turbo="false"
+                                                                    >
+                                                                        <input
+                                                                            type="hidden"
+                                                                            name="action"
+                                                                            value="start"
+                                                                        >
+
+                                                                        <input
+                                                                            type="hidden"
+                                                                            name="_token"
+                                                                            value="{{ csrf_token('start_exchange_payment_' ~ returnRequest.id) }}"
+                                                                        >
+
+                                                                        <button
+                                                                            type="submit"
+                                                                            class="w-full rounded-xl bg-brand px-4 py-3 text-sm font-semibold text-white transition hover:bg-brand-dark"
+                                                                        >
+                                                                            Payer le montant de l'échange
+                                                                        </button>
+                                                                    </form>
+
+                                                                {% else %}
+
+                                                                    <p class="rounded-xl bg-green-50 p-3 text-sm font-semibold text-green-700">
+                                                                        Aucun paiement supplémentaire n'est nécessaire.
+                                                                    </p>
+
+                                                                {% endif %}
+
+                                                            </div>
+
+                                                        {% endif %}
+
+                                                    </div>
+
+                                                {% endfor %}
+
+                                            </div>
+
+                                        {% elseif canRequestReturn %}
+
+                                            <div class="mt-3 flex flex-wrap items-center gap-3">
+
+                                                <span class="inline-flex items-center gap-2 rounded-xl bg-cream px-3 py-2 text-xs font-medium text-brand">
+                                                    <span>↩</span>
+                                                    Retour possible pendant 7 jours après réception
+                                                </span>
+
+                                                <a
+                                                    href="{{ path('app_account_return_request', {id: item.id}) }}"
+                                                    class="inline-flex items-center justify-center rounded-xl bg-[#292524] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#44403C]"
+                                                >
+                                                    Demander un échange
+                                                </a>
+
+                                            </div>
+
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="shrink-0 sm:text-right">
+
+                                        <p class="text-sm text-ink-soft">
+                                            Prix unitaire
+                                        </p>
+
+                                        <p class="mt-1 font-semibold text-ink">
+                                            {{ item.unitPrice|number_format(0, ',', ' ') }} Ar
+                                        </p>
+
+                                        <p class="mt-2 font-bold text-brand">
+                                            {{ (item.unitPrice * item.quantity)|number_format(0, ',', ' ') }} Ar
+                                        </p>
+
+                                    </div>
+
+                                </article>
+
+                            {% endfor %}
+
+                        </div>
+
+                    </section>
+
+                    {# Récapitulatif financier et suivi des paiements #}
+                    <section class="rounded-3xl border border-beige bg-white p-5 shadow-sm sm:p-7">
+
+                        <h2 class="text-lg font-bold text-ink">
+                            Récapitulatif du paiement
+                        </h2>
+
+                        {# Mode de livraison #}
+                        <div class="mt-5 rounded-xl bg-cream p-4">
+
+                            <p class="text-xs font-semibold uppercase tracking-wider text-ink-soft">
+                                Mode de livraison
+                            </p>
+
+                            <p class="mt-2 font-semibold text-ink">
+                                {{ deliveryMethodLabel }}
+                            </p>
+
+                        </div>
+
+                        {# Montants de la commande #}
+                        <div class="mt-6 space-y-4 text-sm">
+
+                            <div class="flex justify-between gap-4 text-ink-soft">
+
+                                <span>Sous-total des articles</span>
+
+                                <span class="font-medium text-ink">
+                                    {{ subtotal|number_format(0, ',', ' ') }} Ar
+                                </span>
+
+                            </div>
+
+                            <div class="flex justify-between gap-4 text-ink-soft">
+
+                                <span>Frais de livraison</span>
+
+                                <span class="font-medium text-ink">
+                                    {{ deliveryFee|number_format(0, ',', ' ') }} Ar
+                                </span>
+
+                            </div>
+
+                            <div class="flex justify-between gap-4 border-t border-beige pt-4">
+
+                                <span class="font-bold text-ink">
+                                    Total de la commande
+                                </span>
+
+                                <span class="text-xl font-bold text-brand">
+                                    {{ order.totalAmount|number_format(0, ',', ' ') }} Ar
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        {# Historique des paiements #}
+                        <div class="mt-8 border-t border-beige pt-6">
+
+                            <h3 class="font-semibold text-ink">
+                                Historique des paiements
+                            </h3>
+
+                            <div class="mt-4 space-y-3">
+
+                                {% for currentPayment in order.payments %}
+
+                                    <div class="rounded-xl border border-beige p-4">
+
+                                        <div class="flex flex-wrap items-center justify-between gap-3">
+
+                                            <div>
+
+                                                <p class="font-semibold text-ink">
+
+                                                    {% if currentPayment.method == 'mobile_money_demo' %}
+
+                                                        Acompte Mobile Money
+
+                                                    {% elseif currentPayment.method == 'mobile_money_balance' %}
+
+                                                        Solde Mobile Money
+
+                                                    {% elseif currentPayment.method == 'cash_balance' %}
+
+                                                        Solde en espèces
+
+                                                    {% elseif currentPayment.method == 'cash_on_delivery' %}
+
+                                                        Paiement à la livraison
+
+                                                    {% else %}
+
+                                                        {{ currentPayment.method }}
+
+                                                    {% endif %}
+
+                                                </p>
+
+                                                <p class="mt-1 text-xs text-ink-soft">
+                                                    {{ currentPayment.createdAt|date('d/m/Y à H:i') }}
+                                                </p>
+
+                                            </div>
+
+                                            <div class="text-right">
+
+                                                <p class="font-bold text-ink">
+                                                    {{ currentPayment.amount|number_format(0, ',', ' ') }} Ar
+                                                </p>
+
+                                                {% if currentPayment.status == 'paid' %}
+
+                                                    <span class="mt-1 inline-flex rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700">
+                                                        Payé
+                                                    </span>
+
+                                                {% elseif currentPayment.status == 'failed' %}
+
+                                                    <span class="mt-1 inline-flex rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-700">
+                                                        Échec
+                                                    </span>
+
+                                                {% else %}
+
+                                                    <span class="mt-1 inline-flex rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
+                                                        En attente
+                                                    </span>
+
+                                                {% endif %}
+
+                                            </div>
+
+                                        </div>
+
+                                        {% if currentPayment.transactionReference %}
+
+                                            <p class="mt-3 break-all text-xs text-ink-soft">
+                                                Référence :
+                                                {{ currentPayment.transactionReference }}
+                                            </p>
+
+                                        {% endif %}
+
+                                        {% if currentPayment.paidAt %}
+
+                                            <p class="mt-1 text-xs text-ink-soft">
+                                                Confirmé le :
+                                                {{ currentPayment.paidAt|date('d/m/Y à H:i') }}
+                                            </p>
+
+                                        {% endif %}
+
+                                        {# Télécharger le reçu uniquement pour un paiement confirmé. #}
+                                        {% if currentPayment.status == 'paid' and currentPayment.paidAt %}
+
+                                            <a
+                                                href="{{ path('app_account_payment_receipt', {
+                                                    paymentId: currentPayment.id
+                                                }) }}"
+                                                class="mt-4 inline-flex items-center gap-2 rounded-xl border border-brand bg-white px-4 py-2.5 text-sm font-semibold text-brand transition hover:bg-cream"
+                                            >
+                                                Télécharger le reçu PDF
+                                            </a>
+
+                                        {% endif %}
+
+                                    </div>
+
+                                {% else %}
+
+                                    <p class="rounded-xl bg-cream p-4 text-sm text-ink-soft">
+                                        Aucun paiement enregistré.
+                                    </p>
+
+                                {% endfor %}
+
+                            </div>
+
+                        </div>
+
+                        {# Résumé du paiement et règlement du solde #}
+                        <div class="mt-6 rounded-2xl border border-brand/20 bg-brand-light p-5">
+
+                            {# Montant déjà payé #}
+                            <div class="flex justify-between gap-4 text-sm">
+                                <span class="text-ink-soft">
+                                    Montant déjà payé
+                                </span>
+
+                                <span class="font-semibold text-green-700">
+                                    {{ paidAmount|number_format(0, ',', ' ') }} Ar
+                                </span>
+                            </div>
+
+                            {# Acompte non encore payé #}
+                            {% if payment
+                                and payment.method == 'mobile_money_demo'
+                                and payment.status != 'paid'
+                                and order.status != 'cancelled'
+                            %}
+
+                                <div class="mt-4 border-t border-brand/20 pt-4">
+
+                                    <p class="font-bold text-ink">
+                                        Acompte à régler maintenant (50 %)
+                                    </p>
+
+                                    <p class="mt-2 text-xl font-bold text-brand">
+                                        {{ payment.amount|number_format(0, ',', ' ') }} Ar
+                                    </p>
+
+                                    {% if payment.status == 'failed' %}
+                                        <p class="mt-3 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                                            Votre paiement précédent n'a pas abouti.
+                                            Vous pouvez effectuer une nouvelle tentative.
+                                        </p>
+                                    {% else %}
+                                        <p class="mt-3 text-sm leading-6 text-ink-soft">
+                                            Veuillez régler votre acompte pour permettre
+                                            le traitement de votre commande.
+                                        </p>
+                                    {% endif %}
+
+                                    {# Paiement de l'acompte #}
+                                    <form
+                                        method="POST"
+                                        action="{{ path('app_order_payment_simulate', {
+                                            orderNumber: order.orderNumber
+                                        }) }}"
+                                        class="mt-5"
+                                    >
+                                        <input
+                                            type="hidden"
+                                            name="_token"
+                                            value="{{ csrf_token('simulate_payment_' ~ order.orderNumber) }}"
+                                        >
+
+                                        <input
+                                            type="hidden"
+                                            name="simulationResult"
+                                            value="success"
+                                        >
+
+                                        <button
+                                            type="submit"
+                                            class="w-full rounded-xl bg-brand px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-brand-dark"
+                                        >
+                                            Payer mon acompte
+                                        </button>
+                                    </form>
+
+                                    <div class="mt-4 flex justify-between gap-4 border-t border-brand/20 pt-4 text-sm">
+
+                                        <span class="text-ink-soft">
+                                            Solde après acompte
+                                        </span>
+
+                                        <span class="font-semibold text-ink">
+                                            {{ (order.totalAmount - payment.amount)|number_format(0, ',', ' ') }} Ar
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            {% elseif remainingAmount <= 0 %}
+
+                                {# Commande entièrement réglée #}
+                                <div class="mt-4 border-t border-brand/20 pt-4">
+
+                                    <div class="flex justify-between gap-4">
+                                        <span class="font-bold text-ink">
+                                            Solde restant
+                                        </span>
+
+                                        <span class="text-xl font-bold text-green-700">
+                                            0 Ar
+                                        </span>
+                                    </div>
+
+                                    <p class="mt-4 rounded-xl bg-green-50 p-3 text-sm font-medium text-green-700">
+                                        Votre commande est entièrement réglée. Merci !
+                                    </p>
+
+                                </div>
+
+                            {% elseif canPayBalance %}
+
+                                {# Acompte payé : règlement du solde #}
+                                <div class="mt-4 border-t border-brand/20 pt-4">
+
+                                    <div class="flex justify-between gap-4">
+
+                                        <span class="font-bold text-ink">
+                                            Solde restant à payer
+                                        </span>
+
+                                        <span class="text-xl font-bold text-brand">
+                                            {{ remainingAmount|number_format(0, ',', ' ') }} Ar
+                                        </span>
+
+                                    </div>
+
+                                    <p class="mt-3 text-sm leading-6 text-ink-soft">
+                                        Choisissez votre mode de règlement pour terminer votre paiement.
+                                    </p>
+
+                                    {# Paiement du solde par Mobile Money #}
+                                    <form
+                                        method="POST"
+                                        action="{{ path('app_account_balance_mobile', {
+                                            orderNumber: order.orderNumber
+                                        }) }}"
+                                        class="mt-5"
+                                        onsubmit="return confirm('Confirmer le paiement du solde par Mobile Money ?');"
+                                    >
+
+                                        <input
+                                            type="hidden"
+                                            name="_token"
+                                            value="{{ csrf_token('pay_balance_' ~ order.orderNumber) }}"
+                                        >
+
+                                        <button
+                                            type="submit"
+                                            class="w-full rounded-xl bg-brand px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-brand-dark"
+                                        >
+                                            Payer le solde par Mobile Money
+                                        </button>
+
+                                    </form>
+
+                                    {# Paiement en espèces uniquement à domicile #}
+                                    {% if canPayCash %}
+
+                                        <form
+                                            method="POST"
+                                            action="{{ path('app_account_balance_cash', {
+                                                orderNumber: order.orderNumber
+                                            }) }}"
+                                            class="mt-3"
+                                            onsubmit="return confirm('Confirmer votre choix de règlement en espèces à la livraison ?');"
+                                        >
+
+                                            <input
+                                                type="hidden"
+                                                name="_token"
+                                                value="{{ csrf_token('pay_balance_cash_' ~ order.orderNumber) }}"
+                                            >
+
+                                            <button
+                                                type="submit"
+                                                class="w-full rounded-xl border border-brand bg-white px-5 py-3.5 text-sm font-semibold text-brand transition hover:bg-cream"
+                                            >
+                                                Choisir le règlement en espèces
+                                            </button>
+
+                                        </form>
+
+                                        <p class="mt-3 text-xs leading-5 text-ink-soft">
+                                            Le paiement en espèces sera confirmé par notre équipe après réception du montant.
+                                        </p>
+
+                                    {% endif %}
+
+                                </div>
+
+                            {% else %}
+
+                                {# Acompte en attente de confirmation #}
+                                <div class="mt-4 border-t border-brand/20 pt-4">
+
+                                    <div class="flex justify-between gap-4">
+                                        <span class="font-bold text-ink">
+                                            Montant restant à régler
+                                        </span>
+
+                                        <span class="text-xl font-bold text-brand">
+                                            {{ remainingAmount|number_format(0, ',', ' ') }} Ar
+                                        </span>
+                                    </div>
+
+                                    <p class="mt-3 text-sm leading-6 text-ink-soft">
+                                        Le paiement de l'acompte doit être confirmé avant de pouvoir régler le solde.
+                                    </p>
+
+                                </div>
+
+                            {% endif %}
+
+                        </div>
+
+                    </section>
+
+                </main>
+
+            </div>
+
+        </div>
+    </section>
+
+{% endblock %}

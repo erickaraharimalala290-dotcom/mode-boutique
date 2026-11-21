@@ -1,0 +1,509 @@
+{% extends 'layouts/admin-layout.html.twig' %}
+
+{% block title %}Gestion des livraisons | ModeBoutique{% endblock %}
+
+{% block admin_content %}
+
+    <div class="space-y-8">
+
+        {# En-tête de la page #}
+        <div class="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+            <div>
+                <p class="text-xs font-bold uppercase tracking-[0.2em] text-[#B08D67]">
+                    Ventes & logistique
+                </p>
+
+                <h1 class="mt-2 text-2xl font-bold tracking-tight text-[#292524] sm:text-3xl">
+                    Gestion des livraisons
+                </h1>
+
+                <p class="mt-2 max-w-2xl text-sm leading-6 text-[#78716C]">
+                    Gérez les expéditions, les transporteurs et le suivi des commandes de vos clients.
+                </p>
+            </div>
+
+            <div class="inline-flex items-center gap-2 self-start rounded-full border border-[#E7DED2] bg-white px-4 py-2 text-xs font-semibold text-[#57534E] sm:self-auto">
+                <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                Suivi logistique actif
+            </div>
+        </div>
+
+        {# Messages flash #}
+        {% for message in app.flashes('success') %}
+            <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                {{ message }}
+            </div>
+        {% endfor %}
+
+        {% for message in app.flashes('error') %}
+            <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {{ message }}
+            </div>
+        {% endfor %}
+
+        {# Cartes statistiques #}
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+
+            {# Nombre total de livraisons #}
+            <div class="rounded-2xl border border-[#E7DED2] bg-white p-5 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm font-medium text-[#78716C]">Total livraisons</p>
+                    <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-[#F5F0E8] text-xl text-[#B08D67]">
+                        ▤
+                    </span>
+                </div>
+                <p class="mt-5 text-3xl font-bold text-[#292524]">
+                    {{ stats.total }}
+                </p>
+                <p class="mt-1 text-xs text-[#A8A29E]">Livraisons enregistrées</p>
+            </div>
+
+            {# Livraisons en attente #}
+            <div class="rounded-2xl border border-[#E7DED2] bg-white p-5 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm font-medium text-[#78716C]">En attente</p>
+                    <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-xl text-amber-600">
+                        ◷
+                    </span>
+                </div>
+                <p class="mt-5 text-3xl font-bold text-amber-600">
+                    {{ stats.pending }}
+                </p>
+                <p class="mt-1 text-xs text-[#A8A29E]">À préparer</p>
+            </div>
+
+            {# Livraisons en cours #}
+            <div class="rounded-2xl border border-[#E7DED2] bg-white p-5 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm font-medium text-[#78716C]">En cours</p>
+                    <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-xl text-blue-600">
+                        ➜
+                    </span>
+                </div>
+                <p class="mt-5 text-3xl font-bold text-blue-700">
+                    {{ stats.inProgress }}
+                </p>
+                <p class="mt-1 text-xs text-[#A8A29E]">Préparation et expédition</p>
+            </div>
+
+            {# Livraisons terminées #}
+            <div class="rounded-2xl border border-[#E7DED2] bg-white p-5 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm font-medium text-[#78716C]">Livrées</p>
+                    <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-xl text-emerald-600">
+                        ✓
+                    </span>
+                </div>
+                <p class="mt-5 text-3xl font-bold text-emerald-700">
+                    {{ stats.delivered }}
+                </p>
+                <p class="mt-1 text-xs text-[#A8A29E]">Livraisons terminées</p>
+            </div>
+
+            {# Livraisons annulées #}
+            <div class="rounded-2xl border border-[#E7DED2] bg-white p-5 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm font-medium text-[#78716C]">Annulées</p>
+                    <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-xl text-red-600">
+                        ×
+                    </span>
+                </div>
+                <p class="mt-5 text-3xl font-bold text-red-600">
+                    {{ stats.cancelled }}
+                </p>
+                <p class="mt-1 text-xs text-[#A8A29E]">Livraisons non effectuées</p>
+            </div>
+
+            {# Livraisons reportées #}
+            <div class="rounded-2xl border border-[#E7DED2] bg-white p-5 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm font-medium text-[#78716C]">Reportées</p>
+                    <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-50 text-xl text-orange-600">
+                        ↻
+                    </span>
+                </div>
+                <p class="mt-5 text-3xl font-bold text-orange-600">
+                    {{ stats.postponed }}
+                </p>
+                <p class="mt-1 text-xs text-[#A8A29E]">Livraisons à reprogrammer</p>
+            </div>
+
+        </div>
+
+        {# Résumé financier et logistique #}
+        <div class="overflow-hidden rounded-2xl bg-[#292524] p-6 text-white shadow-sm sm:p-7">
+            <div class="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+
+                <div class="flex items-start gap-4">
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/10 text-2xl text-[#D6B995]">
+                        ♧
+                    </div>
+
+                    <div>
+                        <p class="text-sm font-semibold text-white">
+                            Aperçu logistique
+                        </p>
+                        <p class="mt-1 max-w-xl text-sm leading-6 text-stone-300">
+                            Retrouvez les informations de livraison et mettez à jour le suivi de vos expéditions.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="border-t border-white/10 pt-5 sm:border-l sm:border-t-0 sm:pl-8 sm:pt-0">
+                    <p class="text-xs font-medium text-stone-400">
+                        Frais de livraison cumulés
+                    </p>
+                    <p class="mt-2 text-2xl font-bold text-[#D6B995]">
+                        {{ stats.fees|number_format(0, ',', ' ') }} Ar
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+        {# Tableau des livraisons #}
+        <section class="overflow-hidden rounded-2xl border border-[#E7DED2] bg-white shadow-sm">
+
+            <div class="flex flex-col gap-3 border-b border-[#F0EBE4] px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                <div>
+                    <h2 class="text-lg font-bold text-[#292524]">
+                        Toutes les livraisons
+                    </h2>
+                    <p class="mt-1 text-sm text-[#78716C]">
+                        Consultez et gérez les informations de chaque expédition.
+                    </p>
+                </div>
+
+                <span class="inline-flex w-fit items-center rounded-full bg-[#F5F0E8] px-3 py-1.5 text-xs font-semibold text-[#8A6848]">
+                    {{ stats.total }} livraison(s)
+                </span>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[1300px] text-left text-sm">
+
+                    <thead class="bg-[#FAF8F5] text-[11px] font-bold uppercase tracking-wider text-[#78716C]">
+                        <tr>
+                            <th class="px-6 py-4">Référence</th>
+                            <th class="px-6 py-4">Client et adresse</th>
+                            <th class="px-6 py-4">Mode de livraison</th>
+                            <th class="px-6 py-4">Transporteur</th>
+                            <th class="px-6 py-4">Date</th>
+                            <th class="px-6 py-4">Frais</th>
+                            <th class="px-6 py-4">Statut</th>
+                            <th class="px-6 py-4">Gestion</th>
+                        </tr>
+                    </thead>
+
+                    <tbody class="divide-y divide-[#F0EBE4]">
+
+                        {% for row in deliveryRows %}
+                            {% set delivery = row.delivery %}
+
+                            <tr class="align-top transition hover:bg-[#FAF8F5]">
+
+                                {# Référence de livraison #}
+                                <td class="px-6 py-5">
+                                    <p class="font-bold text-[#292524]">
+                                        {{ row.reference }}
+                                    </p>
+                                    <p class="mt-1 text-xs text-[#A8A29E]">
+                                        Commande {{ row.order.orderNumber }}
+                                    </p>
+
+                                    {% if delivery.trackingNumber %}
+                                        <p class="mt-2 text-xs text-[#8A6848]">
+                                            Suivi : {{ delivery.trackingNumber }}
+                                        </p>
+                                    {% endif %}
+                                </td>
+
+                                {# Informations du client #}
+                                <td class="max-w-xs px-6 py-5">
+                                    <p class="font-semibold text-[#292524]">
+                                        {{ row.customer }}
+                                    </p>
+                                    <p class="mt-1 text-xs leading-5 text-[#78716C]">
+                                        {{ row.address }}
+                                    </p>
+
+                                    {% if row.phone %}
+                                        <p class="mt-2 text-xs text-[#78716C]">
+                                            Tél. : {{ row.phone }}
+                                        </p>
+                                    {% endif %}
+                                </td>
+
+                                {# Mode de livraison #}
+                                <td class="px-6 py-5">
+                                    <span class="inline-flex whitespace-nowrap rounded-full bg-[#F5F0E8] px-3 py-1.5 text-xs font-semibold text-[#8A6848]">
+                                        {{ row.deliveryMethod }}
+                                    </span>
+                                </td>
+
+                                {# Transporteur #}
+                                <td class="px-6 py-5 text-[#57534E]">
+                                    {{ delivery.carrier ?: 'Non renseigné' }}
+                                </td>
+
+                                {# Date d'expédition #}
+                                <td class="whitespace-nowrap px-6 py-5 text-xs text-[#78716C]">
+                                    {{ row.date ? row.date|date('d/m/Y H:i') : '—' }}
+                                </td>
+
+                                {# Frais de livraison #}
+                                <td class="whitespace-nowrap px-6 py-5 font-semibold text-[#292524]">
+                                    {{ row.fees|number_format(0, ',', ' ') }} Ar
+                                </td>
+
+                                {# Affichage du statut et des informations associées #}
+                                <td class="px-6 py-5">
+
+                                    {% if row.status == 'delivered' %}
+                                        <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
+                                            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                                            Livrée
+                                        </span>
+
+                                    {% elseif row.status == 'shipped' %}
+                                        <span class="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700">
+                                            <span class="h-1.5 w-1.5 rounded-full bg-blue-500"></span>
+                                            Expédiée
+                                        </span>
+
+                                    {% elseif row.status == 'processing' %}
+                                        <span class="inline-flex items-center gap-1.5 rounded-full bg-violet-50 px-3 py-1.5 text-xs font-semibold text-violet-700">
+                                            <span class="h-1.5 w-1.5 rounded-full bg-violet-500"></span>
+                                            En préparation
+                                        </span>
+
+                                    {% elseif row.status == 'cancelled' %}
+                                        <span class="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700">
+                                            <span class="h-1.5 w-1.5 rounded-full bg-red-500"></span>
+                                            Annulée
+                                        </span>
+
+                                        {# Afficher la raison de l'annulation #}
+                                        {% if row.failureReason %}
+                                            <p class="mt-2 max-w-40 text-xs leading-5 text-red-700">
+                                                {{ row.failureReason }}
+                                            </p>
+                                        {% endif %}
+
+                                        {# Afficher la date de l'annulation #}
+                                        {% if row.failedAt %}
+                                            <p class="mt-1 text-[11px] text-[#A8A29E]">
+                                                Le {{ row.failedAt|date('d/m/Y H:i') }}
+                                            </p>
+                                        {% endif %}
+
+                                    {% elseif row.status == 'postponed' %}
+                                        {# Afficher le statut d'une livraison reportée #}
+                                        <span class="inline-flex items-center gap-1.5 rounded-full bg-orange-50 px-3 py-1.5 text-xs font-semibold text-orange-700">
+                                            <span class="h-1.5 w-1.5 rounded-full bg-orange-500"></span>
+                                            Reportée
+                                        </span>
+
+                                        {% if row.failureReason %}
+                                            <p class="mt-2 max-w-40 text-xs leading-5 text-orange-700">
+                                                {{ row.failureReason }}
+                                            </p>
+                                        {% endif %}
+
+                                        {% if row.failedAt %}
+                                            <p class="mt-1 text-[11px] text-[#A8A29E]">
+                                                Le {{ row.failedAt|date('d/m/Y H:i') }}
+                                            </p>
+                                        {% endif %}
+
+                                    {% elseif row.status == 'confirmed' %}
+                                        <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700">
+                                            <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+                                            Confirmée
+                                        </span>
+
+                                    {% else %}
+                                        <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700">
+                                            <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+                                            En attente
+                                        </span>
+                                    {% endif %}
+
+                                </td>
+
+                                {# Formulaire de mise à jour de la livraison #}
+                                <td class="px-4 py-5 align-top">
+                                    <details class="group w-52">
+
+                                        <summary class="flex cursor-pointer list-none items-center justify-center gap-2 rounded-lg bg-[#292524] px-3 py-2.5 text-xs font-semibold text-white transition hover:bg-[#44403C]">
+                                            <span>Modifier</span>
+                                            <span class="transition group-open:rotate-180">⌄</span>
+                                        </summary>
+
+                                        <form
+                                            method="POST"
+                                            action="{{ path('admin_deliveries_update', {id: delivery.id}) }}"
+                                            class="mt-3 space-y-3 rounded-xl border border-[#E7DED2] bg-[#FAF8F5] p-3"
+                                        >
+                                            {# Jeton CSRF pour sécuriser la modification #}
+                                            <input
+                                                type="hidden"
+                                                name="_token"
+                                                value="{{ csrf_token('update_delivery_' ~ delivery.id) }}"
+                                            >
+
+                                            {# Champ transporteur #}
+                                            <div>
+                                                <label class="mb-1 block text-[11px] font-semibold text-[#57534E]">
+                                                    Transporteur
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    name="carrier"
+                                                    value="{{ delivery.carrier }}"
+                                                    placeholder="Nom du transporteur"
+                                                    class="w-full min-w-0 rounded-lg border border-[#E7DED2] bg-white px-3 py-2 text-xs text-[#292524] outline-none focus:border-[#B08D67]"
+                                                >
+                                            </div>
+
+                                            {# Champ numéro de suivi #}
+                                            <div>
+                                                <label class="mb-1 block text-[11px] font-semibold text-[#57534E]">
+                                                    Numéro de suivi
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    name="trackingNumber"
+                                                    value="{{ delivery.trackingNumber }}"
+                                                    placeholder="Numéro de suivi"
+                                                    class="w-full min-w-0 rounded-lg border border-[#E7DED2] bg-white px-3 py-2 text-xs text-[#292524] outline-none focus:border-[#B08D67]"
+                                                >
+                                            </div>
+
+                                            {# Sélection du statut de livraison #}
+                                            <div>
+                                                <label class="mb-1 block text-[11px] font-semibold text-[#57534E]">
+                                                    Statut de livraison
+                                                </label>
+
+                                                <select
+                                                    name="status"
+                                                    required
+                                                    class="w-full min-w-0 rounded-lg border border-[#E7DED2] bg-white px-3 py-2 text-xs text-[#292524] outline-none focus:border-[#B08D67]"
+                                                >
+                                                    <option value="pending" {{ row.status == 'pending' ? 'selected' : '' }}>
+                                                        En attente
+                                                    </option>
+                                                    <option value="confirmed" {{ row.status == 'confirmed' ? 'selected' : '' }}>
+                                                        Confirmée
+                                                    </option>
+                                                    <option value="processing" {{ row.status == 'processing' ? 'selected' : '' }}>
+                                                        En préparation
+                                                    </option>
+                                                    <option value="shipped" {{ row.status == 'shipped' ? 'selected' : '' }}>
+                                                        Expédiée
+                                                    </option>
+                                                    <option value="delivered" {{ row.status == 'delivered' ? 'selected' : '' }}>
+                                                        Livrée
+                                                    </option>
+                                                    <option value="cancelled" {{ row.status == 'cancelled' ? 'selected' : '' }}>
+                                                        Annulée
+                                                    </option>
+
+                                                    {# Statut permettant de reporter une livraison #}
+                                                    <option value="postponed" {{ row.status == 'postponed' ? 'selected' : '' }}>
+                                                        Reportée
+                                                    </option>
+                                                </select>
+                                            </div>
+
+                                            {# Sélection de la raison en cas d'annulation ou de report #}
+                                            <div>
+                                                <label class="mb-1 block text-[11px] font-semibold text-[#57534E]">
+                                                    Raison de l'annulation ou du report
+                                                </label>
+
+                                                <select
+                                                    name="failureReason"
+                                                    class="w-full min-w-0 rounded-lg border border-[#E7DED2] bg-white px-3 py-2 text-xs text-[#292524] outline-none focus:border-[#B08D67]"
+                                                >
+                                                    <option value="">Choisir une raison</option>
+
+                                                    {# Raisons possibles en cas d'annulation #}
+                                                    <optgroup label="Annulation">
+                                                        <option value="Client absent" {{ row.failureReason == 'Client absent' ? 'selected' : '' }}>
+                                                            Client absent
+                                                        </option>
+                                                        <option value="Client injoignable" {{ row.failureReason == 'Client injoignable' ? 'selected' : '' }}>
+                                                            Client injoignable
+                                                        </option>
+                                                        <option value="Adresse incorrecte" {{ row.failureReason == 'Adresse incorrecte' ? 'selected' : '' }}>
+                                                            Adresse incorrecte
+                                                        </option>
+                                                    </optgroup>
+
+                                                    {# Raisons possibles en cas de report #}
+                                                    <optgroup label="Report">
+                                                        <option value="Livreur non présenté" {{ row.failureReason == 'Livreur non présenté' ? 'selected' : '' }}>
+                                                            Livreur non présenté
+                                                        </option>
+                                                        <option value="Problème du transporteur" {{ row.failureReason == 'Problème du transporteur' ? 'selected' : '' }}>
+                                                            Problème du transporteur
+                                                        </option>
+                                                    </optgroup>
+                                                </select>
+
+                                                <p class="mt-1 text-[10px] leading-4 text-[#A8A29E]">
+                                                    Obligatoire si la livraison est annulée ou reportée.
+                                                </p>
+                                            </div>
+
+                                            {# Bouton d'enregistrement #}
+                                            <button
+                                                type="submit"
+                                                class="w-full rounded-lg bg-[#B08D67] px-3 py-2.5 text-xs font-semibold text-white transition hover:bg-[#96734F]"
+                                            >
+                                                Enregistrer
+                                            </button>
+
+                                        </form>
+                                    </details>
+                                </td>
+
+                            </tr>
+
+                        {% else %}
+                            <tr>
+                                <td colspan="8" class="px-6 py-16 text-center">
+                                    <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#F5F0E8] text-2xl text-[#B08D67]">
+                                        ▤
+                                    </div>
+
+                                    <p class="mt-4 font-semibold text-[#292524]">
+                                        Aucune livraison disponible
+                                    </p>
+
+                                    <p class="mt-2 text-sm text-[#A8A29E]">
+                                        Les livraisons apparaîtront ici après la validation des commandes.
+                                    </p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+
+            {# Note informative en bas du tableau #}
+            <div class="border-t border-[#F0EBE4] bg-[#FAF8F5] px-5 py-3 sm:px-6">
+                <p class="text-xs leading-5 text-[#A8A29E]">
+                    Les modifications du transporteur, du suivi et du statut sont enregistrées individuellement.
+                    L'annulation ou le report d'une livraison ne modifie pas automatiquement le statut de la commande.
+                </p>
+            </div>
+
+        </section>
+
+    </div>
+
+{% endblock %}

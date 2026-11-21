@@ -1,0 +1,48 @@
+{# Classes de base #}
+{% set baseClasses = 'inline-flex items-center justify-center rounded-full font-medium transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand' %}
+
+{# Couleurs des boutons #}
+{% set variants = {
+    'primary': 'bg-ink text-white hover:bg-stone-700',
+    'secondary': 'bg-sky text-ink hover:bg-beige',
+    'outline': 'border border-brand text-ink hover:bg-brand hover:text-white',
+    'light': 'bg-brand-light text-ink hover:bg-beige'
+} %}
+
+{# Tailles des boutons #}
+{% set sizes = {
+    'sm': 'text-sm px-4 py-2',
+    'md': 'text-base px-5 py-2.5',
+    'lg': 'text-lg px-8 py-3'
+} %}
+
+{# Construction des classes #}
+{% set finalClasses = baseClasses
+    ~ ' ' ~ (variants[variant] ?? variants['primary'])
+    ~ ' ' ~ (sizes[size] ?? sizes['md'])
+    ~ (disabled ? ' opacity-50 cursor-not-allowed pointer-events-none' : '')
+%}
+
+{# Contenu du bouton #}
+{% set buttonContent %}
+    {% block content %}Voir{% endblock %}
+{% endset %}
+
+{# Affichage du lien ou du bouton #}
+{% if href is not null and href is not empty %}
+
+    <a href="{{ href }}"
+       {{ attributes.defaults({class: finalClasses}) }}
+       {% if disabled %}aria-disabled="true" tabindex="-1"{% endif %}>
+        {{ buttonContent }}
+    </a>
+
+{% else %}
+
+    <button type="{{ type in ['button', 'submit', 'reset'] ? type : 'button' }}"
+            {{ attributes.defaults({class: finalClasses}) }}
+            {% if disabled %}disabled{% endif %}>
+        {{ buttonContent }}
+    </button>
+
+{% endif %}

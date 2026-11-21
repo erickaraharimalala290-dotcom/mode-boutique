@@ -1,0 +1,395 @@
+{% extends 'layouts/admin-layout.html.twig' %}
+
+{% block title %}Facture {{ invoice.invoiceNumber }} | ModeBoutique{% endblock %}
+
+{% block admin_content %}
+
+    <div class="mx-auto max-w-5xl space-y-8">
+
+        {# En-tête et navigation #}
+        <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.25em] text-[#B08D67]">
+                    Boutique
+                </p>
+
+                <h1 class="mt-2 text-2xl font-semibold text-stone-800 sm:text-3xl">
+                    Détails de la facture
+                </h1>
+
+                <p class="mt-2 text-sm text-stone-500">
+                    Consultez les informations et les paiements de cette facture.
+                </p>
+            </div>
+
+        
+            <div class="flex flex-wrap items-center gap-3">
+
+                <a
+                    href="{{ path('admin_invoices_index') }}"
+                    class="inline-flex items-center gap-2 rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm font-medium text-stone-600 transition hover:border-[#B08D67] hover:text-[#B08D67]"
+                >
+                    <span>←</span>
+                    Retour aux factures
+                </a>
+
+                <a
+                    href="{{ path('admin_invoices_pdf', {
+                    invoiceNumber: invoice.invoiceNumber
+                    }) }}"
+                    class="inline-flex items-center gap-2 rounded-xl bg-[#292524] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#B08D67]"
+                >
+                    <span>↓</span>
+                    Télécharger PDF
+                </a>
+
+            </div>
+
+        </div>
+
+        {# Informations générales de la facture #}
+        <div class="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
+
+            <div class="flex flex-col justify-between gap-5 border-b border-stone-100 p-6 sm:flex-row sm:items-start sm:p-8">
+
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#B08D67]">
+                        ModeBoutique
+                    </p>
+
+                    <h2 class="mt-3 text-2xl font-bold text-stone-800">
+                        FACTURE
+                    </h2>
+
+                    <p class="mt-2 text-sm text-stone-500">
+                        Vente de vêtements et accessoires
+                    </p>
+                </div>
+
+                <div class="sm:text-right">
+                    <p class="text-xs font-medium uppercase tracking-wider text-stone-400">
+                        Numéro de facture
+                    </p>
+
+                    <p class="mt-2 break-all text-lg font-bold text-stone-800">
+                        {{ invoice.invoiceNumber }}
+                    </p>
+
+                    <p class="mt-2 text-sm text-stone-500">
+                        Émise le
+                        {{ invoice.issuedAt ? invoice.issuedAt|date('d/m/Y à H:i') : '—' }}
+                    </p>
+                </div>
+
+            </div>
+
+            {# Informations du client et de la commande #}
+            <div class="grid grid-cols-1 gap-8 border-b border-stone-100 p-6 sm:grid-cols-2 sm:p-8">
+
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-stone-400">
+                        Facturé à
+                    </p>
+
+                    <p class="mt-3 font-semibold text-stone-800">
+                        {{ order.address.recipientName }}
+                    </p>
+
+                    <p class="mt-1 text-sm text-stone-500">
+                        {{ order.user.email }}
+                    </p>
+
+                    <p class="mt-2 text-sm text-stone-600">
+                        {{ order.address.phone }}
+                    </p>
+
+                    <p class="mt-1 text-sm text-stone-500">
+                        {{ order.address.addressLine1 }}
+                    </p>
+
+                    {% if order.address.addressLine2 %}
+                        <p class="mt-1 text-sm text-stone-500">
+                            {{ order.address.addressLine2 }}
+                        </p>
+                    {% endif %}
+
+                    <p class="mt-1 text-sm text-stone-500">
+                        {{ order.address.city }}, {{ order.address.country }}
+                    </p>
+
+                    {% if order.address.postalCode %}
+                        <p class="mt-1 text-sm text-stone-500">
+                            Code postal : {{ order.address.postalCode }}
+                        </p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-stone-400">
+                        Informations de commande
+                    </p>
+
+                    <div class="mt-3 space-y-3">
+                        <div>
+                            <p class="text-xs text-stone-400">Référence</p>
+                            <p class="mt-1 font-semibold text-stone-800">
+                                {{ order.orderNumber }}
+                            </p>
+                        </div>
+
+                        <div>
+                            <p class="text-xs text-stone-400">Date de commande</p>
+                            <p class="mt-1 text-sm text-stone-700">
+                                {{ order.createdAt ? order.createdAt|date('d/m/Y à H:i') : '—' }}
+                            </p>
+                        </div>
+
+                        <div>
+                            <p class="text-xs text-stone-400">Statut</p>
+
+                            {% set orderStatus = order.status|lower %}
+
+                            {% if orderStatus == 'delivered' %}
+                                <span class="mt-1 inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+                                    Livrée
+                                </span>
+                            {% elseif orderStatus == 'cancelled' %}
+                                <span class="mt-1 inline-flex rounded-full bg-red-50 px-3 py-1 text-xs font-medium text-red-700">
+                                    Annulée
+                                </span>
+                            {% elseif orderStatus == 'shipped' %}
+                                <span class="mt-1 inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
+                                    Expédiée
+                                </span>
+                            {% elseif orderStatus == 'processing' %}
+                                <span class="mt-1 inline-flex rounded-full bg-violet-50 px-3 py-1 text-xs font-medium text-violet-700">
+                                    En préparation
+                                </span>
+                            {% elseif orderStatus == 'confirmed' %}
+                                <span class="mt-1 inline-flex rounded-full bg-sky-50 px-3 py-1 text-xs font-medium text-sky-700">
+                                    Confirmée
+                                </span>
+                            {% else %}
+                                <span class="mt-1 inline-flex rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
+                                    En attente
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            {# Tableau des produits #}
+            <div class="p-6 sm:p-8">
+
+                <h3 class="font-semibold text-stone-800">
+                    Articles commandés
+                </h3>
+
+                <div class="mt-5 overflow-x-auto">
+                    <table class="w-full min-w-[650px] text-left text-sm">
+
+                        <thead class="border-b border-stone-200 bg-stone-50 text-xs uppercase tracking-wider text-stone-500">
+                            <tr>
+                                <th class="px-4 py-4 font-medium">Désignation</th>
+                                <th class="px-4 py-4 text-center font-medium">Quantité</th>
+                                <th class="px-4 py-4 text-right font-medium">Prix unitaire</th>
+                                <th class="px-4 py-4 text-right font-medium">Total</th>
+                            </tr>
+                        </thead>
+
+                        <tbody class="divide-y divide-stone-100">
+
+                            {% for item in order.orderItems %}
+                                <tr>
+                                    <td class="px-4 py-5">
+                                        <p class="font-semibold text-stone-800">
+                                            {{ item.product ? item.product.name : 'Produit indisponible' }}
+                                        </p>
+
+                                        {% if item.variant %}
+                                            <div class="mt-1 space-y-1 text-xs text-stone-500">
+                                                {% if item.variant.color %}
+                                                    <p>Couleur : {{ item.variant.color }}</p>
+                                                {% endif %}
+
+                                                {% if item.variant.size %}
+                                                    <p>Taille : {{ item.variant.size }}</p>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                    </td>
+
+                                    <td class="px-4 py-5 text-center text-stone-600">
+                                        {{ item.quantity }}
+                                    </td>
+
+                                    <td class="whitespace-nowrap px-4 py-5 text-right text-stone-600">
+                                        {{ item.unitPrice|number_format(0, ',', ' ') }} Ar
+                                    </td>
+
+                                    <td class="whitespace-nowrap px-4 py-5 text-right font-semibold text-stone-800">
+                                        {{ (item.unitPrice * item.quantity)|number_format(0, ',', ' ') }} Ar
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="px-4 py-8 text-center text-sm text-stone-500">
+                                        Aucun article dans cette commande.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+
+                        </tbody>
+                    </table>
+                </div>
+
+                {# Totaux de la facture #}
+                <div class="mt-8 flex justify-end">
+                    <div class="w-full space-y-3 sm:max-w-sm">
+
+                        <div class="flex justify-between gap-4 text-sm">
+                            <span class="text-stone-500">Sous-total des articles</span>
+                            <span class="font-medium text-stone-700">
+                                {{ subtotal|number_format(0, ',', ' ') }} Ar
+                            </span>
+                        </div>
+
+                        <div class="flex justify-between gap-4 text-sm">
+                            <span class="text-stone-500">Frais de livraison</span>
+                            <span class="font-medium text-stone-700">
+                                {{ deliveryFee|number_format(0, ',', ' ') }} Ar
+                            </span>
+                        </div>
+
+                        <div class="flex justify-between gap-4 border-t border-stone-200 pt-4">
+                            <span class="font-semibold text-stone-800">Total commande</span>
+                            <span class="text-xl font-bold text-[#B08D67]">
+                                {{ total|number_format(0, ',', ' ') }} Ar
+                            </span>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            {# Historique des paiements #}
+            <div class="border-t border-stone-100 bg-stone-50/60 p-6 sm:p-8">
+
+                <h3 class="font-semibold text-stone-800">
+                    Suivi des paiements
+                </h3>
+
+                <p class="mt-1 text-sm text-stone-500">
+                    Seuls les paiements confirmés sont comptabilisés comme encaissés.
+                </p>
+
+                <div class="mt-5 space-y-3">
+
+                    {% for payment in order.payments %}
+
+                        {% set paymentStatus = payment.status|default('pending')|lower %}
+
+                        <div class="flex flex-col justify-between gap-3 rounded-xl border border-stone-200 bg-white p-4 sm:flex-row sm:items-center">
+
+                            <div>
+                                <p class="font-medium text-stone-800">
+                                    {% if payment.method == 'mobile_money_demo' %}
+                                        Mobile Money
+                                    {% elseif payment.method == 'cash_on_delivery' %}
+                                        Paiement à la livraison
+                                    {% else %}
+                                        {{ payment.method }}
+                                    {% endif %}
+                                </p>
+
+                                <p class="mt-1 text-xs text-stone-400">
+                                    Référence :
+                                    {{ payment.transactionReference ?: 'Non renseignée' }}
+                                </p>
+
+                                <p class="mt-1 text-xs text-stone-400">
+                                    {{ payment.createdAt ? payment.createdAt|date('d/m/Y à H:i') : '—' }}
+                                </p>
+                            </div>
+
+                            <div class="sm:text-right">
+                                <p class="font-semibold text-stone-800">
+                                    {{ payment.amount|number_format(0, ',', ' ') }} Ar
+                                </p>
+
+                                {% if paymentStatus == 'paid' %}
+                                    <span class="mt-1 inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+                                        Payé
+                                    </span>
+                                {% elseif paymentStatus == 'failed' %}
+                                    <span class="mt-1 inline-flex rounded-full bg-red-50 px-3 py-1 text-xs font-medium text-red-700">
+                                        Échec
+                                    </span>
+                                {% else %}
+                                    <span class="mt-1 inline-flex rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
+                                        En attente
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                        </div>
+
+                    {% else %}
+
+                        <p class="rounded-xl border border-stone-200 bg-white p-4 text-sm text-stone-500">
+                            Aucun paiement enregistré pour cette commande.
+                        </p>
+
+                    {% endfor %}
+
+                </div>
+
+                {# Résumé des sommes payées et restantes #}
+                <div class="mt-6 rounded-xl border border-stone-200 bg-white p-5">
+                    <div class="space-y-3">
+
+                        <div class="flex justify-between gap-4 text-sm">
+                            <span class="text-stone-500">Total de la commande</span>
+                            <span class="font-medium text-stone-700">
+                                {{ total|number_format(0, ',', ' ') }} Ar
+                            </span>
+                        </div>
+
+                        <div class="flex justify-between gap-4 text-sm">
+                            <span class="text-stone-500">Montant réellement encaissé</span>
+                            <span class="font-semibold text-emerald-700">
+                                {{ paidAmount|number_format(0, ',', ' ') }} Ar
+                            </span>
+                        </div>
+
+                        <div class="flex justify-between gap-4 border-t border-stone-100 pt-3">
+                            <span class="font-semibold text-stone-800">Solde restant à payer</span>
+                            <span class="text-lg font-bold text-[#B08D67]">
+                                {{ remainingAmount|number_format(0, ',', ' ') }} Ar
+                            </span>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            {# Pied de facture #}
+            <div class="border-t border-stone-100 p-6 text-center sm:p-8">
+                <p class="text-sm font-medium text-stone-700">
+                    Merci d'avoir choisi ModeBoutique !
+                </p>
+
+                <p class="mt-2 text-xs text-stone-400">
+                    Document généré automatiquement par ModeBoutique.
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+
+{% endblock %}

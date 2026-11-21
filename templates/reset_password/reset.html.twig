@@ -1,0 +1,58 @@
+{% extends 'layouts/auth-layout.html.twig' %}
+
+{% block title %}Réinitialiser le mot de passe | ModeBoutique{% endblock %}
+
+{% block body %}
+<div class="min-h-screen flex items-center justify-center bg-cream px-4 py-12">
+    <div class="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
+        <a href="{{ path('home') }}" class="mb-6 block text-center text-2xl font-bold text-ink">
+            Mode<span class="text-brand">Boutique</span>
+        </a>
+
+        <h1 class="mb-3 text-center text-2xl font-semibold text-ink">
+            Nouveau mot de passe
+        </h1>
+
+        <p class="mb-6 text-center text-sm text-gray-600">
+            Choisissez un nouveau mot de passe d'au moins 8 caractères.
+        </p>
+
+        {% for flash_error in app.flashes('reset_password_error') %}
+            <div class="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+                {{ flash_error }}
+            </div>
+        {% endfor %}
+
+        {{ form_start(resetForm, {'attr': {'class': 'space-y-5'}}) }}
+            {{ form_row(resetForm.plainPassword.first, {
+                'label': 'Nouveau mot de passe',
+                'attr': {
+                    'placeholder': 'Votre nouveau mot de passe',
+                    'class': 'w-full rounded-xl border border-beige bg-white px-4 py-3 text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20'
+                },
+                'label_attr': {'class': 'mb-2 block text-sm font-medium text-ink'}
+            }) }}
+
+            {{ form_row(resetForm.plainPassword.second, {
+                'label': 'Confirmer le nouveau mot de passe',
+                'attr': {
+                    'placeholder': 'Confirmez votre mot de passe',
+                    'class': 'w-full rounded-xl border border-beige bg-white px-4 py-3 text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20'
+                },
+                'label_attr': {'class': 'mb-2 block text-sm font-medium text-ink'}
+            }) }}
+
+            <button type="submit"
+                class="w-full rounded-xl bg-brand px-5 py-3 font-semibold text-white transition hover:opacity-90">
+                Enregistrer le nouveau mot de passe
+            </button>
+        {{ form_end(resetForm) }}
+
+        <p class="mt-6 text-center text-sm text-gray-600">
+            <a href="{{ path('app_login') }}" class="font-semibold text-brand hover:underline">
+                Retour à la connexion
+            </a>
+        </p>
+    </div>
+</div>
+{% endblock %}

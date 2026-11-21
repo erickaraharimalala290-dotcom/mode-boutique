@@ -1,0 +1,194 @@
+{% extends 'layouts/auth-layout.html.twig' %}
+
+{% block title %}Paiement de l'échange | ModeBoutique{% endblock %}
+
+{% block body %}
+
+    {% set priceDifference = returnRequest.priceDifference|default(0) %}
+    {% set exchangeDeliveryFee = returnRequest.exchangeDeliveryFee|default(0) %}
+
+    <section class="min-h-screen bg-[#F5F0E8] px-4 py-12 sm:px-6 lg:py-16">
+
+        <div class="mx-auto max-w-2xl">
+
+            {# Lien de retour #}
+            <a
+                href="{{ path('app_account_order_detail', {
+                    orderNumber: returnRequest.orderItem.customerOrder.orderNumber
+                }) }}"
+                class="mb-6 inline-flex items-center gap-2 text-sm font-medium text-[#44403C] transition hover:text-[#B08D67]"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                     viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m12 19-7-7 7-7"/>
+                    <path d="M19 12H5"/>
+                </svg>
+                Retour à ma commande
+            </a>
+
+            {# Carte principale #}
+            <div class="overflow-hidden rounded-3xl border border-[#B08D67]/20 bg-white shadow-lg shadow-[#292524]/5">
+
+                {# En-tête #}
+                <div class="border-b border-[#B08D67]/15 px-6 py-9 text-center sm:px-10">
+
+                    <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-[#F5F0E8] text-[#B08D67]">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
+                             viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="5" width="20" height="14" rx="2"/>
+                            <path d="M2 10h20"/>
+                        </svg>
+                    </div>
+
+                    <p class="mt-6 text-xs font-bold uppercase tracking-[0.2em] text-[#B08D67]">
+                        Finalisation de votre échange
+                    </p>
+
+                    <h1 class="mt-3 text-2xl font-bold text-[#292524] sm:text-3xl">
+                        Paiement de l'échange
+                    </h1>
+
+                    <p class="mx-auto mt-3 max-w-md text-sm leading-7 text-[#44403C]">
+                        Votre demande d'échange a été acceptée.
+                        Retrouvez ci-dessous le détail des frais à régler pour poursuivre son traitement.
+                    </p>
+
+                </div>
+
+                {# Détails du paiement #}
+                <div class="p-6 sm:p-10">
+
+                    <div class="rounded-2xl border border-[#B08D67]/20 bg-[#F5F0E8]/70 p-5 sm:p-7">
+
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+
+                            <p class="text-sm font-medium text-[#44403C]">
+                                Référence de la demande
+                            </p>
+
+                            <span class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-[#B08D67]">
+                                Échange accepté
+                            </span>
+
+                        </div>
+
+                        <p class="mt-2 break-all text-base font-bold tracking-wide text-[#292524]">
+                            {{ returnRequest.requestNumber }}
+                        </p>
+
+                        <div class="my-6 border-t border-[#B08D67]/25"></div>
+
+                        {# Détail des montants #}
+                        <div class="space-y-4">
+
+                            <div class="flex justify-between gap-4 text-sm">
+                                <span class="text-[#44403C]">
+                                    Différence de prix
+                                </span>
+
+                                <span class="font-semibold text-[#292524]">
+                                    {{ priceDifference|number_format(0, ',', ' ') }} Ar
+                                </span>
+                            </div>
+
+                            <div class="flex justify-between gap-4 text-sm">
+                                <span class="text-[#44403C]">
+                                    Frais de livraison de l'échange
+                                </span>
+
+                                <span class="font-semibold text-[#292524]">
+                                    {{ exchangeDeliveryFee|number_format(0, ',', ' ') }} Ar
+                                </span>
+                            </div>
+
+                            <div class="border-t border-[#B08D67]/25 pt-4">
+
+                                <div class="flex items-center justify-between gap-4">
+
+                                    <span class="font-bold text-[#292524]">
+                                        Total à payer
+                                    </span>
+
+                                    <span class="text-2xl font-extrabold text-[#B08D67] sm:text-3xl">
+                                        {{ payment.amount|number_format(0, ',', ' ') }} Ar
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    {# Confirmation du paiement #}
+                    <div class="mt-7">
+
+                        <form
+                            method="POST"
+                            action="{{ path('app_account_exchange_payment', {
+                                id: returnRequest.id
+                            }) }}"
+                            data-turbo="false"
+                        >
+
+                            <input type="hidden" name="action" value="confirm">
+
+                            <input
+                                type="hidden"
+                                name="_token"
+                                value="{{ csrf_token('confirm_exchange_payment_' ~ returnRequest.id) }}"
+                            >
+
+                            <button
+                                type="submit"
+                                class="group flex w-full items-center justify-center gap-3 rounded-2xl bg-[#292524] px-6 py-4 text-sm font-bold text-white shadow-md shadow-[#292524]/10 transition duration-300 hover:-translate-y-0.5 hover:bg-[#44403C] hover:shadow-lg"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                     viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M5 12h14"/>
+                                    <path d="m12 5 7 7-7 7"/>
+                                </svg>
+
+                                Confirmer le paiement
+                            </button>
+
+                        </form>
+
+                        <p class="mt-4 text-center text-xs leading-5 text-[#44403C]/70">
+                            En confirmant, vous validez le règlement du montant total indiqué ci-dessus.
+                        </p>
+
+                    </div>
+
+                </div>
+
+                {# Pied de carte #}
+                <div class="border-t border-[#B08D67]/15 bg-[#FBF9F5] px-6 py-5 text-center">
+
+                    <div class="flex items-center justify-center gap-2 text-xs font-medium text-[#44403C]">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                             viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11z"/>
+                            <path d="m9 12 2 2 4-4"/>
+                        </svg>
+                        Paiement et suivi de votre demande
+                    </div>
+
+                    <p class="mt-2 text-xs text-[#44403C]/65">
+                        ModeBoutique · Merci pour votre confiance.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+{% endblock %}

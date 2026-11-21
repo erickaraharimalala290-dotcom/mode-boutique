@@ -1,0 +1,257 @@
+{#
+    Navbar globale ModeBoutique
+    Navigation desktop et mobile sans JavaScript.
+    Le lien Catégories ouvre directement la page des catégories.
+#}
+
+{% set current_route = app.request.attributes.get('_route') %}
+{% set cartQuantity = cart_count() %}
+
+<header class="sticky top-0 z-50 border-b border-ink/10 bg-white/95 shadow-sm backdrop-blur-sm">
+
+    {# Ligne principale : logo, navigation et actions #}
+    <div class="container-page">
+        <div class="flex h-16 items-center justify-between gap-3 md:h-20 md:gap-4">
+
+            {# Logo #}
+            <a
+                href="{{ path('home') }}"
+                class="group flex shrink-0 items-center gap-2"
+                aria-label="ModeBoutique — Retour à l'accueil"
+            >
+
+                <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-brand text-beige shadow-sm transition-transform duration-200 group-hover:scale-105">
+                    M
+                </span>
+
+                <span class="flex flex-col leading-4">
+                    <span class="font-serif text-xl font-semibold tracking-tight text-ink md:text-2xl">
+                        Mode
+                    </span>
+                    <span class="pl-2 text-brand">Boutique</span>
+                </span>
+            </a>
+
+            {# Navigation desktop #}
+            <nav
+                class="hidden items-center gap-1 md:flex lg:gap-2"
+                aria-label="Navigation principale"
+            >
+
+                {# Accueil #}
+                <a
+                    href="{{ path('home') }}"
+                    class="relative px-3 py-2 text-sm font-medium transition-colors
+                   {{ current_route == 'home' ? 'text-brand' : 'text-ink hover:text-brand' }}"
+                    {% if current_route == 'home' %}aria-current="page"{% endif %}
+                >
+                    Accueil
+
+                    {% if current_route == 'home' %}
+                        <span class="absolute inset-x-3 -bottom-0.5 h-0.5 rounded-full bg-brand"></span>
+                    {% endif %}
+                </a>
+
+                {# Catégories : lien direct vers la page #}
+                <a
+                    href="{{ path('app_category') }}"
+                    class="relative px-3 py-2 text-sm font-medium transition-colors
+                   {{ current_route == 'app_category' ? 'text-brand' : 'text-ink hover:text-brand' }}"
+                    {% if current_route == 'app_category' %}aria-current="page"{% endif %}
+                >
+                    Catégories
+
+                    {% if current_route == 'app_category' %}
+                        <span class="absolute inset-x-3 -bottom-0.5 h-0.5 rounded-full bg-brand"></span>
+                    {% endif %}
+                </a>
+
+                {# Boutique #}
+                <a
+                    href="{{ path('app_shop') }}"
+                    class="relative px-3 py-2 text-sm font-medium transition-colors
+                   {{ current_route starts with 'app_shop' or current_route starts with 'app_product' ? 'text-brand' : 'text-ink hover:text-brand' }}"
+                    {% if current_route starts with 'app_shop' or current_route starts with 'app_product' %}aria-current="page"{% endif %}
+                >
+                    Boutique
+                </a>
+
+                {# À propos #}
+                <a
+                    href="{{ path('app_about') }}"
+                    class="relative px-3 py-2 text-sm font-medium transition-colors
+                   {{ current_route == 'app_about' ? 'text-brand' : 'text-ink hover:text-brand' }}"
+                    {% if current_route == 'app_about' %}aria-current="page"{% endif %}
+                >
+                    À propos
+                </a>
+
+                {# Contact #}
+                <a
+                    href="{{ path('app_contact') }}"
+                    class="relative px-3 py-2 text-sm font-medium transition-colors
+                   {{ current_route == 'app_contact' ? 'text-brand' : 'text-ink hover:text-brand' }}"
+                    {% if current_route == 'app_contact' %}aria-current="page"{% endif %}
+                >
+                    Contact
+                </a>
+
+            </nav>
+
+            {# Actions à droite #}
+            <div class="flex shrink-0 items-center gap-1 sm:gap-2">
+
+                {# Recherche : ouvre la boutique pour le moment #}
+                <a
+                    href="{{ path('app_shop') }}"
+                    class="hidden h-10 w-10 items-center justify-center rounded-full text-ink transition-colors hover:bg-brand-light hover:text-brand sm:inline-flex"
+                    aria-label="Rechercher des produits"
+                >
+                    {{ ux_icon('lucide:search', {class: 'h-5 w-5'}) }}
+                </a>
+
+                {# Compte #}
+                <a
+                    href="{{ app.user ? path('app_account') : path('app_login') }}"
+                    class="hidden h-10 w-10 items-center justify-center rounded-full text-ink transition-colors hover:bg-brand-light hover:text-brand sm:inline-flex"
+                    aria-label="Mon compte"
+                >
+                    {{ ux_icon('lucide:user', {class: 'h-5 w-5'}) }}
+                </a>
+
+                {# Favoris #}
+                <a
+                    href="{{ path('app_favorites') }}"
+                    class="hidden h-10 w-10 items-center justify-center rounded-full text-ink transition-colors hover:bg-brand-light hover:text-brand sm:inline-flex"
+                    aria-label="Mes favoris"
+                >
+                    {{ ux_icon('lucide:heart', {class: 'h-5 w-5'}) }}
+                </a>
+
+                {# Panier #}
+                <a
+                    href="{{ path('app_cart') }}"
+                    class="relative inline-flex h-10 w-10 items-center justify-center rounded-full text-ink transition-colors hover:bg-brand-light hover:text-brand"
+                    aria-label="Mon panier ({{ cartQuantity }} article(s))"
+                >
+
+                    {{ ux_icon('lucide:shopping-cart', {class: 'h-5 w-5'}) }}
+
+                    {# Badge panier de démonstration #}
+                    {# Badge dynamique du panier #}
+                    {% if cartQuantity > 0 %}
+                        <span class="absolute -right-0.5 -top-0.5 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-brand px-1 text-[10px] font-semibold leading-none text-white">
+                            {{ cartQuantity > 99 ? '99+' : cartQuantity }}
+                        </span>
+                    {% endif %}
+                </a>
+
+                {# Bouton menu mobile #}
+                <label
+                    for="mobile-menu-toggle"
+                    class="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-ink transition-colors hover:bg-brand-light hover:text-brand md:hidden"
+                    aria-label="Ouvrir le menu"
+                >
+                    {{ ux_icon('lucide:menu', {class: 'h-6 w-6'}) }}
+                </label>
+
+            </div>
+        </div>
+    </div>
+
+    {# Menu mobile sans JavaScript #}
+    <input
+        type="checkbox"
+        id="mobile-menu-toggle"
+        class="peer sr-only"
+        aria-hidden="true"
+    >
+
+    <div class="hidden border-t border-ink/10 bg-white shadow-lg peer-checked:block md:hidden">
+
+        <nav
+            class="container-page flex flex-col gap-1 py-3"
+            aria-label="Navigation mobile"
+        >
+
+            {# Accueil #}
+            <a
+                href="{{ path('home') }}"
+                class="rounded-lg px-3 py-3 text-base font-medium transition-colors
+               {{ current_route == 'home' ? 'bg-brand-light text-brand' : 'text-ink hover:bg-brand-light hover:text-brand' }}"
+                {% if current_route == 'home' %}aria-current="page"{% endif %}
+            >
+                Accueil
+            </a>
+
+            {# Catégories : accès direct #}
+            <a
+                href="{{ path('app_category') }}"
+                class="rounded-lg px-3 py-3 text-base font-medium transition-colors
+               {{ current_route == 'app_category' ? 'bg-brand-light text-brand' : 'text-ink hover:bg-brand-light hover:text-brand' }}"
+                {% if current_route == 'app_category' %}aria-current="page"{% endif %}
+            >
+                Catégories
+            </a>
+
+            {# Boutique #}
+            <a
+                href="{{ path('app_shop') }}"
+                class="rounded-lg px-3 py-3 text-base font-medium transition-colors
+               {{ current_route starts with 'app_shop' or current_route starts with 'app_product' ? 'bg-brand-light text-brand' : 'text-ink hover:bg-brand-light hover:text-brand' }}"
+                {% if current_route starts with 'app_shop' or current_route starts with 'app_product' %}aria-current="page"{% endif %}
+            >
+                Boutique
+            </a>
+
+            {# À propos #}
+            <a
+                href="{{ path('app_about') }}"
+                class="rounded-lg px-3 py-3 text-base font-medium transition-colors
+               {{ current_route == 'app_about' ? 'bg-brand-light text-brand' : 'text-ink hover:bg-brand-light hover:text-brand' }}"
+                {% if current_route == 'app_about' %}aria-current="page"{% endif %}
+            >
+                À propos
+            </a>
+
+            {# Contact #}
+            <a
+                href="{{ path('app_contact') }}"
+                class="rounded-lg px-3 py-3 text-base font-medium transition-colors
+               {{ current_route == 'app_contact' ? 'bg-brand-light text-brand' : 'text-ink hover:bg-brand-light hover:text-brand' }}"
+                {% if current_route == 'app_contact' %}aria-current="page"{% endif %}
+            >
+                Contact
+            </a>
+
+            <div class="my-2 border-t border-ink/10"></div>
+
+            {# Actions secondaires sur mobile #}
+            <div class="grid grid-cols-2 gap-2 pt-1">
+
+                {# Mon compte #}
+                <a
+                    href="{{ app.user ? path('app_account') : path('app_login') }}"
+                    class="flex items-center justify-center gap-2 rounded-lg bg-brand-light px-3 py-3 text-sm font-medium text-brand transition-colors hover:bg-sky"
+                >
+
+                    {{ ux_icon('lucide:user', {class: 'h-5 w-5'}) }}
+                    Mon compte
+                </a>
+
+                {# Favoris #}
+                <a
+                    href="{{ path('app_favorites') }}"
+                    class="flex items-center justify-center gap-2 rounded-lg bg-brand-light px-3 py-3 text-sm font-medium text-brand transition-colors hover:bg-sky"
+                >
+
+                    {{ ux_icon('lucide:heart', {class: 'h-5 w-5'}) }}
+                    Favoris
+                </a>
+
+            </div>
+
+        </nav>
+    </div>
+
+</header>

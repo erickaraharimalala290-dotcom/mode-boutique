@@ -1,0 +1,366 @@
+{% extends 'layouts/admin-layout.html.twig' %}
+
+{% block title %}Nouvelle promotion | ModeBoutique{% endblock %}
+
+{% block admin_content %}
+    <div class="space-y-8">
+
+        {# En-tête #}
+        <div>
+            <a
+                href="{{ path('admin_promotions_index') }}"
+                class="inline-flex items-center gap-2 text-sm text-stone-500 transition hover:text-[#B08D67]"
+            >
+                <span>←</span>
+                Retour aux promotions
+            </a>
+
+            <p class="mt-5 text-xs font-semibold uppercase tracking-[0.25em] text-[#B08D67]">
+                Marketing
+            </p>
+
+            <h1 class="mt-2 text-2xl font-semibold text-stone-800 sm:text-3xl">
+                Créer une promotion
+            </h1>
+
+            <p class="mt-2 text-sm text-stone-500">
+                Préparez une offre spéciale pour les clients de ModeBoutique.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 items-start gap-6 xl:grid-cols-3">
+
+            {# Formulaire #}
+            <div class="overflow-hidden rounded-2xl border border-stone-200 bg-white xl:col-span-2">
+
+                <div class="border-b border-stone-100 px-6 py-5 sm:px-8">
+                    <h2 class="font-semibold text-stone-800">Informations de la promotion</h2>
+                    <p class="mt-1 text-sm text-stone-500">
+                        Renseignez les détails de votre offre.
+                    </p>
+                </div>
+
+                <form
+                    method="POST"
+                    action="{{ path('admin_promotions_new') }}"
+                    data-turbo="false"
+                    class="space-y-6 p-6 sm:p-8"
+                >
+
+                    <input type="hidden" name="_token" value="{{ csrf_token('create_promotion') }}">
+
+                    {# Erreurs générales #}
+                    {% for error in globalErrors %}
+                        <div class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+
+                    {# Nom de la promotion #}
+                    <div>
+                        <label for="promotion-name" class="mb-2 block text-sm font-medium text-stone-700">
+                            Nom de la promotion *
+                        </label>
+
+                        <input
+                            id="promotion-name"
+                            name="name"
+                            type="text"
+                            maxlength="150"
+                            value="{{ values.name }}"
+                            placeholder="Ex. : Offre spéciale de bienvenue"
+                            class="w-full rounded-xl border {{ fieldErrors.name|default([]) is not empty ? 'border-red-400' : 'border-stone-200' }} bg-stone-50 px-4 py-3 text-sm outline-none transition placeholder:text-stone-400 focus:border-[#B08D67] focus:bg-white focus:ring-2 focus:ring-[#B08D67]/10"
+                        >
+
+                        {% for error in fieldErrors.name|default([]) %}
+                            <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    {# Code promotionnel #}
+                    <div>
+                        <label for="promotion-code" class="mb-2 block text-sm font-medium text-stone-700">
+                            Code promotionnel *
+                        </label>
+
+                        <input
+                            id="promotion-code"
+                            name="code"
+                            type="text"
+                            maxlength="50"
+                            value="{{ values.code }}"
+                            placeholder="Ex. : BIENVENUE10"
+                            class="w-full rounded-xl border {{ fieldErrors.code|default([]) is not empty ? 'border-red-400' : 'border-stone-200' }} bg-stone-50 px-4 py-3 text-sm uppercase outline-none transition placeholder:text-stone-400 focus:border-[#B08D67] focus:bg-white focus:ring-2 focus:ring-[#B08D67]/10"
+                        >
+
+                        <p class="mt-2 text-xs text-stone-400">
+                            Le client saisira ce code pour bénéficier de la réduction.
+                        </p>
+
+                        {% for error in fieldErrors.code|default([]) %}
+                            <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    {# Type et valeur de réduction #}
+                    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+
+                        <div>
+                            <label for="discount-type" class="mb-2 block text-sm font-medium text-stone-700">
+                                Type de réduction *
+                            </label>
+
+                            <select
+                                id="discount-type"
+                                name="discount_type"
+                                class="w-full rounded-xl border {{ fieldErrors.discount_type|default([]) is not empty ? 'border-red-400' : 'border-stone-200' }} bg-stone-50 px-4 py-3 text-sm outline-none focus:border-[#B08D67] focus:bg-white"
+                            >
+                                <option value="percentage" {{ values.discount_type == 'percentage' ? 'selected' : '' }}>
+                                    Pourcentage (%)
+                                </option>
+
+                                <option value="fixed" {{ values.discount_type == 'fixed' ? 'selected' : '' }}>
+                                    Montant fixe (Ar)
+                                </option>
+                            </select>
+
+                            {% for error in fieldErrors.discount_type|default([]) %}
+                                <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+
+                        <div>
+                            <label for="discount-value" class="mb-2 block text-sm font-medium text-stone-700">
+                                Valeur de la réduction *
+                            </label>
+
+                            <input
+                                id="discount-value"
+                                name="discount_value"
+                                type="number"
+                                min="0.01"
+                                step="0.01"
+                                value="{{ values.discount_value }}"
+                                placeholder="Ex. : 10"
+                                class="w-full rounded-xl border {{ fieldErrors.discount_value|default([]) is not empty ? 'border-red-400' : 'border-stone-200' }} bg-stone-50 px-4 py-3 text-sm outline-none focus:border-[#B08D67] focus:bg-white"
+                            >
+
+                            {% for error in fieldErrors.discount_value|default([]) %}
+                                <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+
+                    </div>
+
+                    {# Dates de validité #}
+                    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+
+                        <div>
+                            <label for="start-date" class="mb-2 block text-sm font-medium text-stone-700">
+                                Date de début *
+                            </label>
+
+                            <input
+                                id="start-date"
+                                name="start_date"
+                                type="date"
+                                value="{{ values.start_date }}"
+                                class="w-full rounded-xl border {{ fieldErrors.start_date|default([]) is not empty ? 'border-red-400' : 'border-stone-200' }} bg-stone-50 px-4 py-3 text-sm outline-none focus:border-[#B08D67] focus:bg-white"
+                            >
+
+                            {% for error in fieldErrors.start_date|default([]) %}
+                                <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+
+                        <div>
+                            <label for="end-date" class="mb-2 block text-sm font-medium text-stone-700">
+                                Date de fin *
+                            </label>
+
+                            <input
+                                id="end-date"
+                                name="end_date"
+                                type="date"
+                                value="{{ values.end_date }}"
+                                class="w-full rounded-xl border {{ fieldErrors.end_date|default([]) is not empty ? 'border-red-400' : 'border-stone-200' }} bg-stone-50 px-4 py-3 text-sm outline-none focus:border-[#B08D67] focus:bg-white"
+                            >
+
+                            {% for error in fieldErrors.end_date|default([]) %}
+                                <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+
+                    </div>
+
+                    {# Limite d'utilisation #}
+                    <div>
+                        <label for="usage-limit" class="mb-2 block text-sm font-medium text-stone-700">
+                            Nombre maximal d'utilisations
+                        </label>
+
+                        <input
+                            id="usage-limit"
+                            name="usage_limit"
+                            type="number"
+                            min="1"
+                            step="1"
+                            value="{{ values.usage_limit }}"
+                            placeholder="Ex. : 100"
+                            class="w-full rounded-xl border {{ fieldErrors.usage_limit|default([]) is not empty ? 'border-red-400' : 'border-stone-200' }} bg-stone-50 px-4 py-3 text-sm outline-none focus:border-[#B08D67] focus:bg-white"
+                        >
+
+                        <p class="mt-2 text-xs text-stone-400">
+                            Laissez vide si vous ne souhaitez pas définir de limite.
+                        </p>
+
+                        {% for error in fieldErrors.usage_limit|default([]) %}
+                            <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    {# Produits concernés par la promotion #}
+                    <div>
+                        <div class="mb-3">
+                            <label class="block text-sm font-medium text-stone-700">
+                                Produits concernés *
+                            </label>
+
+                            <p class="mt-1 text-xs text-stone-500">
+                                Sélectionnez les produits qui bénéficieront de cette promotion.
+                            </p>
+                        </div>
+
+                        <div class="max-h-80 space-y-2 overflow-y-auto rounded-xl border border-stone-200 bg-stone-50 p-4">
+
+                            {% for product in products %}
+                                <label
+                                    class="flex cursor-pointer items-center gap-3 rounded-lg border border-stone-200 bg-white p-3 transition hover:border-[#B08D67] hover:bg-[#F5F0E8]"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        name="products[]"
+                                        value="{{ product.id }}"
+                                        {{ product.id in selectedProductIds ? 'checked' : '' }}
+                                        class="h-4 w-4 rounded border-stone-300 text-[#B08D67] focus:ring-[#B08D67]"
+                                    >
+
+                                    <span class="min-w-0 flex-1">
+                                        <span class="block text-sm font-medium text-stone-800">
+                                            {{ product.name }}
+                                        </span>
+
+                                        <span class="mt-1 block text-xs text-stone-500">
+                                            {{ product.price|number_format(0, ',', ' ') }} Ar
+                                        </span>
+                                    </span>
+                                </label>
+                            {% else %}
+                                <p class="py-5 text-center text-sm text-stone-500">
+                                    Aucun produit actif disponible.
+                                </p>
+                            {% endfor %}
+
+                        </div>
+
+                        {% for error in fieldErrors.products|default([]) %}
+                            <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+
+                    {# Statut #}
+                    <div>
+                        <label for="promotion-status" class="mb-2 block text-sm font-medium text-stone-700">
+                            Statut
+                        </label>
+
+                        <select
+                            id="promotion-status"
+                            name="status"
+                            class="w-full rounded-xl border {{ fieldErrors.status|default([]) is not empty ? 'border-red-400' : 'border-stone-200' }} bg-stone-50 px-4 py-3 text-sm outline-none focus:border-[#B08D67] focus:bg-white"
+                        >
+                            <option value="active" {{ values.status == 'active' ? 'selected' : '' }}>
+                                Active
+                            </option>
+
+                            <option value="inactive" {{ values.status == 'inactive' ? 'selected' : '' }}>
+                                Inactive
+                            </option>
+                        </select>
+
+                        {% for error in fieldErrors.status|default([]) %}
+                            <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    {# Boutons #}
+                    <div class="flex flex-col-reverse gap-3 border-t border-stone-100 pt-6 sm:flex-row sm:justify-end">
+
+                        <a
+                            href="{{ path('admin_promotions_index') }}"
+                            class="rounded-xl border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-600 transition hover:bg-stone-50"
+                        >
+                            Annuler
+                        </a>
+
+                        <button
+                            type="submit"
+                            class="rounded-xl bg-stone-800 px-6 py-3 text-sm font-medium text-white transition hover:bg-[#B08D67]"
+                        >
+                            Créer la promotion
+                        </button>
+
+                    </div>
+
+                </form>
+            </div>
+
+            {# Aperçu décoratif #}
+            <aside class="overflow-hidden rounded-2xl border border-stone-200 bg-white">
+
+                <div class="bg-stone-800 px-6 py-7 text-white">
+
+                    <p class="text-xs font-semibold uppercase tracking-[0.25em] text-[#D8B58E]">
+                        ModeBoutique
+                    </p>
+
+                    <div class="mt-8 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-3xl text-[#D8B58E]">
+                        %
+                    </div>
+
+                    <h2 class="mt-5 text-2xl font-semibold">
+                        Une offre spéciale
+                    </h2>
+
+                    <p class="mt-2 text-sm leading-6 text-stone-300">
+                        Proposez une réduction pour fidéliser vos clients et mettre en valeur votre collection.
+                    </p>
+
+                </div>
+
+                <div class="space-y-4 p-6">
+
+                    <div class="rounded-xl border border-dashed border-[#B08D67]/50 bg-[#F5F0E8] p-4 text-center">
+
+                        <p class="text-xs uppercase tracking-wider text-stone-500">
+                            Exemple de code
+                        </p>
+
+                        <p class="mt-2 font-mono text-lg font-bold tracking-widest text-[#8A6848]">
+                            BIENVENUE10
+                        </p>
+
+                    </div>
+
+                    <p class="text-xs leading-5 text-stone-500">
+                        La promotion sera enregistrée après validation du formulaire.
+                    </p>
+
+                </div>
+
+            </aside>
+
+        </div>
+    </div>
+{% endblock %}

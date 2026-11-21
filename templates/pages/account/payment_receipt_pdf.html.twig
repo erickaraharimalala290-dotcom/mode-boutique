@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Reçu de paiement</title>
+
+    <style>
+        @page {
+            margin: 35px;
+        }
+
+        body {
+            font-family: DejaVu Sans, sans-serif;
+            color: #292524;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .header {
+            border-bottom: 3px solid #B08D67;
+            padding-bottom: 18px;
+            margin-bottom: 25px;
+        }
+
+        .brand {
+            font-size: 25px;
+            font-weight: bold;
+            color: #292524;
+        }
+
+        .brand span {
+            color: #B08D67;
+        }
+
+        .subtitle {
+            color: #78716c;
+            font-size: 11px;
+            margin-top: 4px;
+        }
+
+        .receipt-title {
+            text-align: center;
+            margin: 25px 0;
+        }
+
+        .receipt-title h1 {
+            font-size: 22px;
+            margin-bottom: 5px;
+        }
+
+        .receipt-title p {
+            color: #78716c;
+            margin: 0;
+        }
+
+        .section {
+            margin-top: 22px;
+        }
+
+        .section-title {
+            background: #F5F0E8;
+            padding: 9px 12px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #292524;
+        }
+
+        .info-row {
+            padding: 5px 0;
+            border-bottom: 1px solid #eee8df;
+        }
+
+        .label {
+            color: #78716c;
+        }
+
+        .value {
+            font-weight: bold;
+        }
+
+        .amount-box {
+            margin-top: 25px;
+            padding: 18px;
+            background: #F5F0E8;
+            border: 1px solid #B08D67;
+            text-align: center;
+        }
+
+        .amount-label {
+            color: #57534e;
+            font-size: 11px;
+        }
+
+        .amount {
+            font-size: 25px;
+            font-weight: bold;
+            color: #8B6846;
+            margin-top: 5px;
+        }
+
+        .status {
+            color: #15803d;
+            font-weight: bold;
+        }
+
+        .footer {
+            margin-top: 40px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd6ce;
+            text-align: center;
+            color: #78716c;
+            font-size: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        td {
+            vertical-align: top;
+        }
+
+        .right {
+            text-align: right;
+        }
+    </style>
+</head>
+
+<body>
+
+    {# En-tête du reçu #}
+    <div class="header">
+        <div class="brand">
+            Mode<span>Boutique</span>
+        </div>
+
+        <div class="subtitle">
+            Votre boutique de mode
+        </div>
+    </div>
+
+    {# Titre du document #}
+    <div class="receipt-title">
+        {% if returnRequest %}
+            <h1>REÇU DE PAIEMENT D'ÉCHANGE</h1>
+        {% else %}
+            <h1>REÇU DE PAIEMENT</h1>
+        {% endif %}
+
+        <p>
+            Référence du reçu :
+            {{ payment.transactionReference ?: 'PAIEMENT-' ~ payment.id }}
+        </p>
+    </div>
+
+    {# Informations du client #}
+    <div class="section">
+        <div class="section-title">
+            Informations du client
+        </div>
+
+        <div class="info-row">
+            <table>
+                <tr>
+                    <td class="label">Nom complet</td>
+                    <td class="right value">
+                        {{ user.firstname }} {{ user.lastname }}
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="info-row">
+            <table>
+                <tr>
+                    <td class="label">Adresse e-mail</td>
+                    <td class="right value">
+                        {{ user.email }}
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        {% if address %}
+            <div class="info-row">
+                <table>
+                    <tr>
+                        <td class="label">Destinataire</td>
+                        <td class="right value">
+                            {{ address.recipientName }}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="info-row">
+                <table>
+                    <tr>
+                        <td class="label">Téléphone</td>
+                        <td class="right value">
+                            {{ address.phone }}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="info-row">
+                <table>
+                    <tr>
+                        <td class="label">Adresse</td>
+                        <td class="right value">
+                            {{ address.addressLine1 }}
+                            {% if address.addressLine2 %}
+                                , {{ address.addressLine2 }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="info-row">
+                <table>
+                    <tr>
+                        <td class="label">Ville</td>
+                        <td class="right value">
+                            {{ address.city }}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+
+    {# Informations de la commande ou de l'échange #}
+    <div class="section">
+        <div class="section-title">
+            {% if returnRequest %}
+                Informations de l'échange
+            {% else %}
+                Informations de la commande
+            {% endif %}
+        </div>
+
+        <div class="info-row">
+            <table>
+                <tr>
+                    <td class="label">Numéro de commande d'origine</td>
+                    <td class="right value">
+                        {{ order.orderNumber }}
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        {% if returnRequest %}
+            <div class="info-row">
+                <table>
+                    <tr>
+                        <td class="label">Référence de l'échange</td>
+                        <td class="right value">
+                            {{ returnRequest.requestNumber }}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="info-row">
+                <table>
+                    <tr>
+                        <td class="label">Produit de remplacement</td>
+                        <td class="right value">
+                            {% if returnRequest.replacementProduct %}
+                                {{ returnRequest.replacementProduct.name }}
+                            {% else %}
+                                Produit indisponible
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            {% if returnRequest.replacementVariant %}
+                <div class="info-row">
+                    <table>
+                        <tr>
+                            <td class="label">Couleur</td>
+                            <td class="right value">
+                                {{ returnRequest.replacementVariant.color }}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="info-row">
+                    <table>
+                        <tr>
+                            <td class="label">Taille</td>
+                            <td class="right value">
+                                {{ returnRequest.replacementVariant.size }}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            {% endif %}
+
+            <div class="info-row">
+                <table>
+                    <tr>
+                        <td class="label">Quantité échangée</td>
+                        <td class="right value">
+                            {{ returnRequest.quantity }}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="info-row">
+                <table>
+                    <tr>
+                        <td class="label">Motif de l'échange</td>
+                        <td class="right value">
+                            {{ returnRequest.reason }}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        {% else %}
+            <div class="info-row">
+                <table>
+                    <tr>
+                        <td class="label">Date de commande</td>
+                        <td class="right value">
+                            {{ order.createdAt|date('d/m/Y à H:i') }}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+
+    {# Détails du paiement #}
+    <div class="section">
+        <div class="section-title">
+            Détails du paiement
+        </div>
+
+        <div class="info-row">
+            <table>
+                <tr>
+                    <td class="label">Type de paiement</td>
+                    <td class="right value">
+                        {% if returnRequest %}
+                            Paiement complémentaire d'échange
+                        {% elseif payment.method == 'mobile_money_demo' %}
+                            Acompte Mobile Money
+                        {% elseif payment.method == 'mobile_money_balance' %}
+                            Solde Mobile Money
+                        {% elseif payment.method == 'cash_balance' %}
+                            Solde en espèces
+                        {% elseif payment.method == 'cash_on_delivery' %}
+                            Paiement à la livraison
+                        {% else %}
+                            {{ payment.method }}
+                        {% endif %}
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        {% if returnRequest %}
+            <div class="info-row">
+                <table>
+                    <tr>
+                        <td class="label">Différence de prix</td>
+                        <td class="right value">
+                            {{ returnRequest.priceDifference|default(0)|number_format(0, ',', ' ') }} Ar
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="info-row">
+                <table>
+                    <tr>
+                        <td class="label">Frais de livraison de l'échange</td>
+                        <td class="right value">
+                            {{ returnRequest.exchangeDeliveryFee|number_format(0, ',', ' ') }} Ar
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        {% endif %}
+
+        <div class="info-row">
+            <table>
+                <tr>
+                    <td class="label">Référence de transaction</td>
+                    <td class="right value">
+                        {{ payment.transactionReference ?: 'Non renseignée' }}
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="info-row">
+            <table>
+                <tr>
+                    <td class="label">Date de confirmation</td>
+                    <td class="right value">
+                        {{ payment.paidAt|date('d/m/Y à H:i') }}
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="info-row">
+            <table>
+                <tr>
+                    <td class="label">Statut</td>
+                    <td class="right status">
+                        Paiement confirmé
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    {# Montant effectivement payé #}
+    <div class="amount-box">
+        <div class="amount-label">
+            MONTANT EFFECTIVEMENT PAYÉ
+        </div>
+
+        <div class="amount">
+            {{ payment.amount|number_format(0, ',', ' ') }} Ar
+        </div>
+    </div>
+
+    <div class="footer">
+        Merci pour votre confiance.
+        <br>
+        ModeBoutique — Reçu généré à partir des informations de votre paiement.
+    </div>
+
+</body>
+</html>

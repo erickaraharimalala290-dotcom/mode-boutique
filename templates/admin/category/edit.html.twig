@@ -1,0 +1,425 @@
+{% extends 'layouts/admin-layout.html.twig' %}
+
+{% block title %}Modifier la catégorie | ModeBoutique{% endblock %}
+
+{% block admin_content %}
+<div class="space-y-8">
+
+    {# En-tête #}
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <a href="{{ path('admin_categories_index') }}"
+               class="inline-flex items-center gap-2 text-sm text-stone-500 transition hover:text-[#B08D67]">
+                ← Retour aux catégories
+            </a>
+
+            <p class="mt-5 text-xs font-semibold uppercase tracking-[0.25em] text-[#B08D67]">
+                Catalogue ModeBoutique
+            </p>
+
+            <h1 class="mt-2 text-2xl font-semibold text-stone-800 sm:text-3xl">
+                Modifier la catégorie
+            </h1>
+
+            <p class="mt-2 text-sm text-stone-500">
+                Modifiez les informations de « {{ category.name }} ».
+            </p>
+        </div>
+
+        <span class="w-fit rounded-full border border-[#B08D67]/30 bg-[#F5F0E8] px-4 py-2 text-xs font-medium text-[#8A6848]">
+            ✦ Administration
+        </span>
+    </div>
+
+    {# Messages flash #}
+    {% for message in app.flashes('success') %}
+        <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    {% for message in app.flashes('error') %}
+        <div class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    {# Erreurs générales #}
+    {% if not form.vars.valid %}
+        <div class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            <p class="font-semibold">Le formulaire contient des erreurs.</p>
+            <p class="mt-1">Veuillez vérifier les champs indiqués ci-dessous.</p>
+            {{ form_errors(form) }}
+        </div>
+    {% endif %}
+
+    <div class="grid grid-cols-1 items-start gap-6 xl:grid-cols-3">
+
+        {# Formulaire #}
+        <div class="overflow-hidden rounded-2xl border border-stone-200 bg-white xl:col-span-2">
+
+            <div class="border-b border-stone-100 px-6 py-5 sm:px-8">
+                <h2 class="font-semibold text-stone-800">
+                    Informations de la catégorie
+                </h2>
+                <p class="mt-1 text-sm text-stone-500">
+                    Modifiez les champs nécessaires puis enregistrez.
+                </p>
+            </div>
+
+            {{ form_start(form, {
+                attr: {
+                    id: 'category-form',
+                    class: 'space-y-6 p-6 sm:p-8',
+                    enctype: 'multipart/form-data',
+                    novalidate: 'novalidate'
+                }
+            }) }}
+
+            {# Nom #}
+            <div>
+                {{ form_label(form.name, 'Nom de la catégorie', {
+                    label_attr: {
+                        class: 'mb-2 block text-sm font-medium text-stone-700'
+                    }
+                }) }}
+
+                <span class="text-red-500">*</span>
+
+                {{ form_widget(form.name, {
+                    attr: {
+                        id: 'category-name',
+                        placeholder: 'Ex. : FEMME, HOMME, Vêtements femme...',
+                        class: 'w-full rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-[#B08D67] focus:bg-white focus:ring-2 focus:ring-[#B08D67]/10'
+                    }
+                }) }}
+
+                <div class="mt-1 text-sm text-red-600">
+                    {{ form_errors(form.name) }}
+                </div>
+            </div>
+
+            {# Slug #}
+            <div>
+                {{ form_label(form.slug, 'Slug de la catégorie', {
+                    label_attr: {
+                        class: 'mb-2 block text-sm font-medium text-stone-700'
+                    }
+                }) }}
+
+                <span class="text-red-500">*</span>
+
+                {{ form_widget(form.slug, {
+                    attr: {
+                        id: 'category-slug',
+                        placeholder: 'Ex. : femme',
+                        class: 'w-full rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-[#B08D67] focus:bg-white focus:ring-2 focus:ring-[#B08D67]/10'
+                    }
+                }) }}
+
+                <div class="mt-1 text-sm text-red-600">
+                    {{ form_errors(form.slug) }}
+                </div>
+
+                <p class="mt-2 text-xs text-stone-400">
+                    Identifiant utilisé dans l'URL de la catégorie.
+                </p>
+            </div>
+
+            {# Description #}
+            <div>
+                {{ form_label(form.description, 'Description', {
+                    label_attr: {
+                        class: 'mb-2 block text-sm font-medium text-stone-700'
+                    }
+                }) }}
+
+                {{ form_widget(form.description, {
+                    attr: {
+                        id: 'category-description',
+                        rows: 4,
+                        placeholder: 'Décrivez brièvement cette catégorie...',
+                        class: 'w-full resize-y rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-[#B08D67] focus:bg-white focus:ring-2 focus:ring-[#B08D67]/10'
+                    }
+                }) }}
+
+                <div class="mt-1 text-sm text-red-600">
+                    {{ form_errors(form.description) }}
+                </div>
+            </div>
+
+            {# Image #}
+            <div>
+                <label class="mb-2 block text-sm font-medium text-stone-700">
+                    Image actuelle
+                </label>
+
+                {% if category.image %}
+                    <img
+                        src="{{ asset('uploads/categories/' ~ category.image) }}"
+                        alt="{{ category.name }}"
+                        class="mb-4 h-40 w-40 rounded-xl border border-stone-200 object-cover"
+                    >
+                {% else %}
+                    <p class="mb-4 text-sm text-stone-400">
+                        Aucune image enregistrée pour cette catégorie.
+                    </p>
+                {% endif %}
+
+                {{ form_label(form.imageFile, 'Choisir une nouvelle image (facultatif)', {
+                    label_attr: {
+                        class: 'mb-2 block text-sm font-medium text-stone-700'
+                    }
+                }) }}
+
+                {{ form_widget(form.imageFile, {
+                    attr: {
+                        id: 'category-image',
+                        accept: 'image/jpeg,image/png,image/webp',
+                        class: 'block w-full cursor-pointer rounded-xl border border-stone-200 bg-stone-50 text-sm text-stone-600 file:mr-4 file:border-0 file:bg-[#F5F0E8] file:px-4 file:py-5 file:font-medium file:text-[#8A6848] hover:file:bg-[#B08D67]/20'
+                    }
+                }) }}
+
+                <div class="mt-1 text-sm text-red-600">
+                    {{ form_errors(form.imageFile) }}
+                </div>
+
+                <p class="mt-2 text-xs text-stone-400">
+                    JPG, PNG ou WebP, maximum 2 Mo. Laissez vide pour conserver l'image actuelle.
+                </p>
+            </div>
+
+            {# Catégorie parent #}
+            <div>
+                {{ form_label(form.parent, 'Catégorie parent', {
+                    label_attr: {
+                        class: 'mb-2 block text-sm font-medium text-stone-700'
+                    }
+                }) }}
+
+                {{ form_widget(form.parent, {
+                    attr: {
+                        id: 'category-parent',
+                        class: 'w-full rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-800 outline-none transition focus:border-[#B08D67] focus:bg-white'
+                    }
+                }) }}
+
+                <div class="mt-1 text-sm text-red-600">
+                    {{ form_errors(form.parent) }}
+                </div>
+
+                <p class="mt-2 text-xs text-stone-400">
+                    Laissez « Aucune » pour une catégorie principale.
+                </p>
+            </div>
+
+            {# Ordre d'affichage #}
+            <div>
+                {{ form_label(form.sortOrder, "Ordre d'affichage", {
+                    label_attr: {
+                        class: 'mb-2 block text-sm font-medium text-stone-700'
+                    }
+                }) }}
+
+                {{ form_widget(form.sortOrder, {
+                    attr: {
+                        id: 'category-sort-order',
+                        min: 0,
+                        class: 'w-full rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-800 outline-none transition focus:border-[#B08D67] focus:bg-white'
+                    }
+                }) }}
+
+                <div class="mt-1 text-sm text-red-600">
+                    {{ form_errors(form.sortOrder) }}
+                </div>
+            </div>
+
+            {# Statut #}
+            <div class="rounded-xl border border-stone-200 bg-stone-50 p-4">
+                <div class="flex items-start gap-3">
+                    {{ form_widget(form.isActive, {
+                        attr: {
+                            id: 'category-active',
+                            class: 'mt-1 h-4 w-4 rounded border-stone-300 text-[#B08D67] focus:ring-[#B08D67]'
+                        }
+                    }) }}
+
+                    <div>
+                        {{ form_label(form.isActive, 'Catégorie active', {
+                            label_attr: {
+                                class: 'cursor-pointer text-sm font-medium text-stone-700'
+                            }
+                        }) }}
+
+                        <p class="mt-1 text-xs text-stone-500">
+                            Une catégorie inactive peut être masquée de la boutique publique.
+                        </p>
+
+                        <div class="mt-1 text-sm text-red-600">
+                            {{ form_errors(form.isActive) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# Boutons #}
+            <div class="flex flex-col-reverse gap-3 border-t border-stone-100 pt-6 sm:flex-row sm:justify-end">
+                <a href="{{ path('admin_categories_index') }}"
+                   class="rounded-xl border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-600 transition hover:bg-stone-50">
+                    Annuler
+                </a>
+
+                <button type="submit"
+                        class="rounded-xl bg-stone-800 px-6 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-[#B08D67]">
+                    Enregistrer les modifications
+                </button>
+            </div>
+
+            {{ form_end(form) }}
+        </div>
+
+        {# Aperçu dynamique #}
+        <aside class="overflow-hidden rounded-2xl border border-stone-200 bg-white">
+            <div class="border-b border-stone-100 px-5 py-4">
+                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#B08D67]">
+                    Aperçu
+                </p>
+                <h2 class="mt-1 font-semibold text-stone-800">
+                    Votre catégorie
+                </h2>
+            </div>
+
+            <div class="p-5">
+                <div class="overflow-hidden rounded-2xl bg-[#F5F0E8]">
+                    <img
+                        id="category-preview-image"
+                        src="{{ category.image
+                            ? asset('uploads/categories/' ~ category.image)
+                            : asset('images/products/sac-beige.jpg') }}"
+                        alt="Aperçu de la catégorie"
+                        class="h-64 w-full object-cover"
+                    >
+                </div>
+
+                <div class="mt-5">
+                    <span id="category-preview-status"
+                          class="inline-flex rounded-full px-3 py-1 text-xs font-medium">
+                        {{ category.isActive ? 'Active' : 'Inactive' }}
+                    </span>
+
+                    <h3 id="category-preview-name"
+                        class="mt-3 break-words text-xl font-semibold text-stone-800">
+                        {{ category.name }}
+                    </h3>
+
+                    <p id="category-preview-slug"
+                       class="mt-1 break-all text-xs text-stone-400">
+                        {{ category.slug }}
+                    </p>
+
+                    <p id="category-preview-parent"
+                       class="mt-2 text-xs text-stone-500">
+                        {% if category.parent %}
+                            Catégorie parent : {{ category.parent.name }}
+                        {% else %}
+                            Catégorie principale
+                        {% endif %}
+                    </p>
+
+                    <p id="category-preview-description"
+                       class="mt-2 whitespace-pre-line text-sm leading-6 text-stone-500">
+                        {{ category.description ?: 'La description de votre catégorie apparaîtra ici.' }}
+                    </p>
+
+                    <p id="category-preview-order"
+                       class="mt-3 text-xs text-stone-400">
+                        Ordre d'affichage : {{ category.sortOrder }}
+                    </p>
+                </div>
+
+                <div class="mt-5 border-t border-stone-100 pt-4">
+                    <p class="text-xs text-stone-400">MODEBOUTIQUE</p>
+                    <p class="mt-1 text-sm font-medium tracking-wide text-[#B08D67]">
+                        L'élégance au quotidien.
+                    </p>
+                </div>
+            </div>
+        </aside>
+    </div>
+</div>
+
+{# Aperçu dynamique et génération du slug #}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const nameInput = document.getElementById("category-name");
+    const slugInput = document.getElementById("category-slug");
+    const descriptionInput = document.getElementById("category-description");
+    const imageInput = document.getElementById("category-image");
+    const activeInput = document.getElementById("category-active");
+    const parentInput = document.getElementById("category-parent");
+    const orderInput = document.getElementById("category-sort-order");
+
+    const previewImage = document.getElementById("category-preview-image");
+    const previewName = document.getElementById("category-preview-name");
+    const previewSlug = document.getElementById("category-preview-slug");
+    const previewDescription = document.getElementById("category-preview-description");
+    const previewStatus = document.getElementById("category-preview-status");
+    const previewParent = document.getElementById("category-preview-parent");
+    const previewOrder = document.getElementById("category-preview-order");
+
+    const defaultImage = "{{ category.image
+        ? asset('uploads/categories/' ~ category.image)
+        : asset('images/products/sac-beige.jpg') }}";
+
+    let slugManuallyEdited = true;
+
+    function makeSlug(value) {
+        return value
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .trim()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-+|-+$/g, "");
+    }
+
+    function updatePreview() {
+        previewName.textContent = nameInput.value.trim() || "Nom de la catégorie";
+        previewSlug.textContent = slugInput.value.trim() || "slug-de-la-categorie";
+        previewDescription.textContent = descriptionInput.value.trim()
+            || "La description de votre catégorie apparaîtra ici.";
+
+        previewStatus.textContent = activeInput.checked ? "Active" : "Inactive";
+        previewStatus.className = activeInput.checked
+            ? "inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700"
+            : "inline-flex rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-500";
+
+        const selectedParent = parentInput.options[parentInput.selectedIndex];
+        previewParent.textContent = parentInput.value && selectedParent
+            ? "Catégorie parent : " + selectedParent.text
+            : "Catégorie principale";
+
+        previewOrder.textContent = "Ordre d'affichage : " + (orderInput.value || "0");
+    }
+
+    nameInput.addEventListener("input", updatePreview);
+    slugInput.addEventListener("input", updatePreview);
+    descriptionInput.addEventListener("input", updatePreview);
+    activeInput.addEventListener("change", updatePreview);
+    parentInput.addEventListener("change", updatePreview);
+    orderInput.addEventListener("input", updatePreview);
+
+    imageInput.addEventListener("change", () => {
+        const file = imageInput.files[0];
+
+        if (file) {
+            previewImage.src = URL.createObjectURL(file);
+        } else {
+            previewImage.src = defaultImage;
+        }
+    });
+
+    updatePreview();
+});
+</script>
+{% endblock %}

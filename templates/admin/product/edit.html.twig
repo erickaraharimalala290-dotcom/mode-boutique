@@ -1,0 +1,366 @@
+{% extends 'layouts/admin-layout.html.twig' %}
+
+{% block title %}Modifier un produit | ModeBoutique{% endblock %}
+
+{% block admin_content %}
+
+    <div class="mx-auto max-w-5xl space-y-8">
+
+        {# En-tête de la page #}
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-[#292524]">
+                    Modifier le produit
+                </h1>
+                <p class="mt-1 text-sm text-[#78716C]">
+                    Modifiez les informations, les images et les variantes du produit.
+                </p>
+            </div>
+
+            <a
+                href="{{ path('admin_products_index') }}"
+                class="inline-flex items-center justify-center rounded-xl border border-[#D6C5B2] px-4 py-2.5 text-sm font-medium text-[#57534E] transition hover:bg-[#F5F0E8]"
+            >
+                ← Retour à la liste
+            </a>
+        </div>
+        {% for message in app.flashes('error') %}
+            <div class="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                {{ message }}
+            </div>
+        {% endfor %}
+
+        {% for message in app.flashes('success') %}
+            <div class="mb-4 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-700">
+                {{ message }}
+            </div>
+        {% endfor %}
+
+        {# Formulaire principal de modification #}
+        {{ form_start(form, {
+        attr: {
+            class: 'space-y-8',
+            enctype: 'multipart/form-data',
+            id: 'product-form',
+            'data-turbo': 'false'
+        }
+    }) }}
+
+        {# Informations générales #}
+        <section class="rounded-2xl border border-[#E7E0D7] bg-white p-6 shadow-sm">
+            <h2 class="mb-6 text-lg font-semibold text-[#292524]">
+                Informations générales
+            </h2>
+
+            <div class="grid gap-5 md:grid-cols-2">
+
+                <div>
+                    {{ form_label(form.name, 'Nom du produit', {
+                    label_attr: {class: 'mb-2 block text-sm font-medium text-[#44403C]'}
+                }) }}
+                    {{ form_widget(form.name, {
+                    attr: {
+                        class: 'w-full rounded-xl border border-[#D6C5B2] px-4 py-3 text-sm focus:border-[#B08D67] focus:outline-none focus:ring-2 focus:ring-[#B08D67]/20'
+                    }
+                }) }}
+
+                    <div class="mt-1 text-sm text-red-600">
+                        {{ form_errors(form.name) }}
+                    </div>
+                    
+                </div>
+
+                <div>
+                    {{ form_label(form.slug, 'Slug', {
+                    label_attr: {class: 'mb-2 block text-sm font-medium text-[#44403C]'}
+                }) }}
+                    {{ form_widget(form.slug, {
+                    attr: {
+                        class: 'w-full rounded-xl border border-[#D6C5B2] px-4 py-3 text-sm focus:border-[#B08D67] focus:outline-none focus:ring-2 focus:ring-[#B08D67]/20'
+                    }
+                }) }}
+                    <div class="mt-1 text-sm text-red-600">
+                        {{ form_errors(form.slug) }}
+                    </div>
+                    
+                </div>
+
+                <div>
+                    {{ form_label(form.brand, 'Marque', {
+                    label_attr: {class: 'mb-2 block text-sm font-medium text-[#44403C]'}
+                }) }}
+                    {{ form_widget(form.brand, {
+                    attr: {
+                        class: 'w-full rounded-xl border border-[#D6C5B2] px-4 py-3 text-sm focus:border-[#B08D67] focus:outline-none focus:ring-2 focus:ring-[#B08D67]/20'
+                    }
+                }) }}
+                    <div class="mt-1 text-sm text-red-600">
+                        {{ form_errors(form.brand) }}
+                    </div>
+                    
+                </div>
+
+                <div>
+                    {{ form_label(form.category, 'Catégorie', {
+                    label_attr: {class: 'mb-2 block text-sm font-medium text-[#44403C]'}
+                }) }}
+                    {{ form_widget(form.category, {
+                    attr: {
+                        class: 'w-full rounded-xl border border-[#D6C5B2] bg-white px-4 py-3 text-sm focus:border-[#B08D67] focus:outline-none focus:ring-2 focus:ring-[#B08D67]/20'
+                    }
+                }) }}
+                    <div class="mt-1 text-sm text-red-600">
+                        {{ form_errors(form.category) }}
+                    </div>
+                    
+                </div>
+
+                <div>
+                    {{ form_label(form.price, 'Prix', {
+                    label_attr: {class: 'mb-2 block text-sm font-medium text-[#44403C]'}
+                }) }}
+                    {{ form_widget(form.price, {
+                    attr: {
+                        class: 'w-full rounded-xl border border-[#D6C5B2] px-4 py-3 text-sm focus:border-[#B08D67] focus:outline-none focus:ring-2 focus:ring-[#B08D67]/20'
+                    }
+                }) }}
+                    <div class="mt-1 text-sm text-red-600">
+                        {{ form_errors(form.price) }}
+                    </div>
+                    
+                </div>
+
+                <div>
+                    {{ form_label(form.oldPrice, 'Ancien prix', {
+                    label_attr: {class: 'mb-2 block text-sm font-medium text-[#44403C]'}
+                }) }}
+                    {{ form_widget(form.oldPrice, {
+                    attr: {
+                        class: 'w-full rounded-xl border border-[#D6C5B2] px-4 py-3 text-sm focus:border-[#B08D67] focus:outline-none focus:ring-2 focus:ring-[#B08D67]/20'
+                    }
+                }) }}
+                    <div class="mt-1 text-sm text-red-600">
+                        {{ form_errors(form.oldPrice) }}
+                    </div>
+                    
+                </div>
+
+            </div>
+
+            <div class="mt-5">
+                {{ form_label(form.description, 'Description', {
+                label_attr: {class: 'mb-2 block text-sm font-medium text-[#44403C]'}
+            }) }}
+                {{ form_widget(form.description, {
+                attr: {
+                    rows: 5,
+                    class: 'w-full rounded-xl border border-[#D6C5B2] px-4 py-3 text-sm focus:border-[#B08D67] focus:outline-none focus:ring-2 focus:ring-[#B08D67]/20'
+                }
+            }) }}
+                <div class="mt-1 text-sm text-red-600">
+                    {{ form_errors(form.description) }}
+                </div>
+                
+            </div>
+        </section>
+
+        {# Image principale #}
+        <section class="rounded-2xl border border-[#E7E0D7] bg-white p-6 shadow-sm">
+            <h2 class="mb-2 text-lg font-semibold text-[#292524]">
+                Image principale
+            </h2>
+
+            <p class="mb-5 text-sm text-[#78716C]">
+                Choisissez une nouvelle image pour remplacer l'image actuelle.
+            </p>
+
+            {% if product.mainImage %}
+                <div class="mb-5">
+                    <p class="mb-2 text-sm font-medium text-[#44403C]">
+                        Image actuelle
+                    </p>
+
+                    <img
+                        src="{{ asset(product.mainImage) }}"
+                        alt="{{ product.name }}"
+                        class="h-48 w-48 rounded-xl border border-[#E7E0D7] object-cover"
+                    >
+                </div>
+            {% endif %}
+
+            {{ form_widget(form.imageFile, {
+            attr: {
+                class: 'block w-full rounded-xl border border-[#D6C5B2] p-3 text-sm'
+            }
+        }) }}
+            <div class="mt-1 text-sm text-red-600">
+                {{ form_errors(form.imageFile) }}
+            </div>
+            
+        </section>
+
+        {# Images supplémentaires #}
+        <section class="rounded-2xl border border-[#E7E0D7] bg-white p-6 shadow-sm">
+            <h2 class="mb-2 text-lg font-semibold text-[#292524]">
+                Images supplémentaires
+            </h2>
+
+            <p class="mb-5 text-sm text-[#78716C]">
+                Ajoutez des images complémentaires et associez chaque image à une couleur.
+            </p>
+
+            <div class="mb-5">
+                {{ form_widget(form.imagesFiles, {
+                attr: {
+                    class: 'block w-full rounded-xl border border-[#D6C5B2] p-3 text-sm'
+                }
+            }) }}
+                <div class="mt-1 text-sm text-red-600">
+                    {{ form_errors(form.imagesFiles) }}
+                </div>
+                
+            </div>
+
+            {{ form_widget(form.imagesColors, {
+            attr: {id: 'product_imagesColors'}
+        }) }}
+
+            <div
+                id="selected-images-list"
+                class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4"
+            >
+            </div>
+
+            {% if product.images|length > 0 %}
+                <div class="mt-7">
+                    <h3 class="mb-4 text-sm font-semibold text-[#44403C]">
+                        Images déjà enregistrées
+                    </h3>
+
+                    <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+                        {% for image in product.images %}
+                            <div class="rounded-xl border border-[#E7E0D7] p-3">
+
+                                <img
+                                    src="{{ asset(image.imagePath) }}"
+                                    alt="{{ product.name }}"
+                                    class="h-36 w-full rounded-lg object-cover"
+                                >
+
+                                <p class="mt-2 text-sm font-medium text-[#44403C]">
+                                    {{ image.color }}
+                                </p>
+
+                                {# Le bouton utilise un formulaire externe #}
+                                <button
+                                    type="submit"
+                                    form="delete-image-{{ image.id }}"
+                                    class="mt-3 w-full rounded-lg border border-red-200 px-3 py-2 text-xs font-medium text-red-600 transition hover:bg-red-50"
+                                >
+                                    Supprimer
+                                </button>
+
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </section>
+
+        {# Variantes et stock #}
+        <section class="rounded-2xl border border-[#E7E0D7] bg-white p-6 shadow-sm">
+
+            <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h2 class="text-lg font-semibold text-[#292524]">
+                        Variantes et stock
+                    </h2>
+                    <p class="mt-1 text-sm text-[#78716C]">
+                        Définissez les couleurs, les tailles et les quantités disponibles.
+                    </p>
+                </div>
+
+                <button
+                    type="button"
+                    id="add-variant-button"
+                    class="rounded-xl bg-[#292524] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#44403C]"
+                >
+                    + Ajouter une variante
+                </button>
+            </div>
+
+            {{ form_widget(form.variantsData, {
+            attr: {id: 'product_variantsData'}
+        }) }}
+
+            <div id="variants-list" class="space-y-4"></div>
+        </section>
+
+        {# Publication #}
+        <section class="rounded-2xl border border-[#E7E0D7] bg-white p-6 shadow-sm">
+            <h2 class="mb-5 text-lg font-semibold text-[#292524]">
+                Publication
+            </h2>
+
+            <div class="flex flex-col gap-4 sm:flex-row sm:gap-8">
+                <div class="flex items-center gap-3">
+                    {{ form_widget(form.isActive) }}
+                    {{ form_label(form.isActive, 'Produit actif', {
+                    label_attr: {class: 'text-sm font-medium text-[#44403C]'}
+                }) }}
+                </div>
+
+                <div class="flex items-center gap-3">
+                    {{ form_widget(form.isFeatured) }}
+                    {{ form_label(form.isFeatured, 'Produit vedette', {
+                    label_attr: {class: 'text-sm font-medium text-[#44403C]'}
+                }) }}
+                </div>
+            </div>
+        </section>
+
+        {# Boutons d'action #}
+        <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <a
+                href="{{ path('admin_products_index') }}"
+                class="rounded-xl border border-[#D6C5B2] px-6 py-3 text-center text-sm font-medium text-[#57534E] transition hover:bg-[#F5F0E8]"
+            >
+                Annuler
+            </a>
+
+            <button
+                type="submit"
+                class="rounded-xl bg-[#B08D67] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#96734F]"
+            >
+                Enregistrer les modifications
+            </button>
+        </div>
+
+        {{ form_end(form) }}
+
+        {# Formulaires indépendants pour supprimer les images #}
+        {% for image in product.images %}
+            <form
+                id="delete-image-{{ image.id }}"
+                method="post"
+                action="{{ path('admin_products_image_delete', {
+            id: product.id,
+            imageId: image.id
+        }) }}"
+                onsubmit="return confirm('Voulez-vous vraiment supprimer cette image ?');"
+            >
+                <input
+                    type="hidden"
+                    name="_token"
+                    value="{{ csrf_token('delete-product-image-' ~ image.id) }}"
+                >
+            </form>
+        {% endfor %}
+
+    </div>
+
+    {# Scripts de gestion des images et des variantes #}
+    <script src="{{ asset('js/admin/product-images.js') }}" defer></script>
+    <script src="{{ asset('js/admin/product-variants.js') }}" defer></script>
+
+{% endblock %}

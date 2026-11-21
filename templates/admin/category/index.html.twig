@@ -1,0 +1,312 @@
+
+{% extends 'layouts/admin-layout.html.twig' %}
+
+{% block title %}Gestion des catégories | ModeBoutique{% endblock %}
+
+{% block admin_content %}
+    <div class="space-y-8">
+
+        {% for message in app.flashes('success') %}
+            <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-800">
+                {{ message }}
+            </div>
+        {% endfor %}
+
+        {% for message in app.flashes('error') %}
+            <div class="rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
+                {{ message }}
+            </div>
+        {% endfor %}
+
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.25em] text-[#B08D67]">
+                    Catalogue
+                </p>
+
+                <h1 class="mt-2 text-2xl font-semibold text-stone-800 sm:text-3xl">
+                    Gestion des catégories
+                </h1>
+
+                <p class="mt-2 text-sm text-stone-500">
+                    Organisez les catégories et sous-catégories de votre boutique.
+                </p>
+            </div>
+
+            <a
+                href="{{ path('admin_categories_new') }}"
+                class="inline-flex items-center justify-center gap-2 rounded-xl bg-stone-800 px-5 py-3 text-sm font-medium text-white transition hover:bg-[#B08D67]"
+            >
+                <span class="text-lg">+</span>
+                Nouvelle catégorie
+            </a>
+        </div>
+
+        {# Statistiques #}
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div class="rounded-2xl border border-stone-200 bg-white p-5">
+                <p class="text-sm text-stone-500">Total catégories</p>
+                <p class="mt-3 text-3xl font-semibold text-stone-800">
+                    {{ categories|length }}
+                </p>
+                <p class="mt-2 text-xs text-stone-400">Catégories enregistrées</p>
+            </div>
+
+            <div class="rounded-2xl border border-stone-200 bg-white p-5">
+                <p class="text-sm text-stone-500">Catégories actives</p>
+                <p class="mt-3 text-3xl font-semibold text-emerald-700">
+                    {{ categories|filter(c => c.isActive)|length }}
+                </p>
+                <p class="mt-2 text-xs text-stone-400">Catégories activées</p>
+            </div>
+
+            <div class="rounded-2xl border border-stone-200 bg-white p-5">
+                <p class="text-sm text-stone-500">Produits associés</p>
+                <p class="mt-3 text-3xl font-semibold text-[#B08D67]">
+                    {{ categories|reduce((total, c) => total + (c.products|length), 0) }}
+                </p>
+                <p class="mt-2 text-xs text-stone-400">Produits associés aux catégories</p>
+            </div>
+        </div>
+
+        {# Tableau des catégories #}
+        <div class="overflow-hidden rounded-2xl border border-stone-200 bg-white">
+
+            <div class="border-b border-stone-100 p-5">
+                <h2 class="font-semibold text-stone-800">Toutes les catégories</h2>
+                <p class="mt-1 text-sm text-stone-500">
+                    Recherchez et filtrez les catégories.
+                </p>
+
+                <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <input
+                        id="category-search"
+                        type="search"
+                        placeholder="Rechercher une catégorie..."
+                        class="w-full rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm outline-none transition focus:border-[#B08D67] focus:bg-white"
+                    >
+
+                    <select
+                        id="category-status"
+                        class="w-full rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm outline-none transition focus:border-[#B08D67] focus:bg-white"
+                    >
+                        <option value="">Tous les statuts</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[900px] text-left text-sm">
+                    <thead class="bg-stone-50 text-xs uppercase tracking-wider text-stone-500">
+                        <tr>
+                            <th class="px-6 py-4 font-medium">Image</th>
+                            <th class="px-6 py-4 font-medium">Catégorie</th>
+                            <th class="px-6 py-4 font-medium">Parent</th>
+                            <th class="px-6 py-4 font-medium">Slug</th>
+                            <th class="px-6 py-4 font-medium">Produits</th>
+                            <th class="px-6 py-4 font-medium">Statut</th>
+                            <th class="px-6 py-4 font-medium">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="category-table" class="divide-y divide-stone-100">
+                        {% for category in categories %}
+                            <tr
+                                class="category-row transition hover:bg-[#F5F0E8]/50"
+                                data-name="{{ category.name|lower }}"
+                                data-slug="{{ category.slug|lower }}"
+                                data-parent="{{ category.parent ? category.parent.name|lower : '' }}"
+                                data-status="{{ category.isActive ? 'active' : 'inactive' }}"
+                            >
+                                <td class="px-6 py-4">
+                                    {% if category.image %}
+                                        <img
+                                            src="{{ asset('uploads/categories/' ~ category.image) }}"
+                                            alt="{{ category.name }}"
+                                            class="h-12 w-12 rounded-lg object-cover"
+                                        >
+                                    {% else %}
+                                        <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-[#F5F0E8] text-xs text-[#B08D67]">
+                                            IMG
+                                        </div>
+                                    {% endif %}
+                                </td>
+
+                                <td class="px-6 py-5">
+                                    <p class="font-semibold text-stone-800">
+                                        {{ category.name }}
+                                    </p>
+                                    <p class="mt-1 max-w-xs text-xs text-stone-500">
+                                        {{ category.description ?: 'Aucune description renseignée.' }}
+                                    </p>
+                                </td>
+
+                                <td class="px-6 py-5 text-stone-600">
+                                    {{ category.parent ? category.parent.name : 'Aucun' }}
+                                </td>
+
+                                <td class="px-6 py-5 text-stone-500">
+                                    {{ category.slug }}
+                                </td>
+
+                                <td class="px-6 py-5">
+                                    <span class="rounded-lg bg-[#F5F0E8] px-3 py-1.5 text-xs font-semibold text-stone-700">
+                                        {{ category.products|length }} produit(s)
+                                    </span>
+                                </td>
+
+                                <td class="px-6 py-5">
+                                    {% if category.isActive %}
+                                        <span class="inline-flex rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700">
+                                            Active
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex rounded-full bg-stone-100 px-3 py-1.5 text-xs font-medium text-stone-500">
+                                            Inactive
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                            
+                                <td class="px-6 py-5">
+                                    <div class="flex items-center gap-2">
+
+                                        {# Bouton Modifier #}
+                                        <a
+                                            href="{{ path('admin_categories_edit', {id: category.id}) }}"
+                                            title="Modifier la catégorie"
+                                            aria-label="Modifier {{ category.name }}"
+                                            class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#E8DED3] bg-white text-[#8C6038] transition hover:bg-[#F5F0E8] hover:text-[#292524]"
+                                        >
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                width="17"
+                                                height="17"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                stroke-width="1.8"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                aria-hidden="true"
+                                            >
+                                                <path d="M12 20h9"/>
+                                                <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/>
+                                            </svg>
+                                        </a>
+
+                                        {# Bouton Supprimer avec confirmation #}
+                                        <form
+                                            method="post"
+                                            action="{{ path('admin_categories_delete', {id: category.id}) }}"
+                                            onsubmit="return confirm('Voulez-vous vraiment supprimer la catégorie {{ category.name|e('js') }} ?');"
+                                        >
+                                            <input
+                                                type="hidden"
+                                                name="_token"
+                                                value="{{ csrf_token('delete_category_' ~ category.id) }}"
+                                            >
+
+                                            <button
+                                                type="submit"
+                                                title="Supprimer la catégorie"
+                                                aria-label="Supprimer {{ category.name }}"
+                                                class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-red-200 bg-white text-red-600 transition hover:bg-red-50 hover:text-red-700"
+                                            >
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    width="17"
+                                                    height="17"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    stroke-width="1.8"
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    aria-hidden="true"
+                                                >
+                                                    <path d="M3 6h18"/>
+                                                    <path d="M8 6V4h8v2"/>
+                                                    <path d="m19 6-1 14H6L5 6"/>
+                                                    <path d="M10 11v5"/>
+                                                    <path d="M14 11v5"/>
+                                                </svg>
+                                            </button>
+                                        </form>
+
+                                    </div>
+                                </td>
+
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="7" class="px-6 py-12 text-center">
+                                    <p class="font-medium text-stone-700">
+                                        Aucune catégorie enregistrée
+                                    </p>
+                                    <p class="mt-2 text-sm text-stone-500">
+                                        Commencez par ajouter votre première catégorie.
+                                    </p>
+                                    <a
+                                        href="{{ path('admin_categories_new') }}"
+                                        class="mt-4 inline-flex rounded-xl bg-stone-800 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#B08D67]"
+                                    >
+                                        Ajouter une catégorie
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="category-empty" class="hidden px-6 py-12 text-center">
+                <p class="font-medium text-stone-700">Aucune catégorie trouvée</p>
+                <p class="mt-2 text-sm text-stone-500">
+                    Essayez une autre recherche ou un autre filtre.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const categorySearch = document.getElementById("category-search");
+        const categoryStatus = document.getElementById("category-status");
+        const categoryRows = document.querySelectorAll(".category-row");
+        const categoryEmpty = document.getElementById("category-empty");
+
+        function filterCategories() {
+            const search = categorySearch.value.toLowerCase().trim();
+            const status = categoryStatus.value;
+            let visibleCount = 0;
+
+            categoryRows.forEach((row) => {
+                const name = row.dataset.name || "";
+                const slug = row.dataset.slug || "";
+                const parent = row.dataset.parent || "";
+                const rowStatus = row.dataset.status || "";
+
+                const matchesSearch =
+                    name.includes(search) ||
+                    slug.includes(search) ||
+                    parent.includes(search);
+
+                const matchesStatus = status === "" || rowStatus === status;
+                const visible = matchesSearch && matchesStatus;
+
+                row.classList.toggle("hidden", !visible);
+
+                if (visible) {
+                    visibleCount++;
+                }
+            });
+
+            categoryEmpty.classList.toggle("hidden", visibleCount > 0);
+        }
+
+        categorySearch.addEventListener("input", filterCategories);
+        categoryStatus.addEventListener("change", filterCategories);
+    </script>
+{% endblock %}

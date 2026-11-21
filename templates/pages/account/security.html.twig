@@ -1,0 +1,168 @@
+{% extends 'layouts/auth-layout.html.twig' %}
+
+{% block title %}Sécurité | ModeBoutique{% endblock %}
+
+{% block body %}
+<section class="min-h-screen bg-cream px-4 py-8 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-7xl">
+
+        <header class="mb-8 flex flex-wrap items-center justify-between gap-4">
+            <div>
+                <a href="{{ path('home') }}" class="text-2xl font-bold text-ink">
+                    Mode<span class="text-brand">Boutique</span>
+                </a>
+                <p class="mt-1 text-sm text-ink-soft">Mon espace client / Sécurité</p>
+            </div>
+
+            <a href="{{ path('app_account') }}"
+               class="rounded-full border border-beige bg-white px-5 py-3 text-sm font-semibold text-ink transition hover:border-brand hover:text-brand">
+                ← Retour au Tableau de bord
+            </a>
+        </header>
+
+        <div class="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)]">
+
+            {% include 'pages/account/_sidebar.html.twig' with {
+                activePage: 'security'
+            } %}
+
+            <main class="min-w-0 space-y-6">
+
+                <section class="rounded-3xl border border-beige bg-gradient-to-br from-[#FBF7F1] to-[#E8DCCB] p-7 sm:p-9">
+                    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-dark">
+                        Protection du compte
+                    </p>
+
+                    <h1 class="mt-3 text-3xl font-bold text-ink">
+                        Sécurité et mot de passe
+                    </h1>
+
+                    <p class="mt-3 max-w-xl text-sm leading-7 text-ink-soft">
+                        Utilisez un mot de passe unique et difficile à deviner
+                        pour protéger votre compte ModeBoutique.
+                    </p>
+                </section>
+
+                <section class="rounded-3xl border border-beige bg-white p-6 shadow-sm sm:p-8">
+
+                    <div class="mb-6 flex items-start gap-4 border-b border-beige pb-6">
+                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand-light text-xl text-brand">
+                            ♧
+                        </div>
+
+                        <div>
+                            <h2 class="text-lg font-bold text-ink">
+                                Modifier mon mot de passe
+                            </h2>
+                            <p class="mt-1 text-sm leading-6 text-ink-soft">
+                                Saisissez votre mot de passe actuel, puis choisissez
+                                et confirmez le nouveau mot de passe.
+                            </p>
+                        </div>
+                    </div>
+
+                    {% for message in app.flashes('success') %}
+                        <div class="mb-5 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-800"
+                             role="status">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+
+                    {% for message in app.flashes('error') %}
+                        <div class="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+                             role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+
+                    <form
+                        id="passwordForm"
+                        action="{{ path('app_account_security') }}"
+                        method="POST"
+                        class="space-y-5"
+                    >
+                        <input
+                            type="hidden"
+                            name="_csrf_token"
+                            value="{{ csrf_token('change_password') }}"
+                        >
+
+                        <div>
+                            <label for="currentPassword"
+                                   class="mb-2 block text-sm font-semibold text-ink">
+                                Mot de passe actuel
+                            </label>
+
+                            <input type="password"
+                                   id="currentPassword"
+                                   name="currentPassword"
+                                   autocomplete="current-password"
+                                   placeholder="Votre mot de passe actuel"
+                                   required
+                                   class="w-full rounded-xl border border-beige bg-white px-4 py-3 text-ink placeholder:text-ink-soft focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                        </div>
+
+                        <div>
+                            <label for="newPassword"
+                                   class="mb-2 block text-sm font-semibold text-ink">
+                                Nouveau mot de passe
+                            </label>
+
+                            <input type="password"
+                                   id="newPassword"
+                                   name="newPassword"
+                                   autocomplete="new-password"
+                                   placeholder="Au moins 6 caractères"
+                                   minlength="6"
+                                   required
+                                   class="w-full rounded-xl border border-beige bg-white px-4 py-3 text-ink placeholder:text-ink-soft focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+
+                            <p class="mt-2 text-xs leading-5 text-ink-soft">
+                                Choisissez de préférence un mot de passe long,
+                                unique et difficile à deviner.
+                            </p>
+                        </div>
+
+                        <div>
+                            <label for="confirmPassword"
+                                   class="mb-2 block text-sm font-semibold text-ink">
+                                Confirmer le nouveau mot de passe
+                            </label>
+
+                            <input type="password"
+                                   id="confirmPassword"
+                                   name="confirmPassword"
+                                   autocomplete="new-password"
+                                   placeholder="Répétez le nouveau mot de passe"
+                                   minlength="6"
+                                   required
+                                   class="w-full rounded-xl border border-beige bg-white px-4 py-3 text-ink placeholder:text-ink-soft focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+                        </div>
+
+                        <div class="border-t border-beige pt-5">
+                            <button type="submit"
+                                    class="rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-dark">
+                                Modifier mon mot de passe
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="mt-8 rounded-xl border border-beige bg-cream p-4">
+                        <h3 class="text-sm font-semibold text-ink">
+                            Conseils pour protéger votre compte
+                        </h3>
+
+                        <ul class="mt-3 space-y-2 text-sm leading-6 text-ink-soft">
+                            <li>• Ne partagez jamais votre mot de passe.</li>
+                            <li>• Évitez de réutiliser le mot de passe d'un autre site.</li>
+                            <li>• Déconnectez-vous après avoir utilisé un ordinateur partagé.</li>
+                        </ul>
+                    </div>
+
+                </section>
+
+            </main>
+        </div>
+    </div>
+</section>
+{% endblock %}

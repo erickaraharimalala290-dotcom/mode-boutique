@@ -1,0 +1,729 @@
+{% extends 'layouts/base.html.twig' %}
+
+{% block title %}Validation de commande | ModeBoutique{% endblock %}
+
+{% block body %}
+
+    {# Valeurs par défaut pour éviter les variables non définies #}
+    {% set checkoutErrors = checkoutErrors|default({}) %}
+    {% set formData = formData|default({}) %}
+    {% set selectedPayment = formData.paymentMethod|default('mobile_money_demo') %}
+    {% set selectedOperator = formData.paymentOperator|default('') %}
+    {% set selectedDeliveryMethod = formData.deliveryMethod|default('home_delivery') %}
+    {% set useNewAddress = formData.useNewAddress|default(addresses|length > 0 ? '0' : '1') == '1' %}
+
+    <section class="min-h-screen bg-cream px-4 py-10 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-7xl">
+
+            {# En-tête #}
+            <header class="mb-8 flex flex-wrap items-center justify-between gap-4">
+                <div>
+                    <a href="{{ path('home') }}" class="text-2xl font-bold tracking-tight text-ink">
+                        Mode<span class="text-brand">Boutique</span>
+                    </a>
+                    <p class="mt-1 text-sm text-ink-soft">Finalisez votre commande</p>
+                </div>
+
+                <a
+                    href="{{ path('app_cart') }}"
+                    class="rounded-full border border-beige bg-white px-5 py-3 text-sm font-semibold text-ink transition hover:border-brand hover:text-brand"
+                >
+                    ← Retour au panier
+                </a>
+            </header>
+
+            {# Étapes #}
+            <div class="mb-8 rounded-2xl border border-beige bg-white p-5">
+                <div class="mx-auto flex max-w-2xl items-center justify-between gap-2">
+                    <div class="flex flex-col items-center gap-2 text-center">
+                        <span class="flex h-10 w-10 items-center justify-center rounded-full bg-brand-light font-bold text-brand">1</span>
+                        <span class="text-xs font-medium text-ink-soft sm:text-sm">Panier</span>
+                    </div>
+
+                    <div class="h-px flex-1 bg-brand/30"></div>
+
+                    <div class="flex flex-col items-center gap-2 text-center">
+                        <span class="flex h-10 w-10 items-center justify-center rounded-full bg-brand text-white">2</span>
+                        <span class="text-xs font-semibold text-brand sm:text-sm">Livraison</span>
+                    </div>
+
+                    <div class="h-px flex-1 bg-beige"></div>
+
+                    <div class="flex flex-col items-center gap-2 text-center">
+                        <span class="flex h-10 w-10 items-center justify-center rounded-full bg-cream font-bold text-ink-soft">3</span>
+                        <span class="text-xs text-ink-soft sm:text-sm">Confirmation</span>
+                    </div>
+                </div>
+            </div>
+
+            {# Messages d'erreur généraux #}
+            {% for message in app.flashes('error') %}
+                <div role="alert" class="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+                    {{ message }}
+                </div>
+            {% endfor %}
+
+            {% for message in app.flashes('success') %}
+                <div role="status" class="mb-6 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-800">
+                    {{ message }}
+                </div>
+            {% endfor %}
+
+            {# Message général si le formulaire contient des erreurs #}
+            {% if checkoutErrors|length > 0 %}
+                <div role="alert" class="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+                    Certains champs doivent être corrigés avant de confirmer votre commande.
+                </div>
+            {% endif %}
+
+            <div class="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
+
+                {# FORMULAIRE #}
+                <main>
+                    <section class="rounded-3xl border border-beige bg-white p-6 shadow-sm sm:p-8">
+
+                        <div class="mb-7">
+                            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand">Étape 02</p>
+                            <h1 class="mt-2 text-2xl font-bold text-ink sm:text-3xl">
+                                Validation de commande
+                            </h1>
+                            <p class="mt-3 text-sm leading-6 text-ink-soft">
+                                Vérifiez vos coordonnées et choisissez votre mode de paiement.
+                            </p>
+                        </div>
+
+                        <form
+                            method="post"
+                            action="{{ path('app_checkout') }}"
+                            data-turbo="false"
+                            class="space-y-8"
+                        >
+                            <input type="hidden" name="_token" value="{{ csrf_token('checkout') }}">
+
+                            {# Informations personnelles #}
+                            <div>
+                                <h2 class="mb-5 text-lg font-bold text-ink">
+                                    <span class="mr-2 text-brand">01.</span>
+                                    Informations personnelles
+                                </h2>
+
+                                <div class="grid gap-5 sm:grid-cols-2">
+
+                                    <div>
+                                        <label for="firstName" class="mb-2 block text-sm font-semibold text-ink">
+                                            Prénom
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="firstName"
+                                            name="firstName"
+                                            value="{{ user.firstname }}"
+                                            readonly
+                                            class="w-full rounded-xl border border-beige bg-cream px-4 py-3 text-ink"
+                                        >
+                                    </div>
+
+                                    <div>
+                                        <label for="lastName" class="mb-2 block text-sm font-semibold text-ink">
+                                            Nom
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="lastName"
+                                            name="lastName"
+                                            value="{{ user.lastname }}"
+                                            readonly
+                                            class="w-full rounded-xl border border-beige bg-cream px-4 py-3 text-ink"
+                                        >
+                                    </div>
+
+                                    <div>
+                                        <label for="email" class="mb-2 block text-sm font-semibold text-ink">
+                                            Adresse e-mail
+                                        </label>
+                                        <input
+                                            type="email"
+                                            id="email"
+                                            name="email"
+                                            value="{{ user.email }}"
+                                            readonly
+                                            class="w-full rounded-xl border border-beige bg-cream px-4 py-3 text-ink"
+                                        >
+                                    </div>
+
+                                    <div>
+                                        <label for="phone" class="mb-2 block text-sm font-semibold text-ink">
+                                            Téléphone du destinataire
+                                        </label>
+                                        <input
+                                            type="tel"
+                                            id="phone"
+                                            name="phone"
+                                            value="{{ formData.phone|default(addresses|length > 0 ? addresses|first.phone : '') }}"
+                                            placeholder="Ex. : 034 00 000 00"
+                                            autocomplete="tel"
+                                            class="w-full rounded-xl border {{ checkoutErrors.phone is defined ? 'border-red-500' : 'border-beige' }} bg-white px-4 py-3 text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
+                                        >
+
+                                        {% if checkoutErrors.phone is defined %}
+                                            <p class="mt-2 text-sm text-red-600">{{ checkoutErrors.phone }}</p>
+                                        {% endif %}
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            {# Adresse de livraison #}
+                            <div class="border-t border-beige pt-7">
+                                <h2 class="mb-5 text-lg font-bold text-ink">
+                                    <span class="mr-2 text-brand">02.</span>
+                                    Adresse de livraison
+                                </h2>
+
+                                {% if addresses|length > 0 %}
+                                    <div class="mb-5">
+                                        <label for="addressId" class="mb-2 block text-sm font-semibold text-ink">
+                                            Choisir une adresse enregistrée
+                                        </label>
+
+                                        <select
+                                            id="addressId"
+                                            name="addressId"
+                                            class="w-full rounded-xl border {{ checkoutErrors.addressId is defined ? 'border-red-500' : 'border-beige' }} bg-white px-4 py-3 text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
+                                        >
+
+                                            {% for address in addresses %}
+                                                <option
+                                                    value="{{ address.id }}"
+                                                    {{ formData.addressId|default(addresses|first.id)|default('') == address.id ? 'selected' : '' }}
+                                                >
+                                                    {{ address.label ?: 'Adresse' }}
+                                                    — {{ address.addressLine1 }}, {{ address.city }}
+                                                    {{ address.isDefault ? '(Adresse par défaut)' : '' }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+
+                                        {% if checkoutErrors.addressId is defined %}
+                                            <p class="mt-2 text-sm text-red-600">{{ checkoutErrors.addressId }}</p>
+                                        {% endif %}
+
+                                        <p class="mt-2 text-xs leading-5 text-ink-soft">
+                                            Vous pouvez utiliser une adresse déjà enregistrée dans votre espace client.
+                                        </p>
+                                    </div>
+
+                                    <input type="hidden" name="useNewAddress" value="0">
+
+                                    <label class="mb-5 flex cursor-pointer items-start gap-3 rounded-2xl border border-beige p-4 transition hover:border-brand hover:bg-cream">
+                                        <input
+                                            type="checkbox"
+                                            name="useNewAddress"
+                                            value="1"
+                                            {{ useNewAddress ? 'checked' : '' }}
+                                            class="mt-1 accent-[#8B6545]"
+                                        >
+
+                                        <span>
+                                            <span class="block font-semibold text-ink">
+                                                Utiliser une nouvelle adresse
+                                            </span>
+                                            <span class="mt-1 block text-sm leading-5 text-ink-soft">
+                                                Cochez cette option si vous souhaitez livrer à une autre adresse.
+                                            </span>
+                                        </span>
+                                    </label>
+                                {% else %}
+                                    <input type="hidden" name="useNewAddress" value="1">
+
+                                    <p class="mb-5 rounded-xl bg-cream p-4 text-sm leading-6 text-ink-soft">
+                                        Vous n'avez pas encore enregistré d'adresse de livraison.
+                                        Veuillez renseigner les informations ci-dessous.
+                                    </p>
+                                {% endif %}
+
+                                <div class="space-y-5">
+
+                                    <div>
+                                        <label for="recipientName" class="mb-2 block text-sm font-semibold text-ink">
+                                            Nom complet du destinataire
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="recipientName"
+                                            name="recipientName"
+                                            value="{{ formData.recipientName|default(user.firstname ~ ' ' ~ user.lastname) }}"
+                                            placeholder="Nom et prénom"
+                                            autocomplete="name"
+                                            class="w-full rounded-xl border {{ checkoutErrors.recipientName is defined ? 'border-red-500' : 'border-beige' }} bg-white px-4 py-3 text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
+                                        >
+
+                                        {% if checkoutErrors.recipientName is defined %}
+                                            <p class="mt-2 text-sm text-red-600">{{ checkoutErrors.recipientName }}</p>
+                                        {% endif %}
+                                    </div>
+
+                                    <div>
+                                        <label for="address" class="mb-2 block text-sm font-semibold text-ink">
+                                            Adresse complète
+                                        </label>
+                                        <textarea id="address" name="address" rows="3"
+                                                  placeholder="Lot, rue, quartier..."
+                                                  autocomplete="street-address"
+                                                  class="w-full resize-y rounded-xl border {{ checkoutErrors.address is defined ? 'border-red-500' : 'border-beige' }} bg-white px-4 py-3 text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">{{ formData.address|default('') }}</textarea>
+
+                                        {% if checkoutErrors.address is defined %}
+                                            <p class="mt-2 text-sm text-red-600">{{ checkoutErrors.address }}</p>
+                                        {% endif %}
+                                    </div>
+
+                                    <div>
+                                        <label for="addressLine2" class="mb-2 block text-sm font-semibold text-ink">
+                                            Complément d'adresse (facultatif)
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="addressLine2"
+                                            name="addressLine2"
+                                            value="{{ formData.addressLine2|default('') }}"
+                                            placeholder="Appartement, bâtiment, étage..."
+                                            class="w-full rounded-xl border border-beige bg-white px-4 py-3 text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
+                                        >
+                                    </div>
+
+                                    <div class="grid gap-5 sm:grid-cols-2">
+
+                                        <div>
+                                            <label for="city" class="mb-2 block text-sm font-semibold text-ink">
+                                                Ville / Province
+                                            </label>
+                                            <input
+                                                type="text"
+                                                id="city"
+                                                name="city"
+                                                value="{{ formData.city|default('') }}"
+                                                placeholder="Ex. : Antananarivo"
+                                                autocomplete="address-level2"
+                                                class="w-full rounded-xl border {{ checkoutErrors.city is defined ? 'border-red-500' : 'border-beige' }} bg-white px-4 py-3 text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
+                                            >
+
+                                            {% if checkoutErrors.city is defined %}
+                                                <p class="mt-2 text-sm text-red-600">{{ checkoutErrors.city }}</p>
+                                            {% endif %}
+                                        </div>
+
+                                        <div>
+                                            <label for="postalCode" class="mb-2 block text-sm font-semibold text-ink">
+                                                Code postal (facultatif)
+                                            </label>
+                                            <input
+                                                type="text"
+                                                id="postalCode"
+                                                name="postalCode"
+                                                value="{{ formData.postalCode|default('') }}"
+                                                placeholder="Code postal"
+                                                autocomplete="postal-code"
+                                                class="w-full rounded-xl border border-beige bg-white px-4 py-3 text-ink"
+                                            >
+                                        </div>
+
+                                        <div class="sm:col-span-2">
+                                            <label for="country" class="mb-2 block text-sm font-semibold text-ink">
+                                                Pays
+                                            </label>
+                                            <input
+                                                type="text"
+                                                id="country"
+                                                name="country"
+                                                value="{{ formData.country|default('Madagascar') }}"
+                                                autocomplete="country-name"
+                                                class="w-full rounded-xl border {{ checkoutErrors.country is defined ? 'border-red-500' : 'border-beige' }} bg-white px-4 py-3 text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
+                                            >
+
+                                            {% if checkoutErrors.country is defined %}
+                                                <p class="mt-2 text-sm text-red-600">{{ checkoutErrors.country }}</p>
+                                            {% endif %}
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            
+                            {# Mode de livraison #}
+                            <div class="border-t border-beige pt-7">
+
+                                <h2 class="mb-3 text-lg font-bold text-ink">
+                                    <span class="mr-2 text-brand">03.</span>
+                                    Mode de livraison
+                                </h2>
+
+                                <p class="mb-5 text-sm leading-6 text-ink-soft">
+                                    Choisissez comment vous souhaitez recevoir votre commande.
+                                </p>
+
+                                {% if checkoutErrors.deliveryMethod is defined %}
+                                    <p class="mb-3 text-sm text-red-600">
+                                        {{ checkoutErrors.deliveryMethod }}
+                                    </p>
+                                {% endif %}
+
+                                <div class="space-y-3">
+
+                                    {# Livraison à domicile #}
+                                    <label class="flex cursor-pointer items-start gap-3 rounded-2xl border border-beige p-4 transition hover:border-brand hover:bg-cream">
+
+                                        <input
+                                            type="radio"
+                                            name="deliveryMethod"
+                                            value="home_delivery"
+                                            {{ selectedDeliveryMethod == 'home_delivery' ? 'checked' : '' }}
+                                            required
+                                            class="mt-1 accent-[#8B6545]"
+                                        >
+
+                                        <span class="flex-1">
+                                            <span class="block font-semibold text-ink">
+                                                Livraison à domicile
+                                            </span>
+
+                                            <span class="mt-1 block text-sm leading-5 text-ink-soft">
+                                                Votre commande est livrée directement à votre adresse.
+                                            </span>
+                                        </span>
+
+                                        <span aria-hidden="true">🏠</span>
+                                    </label>
+
+                                    {# Envoi en agence #}
+                                    <label class="flex cursor-pointer items-start gap-3 rounded-2xl border border-beige p-4 transition hover:border-brand hover:bg-cream">
+
+                                        <input
+                                            type="radio"
+                                            name="deliveryMethod"
+                                            value="taxi_brousse"
+                                            {{ selectedDeliveryMethod == 'taxi_brousse' ? 'checked' : '' }}
+                                            required
+                                            class="mt-1 accent-[#8B6545]"
+                                        >
+
+                                        <span class="flex-1">
+                                            <span class="block font-semibold text-ink">
+                                                Envoi en agence
+                                            </span>
+
+                                            <span class="mt-1 block text-sm leading-5 text-ink-soft">
+                                                Votre colis sera envoyé dans une agence de transport
+                                                de votre ville. Vous pourrez le récupérer à son arrivée.
+                                            </span>
+                                        </span>
+
+                                        <span aria-hidden="true">📦</span>
+                                    </label>
+
+                                </div>
+                            </div>
+
+
+                            {# Calcul des frais de livraison #}
+                            <div class="border-t border-beige pt-5">
+                                <button
+                                    type="submit"
+                                    name="checkoutAction"
+                                    value="calculate_delivery_fee"
+                                    class="w-full rounded-full border border-brand bg-white px-6 py-3 text-sm font-semibold text-brand transition hover:bg-brand hover:text-white"
+                                >
+                                    Calculer les frais de livraison
+                                </button>
+
+                                <p class="mt-2 text-center text-xs text-ink-soft">
+                                    Vérifiez le montant de la livraison avant de confirmer votre commande.
+                                </p>
+                            </div>
+
+                            
+                            {# Mode de paiement #}
+                            <div class="border-t border-beige pt-7">
+
+                                <h2 class="mb-3 text-lg font-bold text-ink">
+                                    <span class="mr-2 text-brand">04.</span>
+                                    Paiement de l'acompte
+                                </h2>
+
+                                <p class="mb-5 text-sm leading-6 text-ink-soft">
+                                    Un acompte obligatoire de 50 % est demandé pour valider votre commande.
+                                </p>
+
+                                {% if checkoutErrors.paymentMethod is defined %}
+                                    <p class="mb-3 text-sm text-red-600">
+                                        {{ checkoutErrors.paymentMethod }}
+                                    </p>
+                                {% endif %}
+
+                                <div class="rounded-2xl border border-brand bg-cream p-4">
+
+                                    <label class="flex cursor-pointer items-start gap-3">
+
+                                        <input
+                                            type="radio"
+                                            name="paymentMethod"
+                                            value="mobile_money_demo"
+                                            checked
+                                            required
+                                            class="mt-1 accent-[#8B6545]"
+                                        >
+
+                                        <span class="flex-1">
+                                            <span class="block font-semibold text-ink">
+                                                Mobile Money — Acompte obligatoire de 50 %
+                                            </span>
+
+                                            <span class="mt-1 block text-sm leading-5 text-ink-soft">
+                                                MVola, Orange Money ou Airtel Money.
+                                            </span>
+                                        </span>
+
+                                        <span aria-hidden="true">📱</span>
+
+                                    </label>
+
+                                </div>
+
+                                {# Choix obligatoire de l'opérateur #}
+                                <div
+                                    id="mobileMoneyOptions"
+                                    class="mt-4 rounded-2xl border border-beige bg-cream p-5"
+                                >
+
+                                    <label
+                                        for="paymentOperator"
+                                        class="mb-2 block text-sm font-semibold text-ink"
+                                    >
+                                        Choisissez votre opérateur
+                                    </label>
+
+                                    <select
+                                        id="paymentOperator"
+                                        name="paymentOperator"
+                                        required
+                                        class="w-full rounded-xl border {{ checkoutErrors.paymentOperator is defined ? 'border-red-500' : 'border-beige' }} bg-white px-4 py-3 text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
+                                    >
+                                        <option value="">-- Choisir un opérateur --</option>
+
+                                        <option
+                                            value="mvola"
+                                            {{ selectedOperator == 'mvola' ? 'selected' : '' }}
+                                        >
+                                            MVola
+                                        </option>
+
+                                        <option
+                                            value="orange_money"
+                                            {{ selectedOperator == 'orange_money' ? 'selected' : '' }}
+                                        >
+                                            Orange Money
+                                        </option>
+
+                                        <option
+                                            value="airtel_money"
+                                            {{ selectedOperator == 'airtel_money' ? 'selected' : '' }}
+                                        >
+                                            Airtel Money
+                                        </option>
+                                    </select>
+
+                                    {% if checkoutErrors.paymentOperator is defined %}
+                                        <p class="mt-2 text-sm text-red-600">
+                                            {{ checkoutErrors.paymentOperator }}
+                                        </p>
+                                    {% endif %}
+
+                                </div>
+
+                            </div>
+
+
+                            {# Conditions #}
+                            <div class="border-t border-beige pt-6">
+                                <label class="flex items-start gap-3 text-sm leading-6 text-ink-soft">
+                                    <input
+                                        type="checkbox"
+                                        name="acceptTerms"
+                                        value="1"
+                                        {{ formData.acceptTerms|default('') == '1' ? 'checked' : '' }}
+                                        class="mt-1 accent-[#8B6545]"
+                                    >
+
+                                    <span>
+                                        J'ai vérifié mes informations et j'accepte les
+                                        <a
+                                            href="{{ path('app_contact') }}"
+                                            class="font-semibold text-brand underline-offset-4 hover:underline"
+                                        >
+                                            conditions de commande
+                                        </a>.
+                                    </span>
+                                </label>
+
+                                {% if checkoutErrors.acceptTerms is defined %}
+                                    <p class="mt-2 text-sm text-red-600">{{ checkoutErrors.acceptTerms }}</p>
+                                {% endif %}
+                            </div>
+
+                            <button
+                                type="submit"
+                                class="w-full rounded-full bg-brand px-6 py-4 text-sm font-semibold text-white transition hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
+                            >
+                                Confirmer la commande
+                            </button>
+                        </form>
+                    </section>
+                </main>
+
+                {# RÉCAPITULATIF #}
+                <aside class="space-y-6 lg:sticky lg:top-6">
+                    <section class="rounded-3xl border border-beige bg-white p-6 shadow-sm">
+
+                        <div class="flex items-center justify-between border-b border-beige pb-5">
+                            <h2 class="text-lg font-bold text-ink">Votre commande</h2>
+                            <a
+                                href="{{ path('app_cart') }}"
+                                class="text-sm font-semibold text-brand hover:text-brand-dark"
+                            >
+                                Modifier
+                            </a>
+                        </div>
+
+                        {# Articles du panier avec l'image correspondant à la couleur sélectionnée #}
+                        {% for item in items %}
+                            {% set product = item.product %}
+                            {% set variant = item.variant %}
+                            {% set matchingImages = [] %}
+
+                            {% if variant and variant.color %}
+                                {% set matchingImages = product.images|filter(image =>
+                                    image.color and image.color|lower == variant.color|lower
+                                ) %}
+                            {% endif %}
+
+                            {% set variantImage = matchingImages|first %}
+
+                            <div class="flex gap-4 border-b border-beige py-5">
+
+                                {% if variantImage %}
+                                    <img
+                                        src="{{ asset(variantImage.imagePath) }}"
+                                        alt="{{ variantImage.altText|default(product.name ~ ' - ' ~ variant.color) }}"
+                                        class="h-20 w-20 rounded-xl object-cover"
+                                    >
+                                {% elseif product.mainImage %}
+                                    <img
+                                        src="{{ asset(product.mainImage) }}"
+                                        alt="{{ product.name }}"
+                                        class="h-20 w-20 rounded-xl object-cover"
+                                    >
+                                {% else %}
+                                    <div class="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-cream text-xs text-ink-soft">
+                                        Image indisponible
+                                    </div>
+                                {% endif %}
+
+                                <div class="min-w-0 flex-1">
+                                    <h3 class="font-semibold text-ink">
+                                        {{ product.name }}
+                                    </h3>
+
+                                    {% if variant %}
+                                        <p class="mt-1 text-xs text-ink-soft">
+                                            {% if variant.size %}{{ variant.size }}{% endif %}
+                                            {% if variant.color %} · {{ variant.color }}{% endif %}
+                                        </p>
+                                    {% endif %}
+
+                                    <p class="mt-3 text-sm font-semibold text-ink">
+                                        {{ (item.unitPrice * item.quantity)|number_format(0, ',', ' ') }} Ar
+                                    </p>
+
+                                    <p class="mt-1 text-xs text-ink-soft">
+                                        Quantité : {{ item.quantity }}
+                                    </p>
+                                </div>
+                            </div>
+                        {% endfor %}
+
+                        {# Totaux #}
+                        <div class="space-y-3 pt-5 text-sm">
+                            <div class="flex justify-between gap-4 text-ink-soft">
+                                <span>Sous-total</span>
+                                <span>{{ subtotal|number_format(0, ',', ' ') }} Ar</span>
+                            </div>
+
+                            <div class="flex justify-between gap-4 text-ink-soft">
+                                <span>Livraison</span>
+                                <span>{{ deliveryFee|number_format(0, ',', ' ') }} Ar</span>
+                            </div>
+
+                            <div class="flex items-center justify-between gap-4 border-t border-beige pt-4">
+                                <span class="font-bold text-ink">Total commande</span>
+                                <span class="text-xl font-bold text-brand">
+                                    {{ total|number_format(0, ',', ' ') }} Ar
+                                </span>
+                            </div>
+                        </div>
+
+                        {# Calcul de l'acompte #}
+                        <div
+                            id="depositSummary"
+                            class="mt-5 space-y-3 rounded-2xl border border-brand/20 bg-brand-light p-4"
+                        >
+
+                            <p class="font-semibold text-ink">Répartition du paiement</p>
+
+                            <div class="flex justify-between gap-3 text-sm text-ink-soft">
+                                <span>Acompte (50 %)</span>
+                                <span class="font-semibold text-brand">
+                                    {{ (total / 2)|round(0, 'ceil')|number_format(0, ',', ' ') }} Ar
+                                </span>
+                            </div>
+
+                            <div class="flex justify-between gap-3 text-sm text-ink-soft">
+                                <span>Reste à payer</span>
+                                <span class="font-semibold text-ink">
+                                    {{ (total - (total / 2)|round(0, 'ceil'))|number_format(0, ',', ' ') }} Ar
+                                </span>
+                            </div>
+
+                            <p class="text-xs leading-5 text-ink-soft">
+                                L'acompte est à régler lors de la validation de votre commande.
+                                Le solde sera payé selon les modalités de livraison.
+                            </p>
+                        </div>
+
+                        <p class="mt-5 rounded-xl bg-cream p-3 text-xs leading-5 text-ink-soft">
+                            Les frais de livraison sont affichés avant la validation de votre commande.
+                        </p>
+                    </section>
+
+                    <div class="rounded-2xl border border-beige bg-[#FBF7F1] p-5">
+                        <h3 class="font-semibold text-ink">Besoin d'aide ?</h3>
+                        <p class="mt-2 text-sm leading-6 text-ink-soft">
+                            Si vous avez une question sur votre commande, contactez notre équipe.
+                        </p>
+                        <a
+                            href="{{ path('app_contact') }}"
+                            class="mt-4 inline-flex text-sm font-semibold text-brand hover:text-brand-dark"
+                        >
+                            Nous contacter →
+                        </a>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{# JavaScript : afficher les opérateurs et le calcul de l'acompte #}
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('js/checkout.js') }}" defer></script>
+{% endblock %}

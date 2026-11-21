@@ -1,0 +1,392 @@
+{% extends 'layouts/auth-layout.html.twig' %}
+
+{% block title %}Demander un échange | ModeBoutique{% endblock %}
+
+{% block body %}
+
+    <section class="min-h-screen bg-cream px-4 py-8 sm:px-6 lg:px-8">
+
+        <div class="mx-auto max-w-7xl">
+
+            {# En-tête de la page #}
+            <header class="mb-8 flex flex-wrap items-center justify-between gap-4">
+
+                <div>
+                    <a href="{{ path('home') }}" class="text-2xl font-bold text-ink">
+                        Mode<span class="text-brand">Boutique</span>
+                    </a>
+
+                    <p class="mt-1 text-sm text-ink-soft">
+                        Mon espace client / Mes commandes / Demande d'échange
+                    </p>
+                </div>
+
+                <a
+                    href="{{ path('app_account_orders') }}"
+                    class="rounded-full border border-beige bg-white px-5 py-3 text-sm font-semibold text-ink transition hover:border-brand hover:text-brand"
+                >
+                    ← Retour à mes commandes
+                </a>
+
+            </header>
+
+            <div class="grid gap-6 lg:grid-cols-[220px_1fr]">
+
+                {# Menu latéral commun #}
+                {% include 'pages/account/_sidebar.html.twig' with {
+                    activePage: 'orders'
+                } %}
+
+                <main class="min-w-0 space-y-6">
+
+                    {# Présentation de la demande #}
+                    <section class="rounded-3xl border border-beige bg-gradient-to-br from-[#FBF7F1] to-[#E8DCCB] p-7 sm:p-9">
+
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-dark">
+                            Service client
+                        </p>
+
+                        <h1 class="mt-3 text-3xl font-bold text-ink">
+                            Demander un échange
+                        </h1>
+
+                        <p class="mt-3 text-sm text-ink-soft">
+                            Vous souhaitez remplacer un article de votre commande ?
+                            Sélectionnez le produit et la variante que vous souhaitez recevoir.
+                        </p>
+
+                    </section>
+
+                    {# Article concerné #}
+                    <section class="overflow-hidden rounded-3xl border border-beige bg-white shadow-sm">
+
+                        <div class="border-b border-beige p-5 sm:p-6">
+
+                            <h2 class="text-lg font-bold text-ink">
+                                Article concerné
+                            </h2>
+
+                            <p class="mt-1 text-sm text-ink-soft">
+                                Retrouvez les informations de l'article à échanger.
+                            </p>
+
+                        </div>
+
+                        <div class="flex flex-col gap-4 p-5 sm:flex-row sm:items-center">
+
+                            <div class="h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-cream">
+
+                                {% set variantImage = null %}
+
+                                {% if orderItem.variant and orderItem.variant.color %}
+
+                                    {% for productImage in orderItem.product.images %}
+
+                                        {% if productImage.color == orderItem.variant.color %}
+
+                                            {% if variantImage is null or productImage.isPrimary %}
+                                                {% set variantImage = productImage %}
+                                            {% endif %}
+
+                                        {% endif %}
+
+                                    {% endfor %}
+
+                                {% endif %}
+
+                                {% set imagePath = variantImage
+                                    ? variantImage.imagePath
+                                    : orderItem.product.mainImage
+                                %}
+
+                                {% if imagePath %}
+
+                                    <img
+                                        src="{{ asset(imagePath) }}"
+                                        alt="{{ orderItem.product.name }}"
+                                        class="h-full w-full object-cover"
+                                    >
+
+                                {% else %}
+
+                                    <div class="flex h-full items-center justify-center text-2xl text-brand">
+                                        ♡
+                                    </div>
+
+                                {% endif %}
+
+                            </div>
+
+                            <div class="min-w-0 flex-1">
+
+                                <h3 class="font-bold text-ink">
+                                    {{ orderItem.product.name }}
+                                </h3>
+
+                                {% if orderItem.variant %}
+
+                                    <div class="mt-2 flex flex-wrap gap-2 text-xs text-ink-soft">
+
+                                        {% if orderItem.variant.color %}
+                                            <span class="rounded-full bg-cream px-3 py-1">
+                                                Couleur : {{ orderItem.variant.color }}
+                                            </span>
+                                        {% endif %}
+
+                                        {% if orderItem.variant.size %}
+                                            <span class="rounded-full bg-cream px-3 py-1">
+                                                Taille : {{ orderItem.variant.size }}
+                                            </span>
+                                        {% endif %}
+
+                                    </div>
+
+                                {% endif %}
+
+                                <p class="mt-2 text-sm text-ink-soft">
+                                    Quantité commandée : {{ orderItem.quantity }}
+                                </p>
+
+                            </div>
+
+                            <div class="shrink-0 sm:text-right">
+
+                                <p class="text-sm text-ink-soft">
+                                    Prix unitaire
+                                </p>
+
+                                <p class="mt-1 font-semibold text-ink">
+                                    {{ orderItem.unitPrice|number_format(0, ',', ' ') }} Ar
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+                    {# Formulaire de demande d'échange #}
+                    <section class="rounded-3xl border border-beige bg-white p-5 shadow-sm sm:p-7">
+
+                        <h2 class="text-lg font-bold text-ink">
+                            Informations de l'échange
+                        </h2>
+
+                        <p class="mt-1 text-sm text-ink-soft">
+                            Veuillez renseigner les informations nécessaires au traitement de votre demande.
+                        </p>
+
+                        <form method="POST" class="mt-6 space-y-5" data-turbo="false">
+
+                            <input
+                                type="hidden"
+                                name="_token"
+                                value="{{ csrf_token('return_request_' ~ orderItem.id) }}"
+                            >
+
+                            <input
+                                type="hidden"
+                                name="type"
+                                value="exchange"
+                            >
+
+                            {# Produit de remplacement #}
+                            <div>
+
+                                <label
+                                    for="replacementVariant"
+                                    class="mb-2 block text-sm font-semibold text-ink"
+                                >
+                                    Produit souhaité en remplacement *
+                                </label>
+
+                                {% if replacementVariants is not empty %}
+
+                                    <select
+                                        id="replacementVariant"
+                                        name="replacementVariant"
+                                        required
+                                        class="w-full rounded-xl border border-beige bg-white px-4 py-3 text-sm text-ink outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
+                                    >
+
+                                        <option value="">
+                                            Choisir un produit et une variante
+                                        </option>
+
+                                        {% for variant in replacementVariants %}
+
+                                            {% set product = variant.product %}
+                                            {% set replacementPrice = variant.priceOverride ?? product.price %}
+
+                                            {% if replacementPrice >= orderItem.unitPrice %}
+
+                                                <option value="{{ variant.id }}">
+
+                                                    {{ product.name }}
+
+                                                    {% if variant.color %}
+                                                        — {{ variant.color }}
+                                                    {% endif %}
+
+                                                    {% if variant.size %}
+                                                        — {{ variant.size }}
+                                                    {% endif %}
+
+                                                    — {{ replacementPrice|number_format(0, ',', ' ') }} Ar
+
+                                                </option>
+
+                                            {% endif %}
+
+                                        {% endfor %}
+
+                                    </select>
+
+                                    <p class="mt-2 text-xs leading-relaxed text-ink-soft">
+                                        Choisissez le produit, la couleur et la taille souhaités.
+                                        Le prix du produit de remplacement doit être égal ou supérieur
+                                        à celui de l'article original.
+                                    </p>
+
+                                {% else %}
+
+                                    <div class="rounded-xl border border-beige bg-cream p-4">
+
+                                        <p class="text-sm text-ink-soft">
+                                            Aucun produit de remplacement n'est actuellement disponible.
+                                        </p>
+
+                                    </div>
+
+                                {% endif %}
+
+                            </div>
+
+                            {# Motif de l'échange #}
+                            <div>
+
+                                <label
+                                    for="reason"
+                                    class="mb-2 block text-sm font-semibold text-ink"
+                                >
+                                    Motif de l'échange *
+                                </label>
+
+                                <select
+                                    id="reason"
+                                    name="reason"
+                                    required
+                                    class="w-full rounded-xl border border-beige bg-white px-4 py-3 text-sm text-ink outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
+                                >
+                                    <option value="">Choisir un motif</option>
+                                    <option value="Taille incorrecte">Taille incorrecte</option>
+                                    <option value="Couleur différente">Couleur différente</option>
+                                    <option value="Produit défectueux">Produit défectueux</option>
+                                    <option value="Produit incorrect">Produit reçu incorrect</option>
+                                    <option value="Produit non conforme">Produit non conforme à la description</option>
+                                    <option value="Autre">Autre motif</option>
+                                </select>
+
+                            </div>
+
+                            {# Quantité à échanger #}
+                            <div>
+
+                                <label
+                                    for="quantity"
+                                    class="mb-2 block text-sm font-semibold text-ink"
+                                >
+                                    Quantité à échanger *
+                                </label>
+
+                                <input
+                                    type="number"
+                                    id="quantity"
+                                    name="quantity"
+                                    min="1"
+                                    max="{{ orderItem.quantity }}"
+                                    value="1"
+                                    required
+                                    class="w-full rounded-xl border border-beige bg-white px-4 py-3 text-sm text-ink outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
+                                >
+
+                                <p class="mt-2 text-xs text-ink-soft">
+                                    Vous pouvez échanger jusqu'à {{ orderItem.quantity }} article(s).
+                                </p>
+
+                            </div>
+
+                            {# Informations complémentaires #}
+                            <div>
+
+                                <label
+                                    for="description"
+                                    class="mb-2 block text-sm font-semibold text-ink"
+                                >
+                                    Informations complémentaires
+                                    <span class="font-normal text-ink-soft">(facultatif)</span>
+                                </label>
+
+                                <textarea
+                                    id="description"
+                                    name="description"
+                                    rows="4"
+                                    placeholder="Expliquez davantage le problème rencontré..."
+                                    class="w-full resize-y rounded-xl border border-beige bg-white px-4 py-3 text-sm text-ink outline-none transition placeholder:text-ink-soft/60 focus:border-brand focus:ring-2 focus:ring-brand/20"
+                                ></textarea>
+
+                            </div>
+
+                            {# Information sur le traitement et le paiement #}
+                            <div class="rounded-xl bg-cream p-4">
+
+                                <p class="text-sm font-semibold text-ink">
+                                    À savoir avant de confirmer
+                                </p>
+
+                                <p class="mt-2 text-sm leading-relaxed text-ink-soft">
+                                    Votre demande sera examinée par notre équipe.
+                                    Si le produit choisi coûte plus cher que l'article original,
+                                    vous devrez régler la différence avant la finalisation de l'échange.
+                                    Aucun remboursement ni avoir ne sera proposé en cas de différence de prix négative.
+                                </p>
+
+                            </div>
+
+                            {# Boutons d'action #}
+                            <div class="flex flex-col-reverse gap-3 border-t border-beige pt-5 sm:flex-row sm:justify-end">
+
+                                <a
+                                    href="{{ path('app_account_order_detail', {
+                                        orderNumber: orderItem.customerOrder.orderNumber
+                                    }) }}"
+                                    class="inline-flex items-center justify-center rounded-xl border border-beige bg-white px-5 py-3 text-sm font-semibold text-ink transition hover:border-brand hover:text-brand"
+                                >
+                                    Annuler
+                                </a>
+
+                                <button
+                                    type="submit"
+                                    {% if replacementVariants is empty %}
+                                    disabled
+                                    {% endif %}
+                                    class="inline-flex items-center justify-center rounded-xl bg-[#292524] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#44403C] disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    Envoyer ma demande
+                                </button>
+
+                            </div>
+
+                        </form>
+
+                    </section>
+
+                </main>
+
+            </div>
+
+        </div>
+
+    </section>
+
+{% endblock %}

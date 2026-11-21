@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+
+    <title>Facture {{ invoice.invoiceNumber }}</title>
+
+    <style>
+        @page {
+            margin: 35px 38px;
+        }
+
+        body {
+            font-family: "DejaVu Sans", sans-serif;
+            font-size: 11px;
+            color: #292524;
+            line-height: 1.5;
+        }
+
+        .header {
+            width: 100%;
+            border-bottom: 2px solid #B08D67;
+            padding-bottom: 18px;
+            margin-bottom: 25px;
+        }
+
+        .header-table,
+        .info-table,
+        .products-table,
+        .totals-table,
+        .payments-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .brand {
+            font-size: 23px;
+            font-weight: bold;
+            color: #292524;
+        }
+
+        .brand-accent {
+            color: #B08D67;
+        }
+
+        .label {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #877D72;
+        }
+
+        .invoice-title {
+            font-size: 25px;
+            font-weight: bold;
+            margin-top: 22px;
+            margin-bottom: 5px;
+        }
+
+        .invoice-number {
+            color: #B08D67;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .section {
+            margin-top: 25px;
+        }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: bold;
+            color: #292524;
+            border-bottom: 1px solid #E7E5E4;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+        }
+
+        .info-table td {
+            width: 50%;
+            vertical-align: top;
+            padding: 8px 12px 8px 0;
+        }
+
+        .info-content {
+            margin-top: 8px;
+            line-height: 1.8;
+        }
+
+        .products-table th {
+            background-color: #F5F0E8;
+            color: #57534E;
+            font-size: 9px;
+            text-transform: uppercase;
+            padding: 11px 8px;
+            text-align: left;
+        }
+
+        .products-table td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #E7E5E4;
+            vertical-align: top;
+        }
+
+        .text-center {
+            text-align: center !important;
+        }
+
+        .text-right {
+            text-align: right !important;
+        }
+
+        .muted {
+            color: #78716C;
+        }
+
+        .totals-wrapper {
+            width: 48%;
+            margin-left: auto;
+            margin-top: 18px;
+        }
+
+        .totals-table td {
+            padding: 7px 0;
+        }
+
+        .grand-total td {
+            border-top: 1px solid #B08D67;
+            padding-top: 12px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .grand-total .amount {
+            color: #B08D67;
+            text-align: right;
+        }
+
+        .payments-table th {
+            background-color: #F5F0E8;
+            padding: 9px 7px;
+            font-size: 9px;
+            text-align: left;
+        }
+
+        .payments-table td {
+            padding: 9px 7px;
+            border-bottom: 1px solid #E7E5E4;
+        }
+
+        .payment-summary {
+            margin-top: 15px;
+            padding: 13px;
+            background-color: #F5F0E8;
+        }
+
+        .payment-summary table {
+            width: 100%;
+        }
+
+        .payment-summary td {
+            padding: 5px 0;
+        }
+
+        .remaining {
+            color: #B08D67;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .footer {
+            border-top: 1px solid #E7E5E4;
+            margin-top: 35px;
+            padding-top: 15px;
+            text-align: center;
+            color: #78716C;
+            font-size: 9px;
+        }
+
+        .footer strong {
+            color: #B08D67;
+        }
+
+        .page-note {
+            margin-top: 8px;
+            font-size: 9px;
+            color: #A8A29E;
+        }
+    </style>
+</head>
+
+<body>
+
+    {# En-tête de la facture #}
+    <div class="header">
+        <table class="header-table">
+            <tr>
+                <td>
+                    <div class="brand">
+                        Mode<span class="brand-accent">Boutique</span>
+                    </div>
+
+                    <p class="muted">
+                        La mode à portée de clic
+                    </p>
+                </td>
+
+                <td class="text-right">
+                    <div class="label">Date d'émission</div>
+
+                    <strong>
+                        {{ invoice.issuedAt ? invoice.issuedAt|date('d/m/Y à H:i') : '—' }}
+                    </strong>
+                </td>
+            </tr>
+        </table>
+
+        <div class="invoice-title">FACTURE</div>
+
+        <div class="invoice-number">
+            {{ invoice.invoiceNumber }}
+        </div>
+    </div>
+
+    {# Informations du client #}
+    <div class="section">
+        <table class="info-table">
+            <tr>
+                <td>
+                    <div class="section-title">
+                        Informations du client
+                    </div>
+
+                    <div class="info-content">
+                        <strong>{{ order.address.recipientName }}</strong><br>
+                        {{ order.user.email }}<br>
+                        {{ order.address.phone }}<br>
+                        {{ order.address.addressLine1 }}<br>
+
+                        {% if order.address.addressLine2 %}
+                            {{ order.address.addressLine2 }}<br>
+                        {% endif %}
+
+                        {{ order.address.city }},
+                        {{ order.address.country }}
+
+                        {% if order.address.postalCode %}
+                            <br>{{ order.address.postalCode }}
+                        {% endif %}
+                    </div>
+                </td>
+
+                <td>
+                    <div class="section-title">
+                        Référence de commande
+                    </div>
+
+                    <div class="info-content">
+                        <strong>{{ order.orderNumber }}</strong><br>
+
+                        Date :
+                        {{ order.createdAt ? order.createdAt|date('d/m/Y à H:i') : '—' }}
+                        <br>
+
+                        Statut :
+                        {{ order.status }}
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    {# Détail des produits #}
+    <div class="section">
+        <div class="section-title">
+            Détail des articles
+        </div>
+
+        <table class="products-table">
+            <thead>
+                <tr>
+                    <th>Désignation</th>
+                    <th class="text-center">Quantité</th>
+                    <th class="text-right">Prix unitaire</th>
+                    <th class="text-right">Total</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for item in order.orderItems %}
+                    <tr>
+                        <td>
+                            <strong>
+                                {{ item.product ? item.product.name : 'Produit indisponible' }}
+                            </strong>
+
+                            {% if item.variant %}
+                                <div class="muted">
+                                    {% if item.variant.color %}
+                                        Couleur : {{ item.variant.color }}
+                                    {% endif %}
+
+                                    {% if item.variant.size %}
+                                        | Taille : {{ item.variant.size }}
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-center">
+                            {{ item.quantity }}
+                        </td>
+
+                        <td class="text-right">
+                            {{ item.unitPrice|number_format(0, ',', ' ') }} Ar
+                        </td>
+
+                        <td class="text-right">
+                            {{ (item.unitPrice * item.quantity)|number_format(0, ',', ' ') }} Ar
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center">
+                            Aucun article enregistré.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {# Totaux #}
+    <div class="totals-wrapper">
+        <table class="totals-table">
+            <tr>
+                <td class="muted">Sous-total</td>
+                <td class="text-right">
+                    {{ subtotal|number_format(0, ',', ' ') }} Ar
+                </td>
+            </tr>
+
+            <tr>
+                <td class="muted">Livraison</td>
+                <td class="text-right">
+                    {{ deliveryFee|number_format(0, ',', ' ') }} Ar
+                </td>
+            </tr>
+
+            <tr class="grand-total">
+                <td>Total commande</td>
+                <td class="amount">
+                    {{ total|number_format(0, ',', ' ') }} Ar
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    {# Historique des paiements #}
+    <div class="section">
+        <div class="section-title">
+            Suivi des paiements
+        </div>
+
+        <table class="payments-table">
+            <thead>
+                <tr>
+                    <th>Moyen de paiement</th>
+                    <th>Référence</th>
+                    <th>Statut</th>
+                    <th class="text-right">Montant</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for payment in order.payments %}
+                    <tr>
+                        <td>
+                            {% if payment.method == 'mobile_money_demo' %}
+                                Mobile Money
+                            {% elseif payment.method == 'cash_on_delivery' %}
+                                Paiement à la livraison
+                            {% else %}
+                                {{ payment.method }}
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {{ payment.transactionReference ?: '—' }}
+                        </td>
+
+                        <td>
+                            {% if payment.status == 'paid' %}
+                                Payé
+                            {% elseif payment.status == 'failed' %}
+                                Échec
+                            {% else %}
+                                En attente
+                            {% endif %}
+                        </td>
+
+                        <td class="text-right">
+                            {{ payment.amount|number_format(0, ',', ' ') }} Ar
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center">
+                            Aucun paiement enregistré.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="payment-summary">
+            <table>
+                <tr>
+                    <td class="muted">Total de la commande</td>
+                    <td class="text-right">
+                        {{ total|number_format(0, ',', ' ') }} Ar
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="muted">Montant réellement encaissé</td>
+                    <td class="text-right">
+                        <strong>
+                            {{ paidAmount|number_format(0, ',', ' ') }} Ar
+                        </strong>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="remaining">Solde restant à payer</td>
+                    <td class="text-right remaining">
+                        {{ remainingAmount|number_format(0, ',', ' ') }} Ar
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    {# Pied de page #}
+    <div class="footer">
+        <strong>Merci d'avoir choisi ModeBoutique !</strong>
+
+        <p>
+            Document généré automatiquement par ModeBoutique.
+        </p>
+
+        <div class="page-note">
+            Facture associée à la commande {{ order.orderNumber }}.
+        </div>
+    </div>
+
+</body>
+</html>

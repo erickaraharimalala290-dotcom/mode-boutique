@@ -1,0 +1,582 @@
+{% extends 'layouts/admin-layout.html.twig' %}
+
+{% block title %}Détail de la commande | ModeBoutique{% endblock %}
+
+{% block admin_content %}
+
+    {% set statusLabels = {
+    'pending': 'En attente',
+    'confirmed': 'Confirmée',
+    'processing': 'En préparation',
+    'shipped': 'Expédiée',
+    'delivered': 'Livrée',
+    'cancelled': 'Annulée'
+} %}
+
+    {% set paymentMethodLabels = {
+    'cash_on_delivery': 'Paiement à la livraison',
+    'mobile_money_demo': 'Mobile Money'
+} %}
+
+    {% set paymentStatusLabels = {
+    'pending': 'En attente',
+    'paid': 'Payé',
+    'failed': 'Échoué',
+    'refunded': 'Remboursé'
+} %}
+
+    {% set status = order.status|lower %}
+
+    <div class="mx-auto max-w-6xl space-y-8">
+
+        {# En-tête de la commande #}
+        <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+
+            <div>
+                <a
+                    href="{{ path('admin_orders_index') }}"
+                    class="text-sm font-medium text-[#B08D67] transition hover:underline"
+                >
+                    ← Retour aux commandes
+                </a>
+
+                <h1 class="mt-3 text-2xl font-semibold text-stone-800 sm:text-3xl">
+                    Détail de la commande
+                </h1>
+
+                <p class="mt-2 text-sm text-stone-500">
+                    Référence : {{ order.orderNumber }}
+                </p>
+
+                <p class="mt-1 text-sm text-stone-500">
+                    Passée le {{ order.createdAt|date('d/m/Y à H:i') }}
+                </p>
+            </div>
+
+            <span class="w-fit rounded-full bg-amber-50 px-4 py-2 text-sm font-medium text-amber-700">
+                {{ statusLabels[status]|default(order.status|capitalize) }}
+            </span>
+
+        </div>
+
+        {# Messages de confirmation et d'erreur #}
+        {% for message in app.flashes('success') %}
+            <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                {{ message }}
+            </div>
+        {% endfor %}
+
+        {% for message in app.flashes('error') %}
+            <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {{ message }}
+            </div>
+        {% endfor %}
+
+        {# Informations générales #}
+        <div class="grid gap-6 md:grid-cols-2">
+
+            {# Informations du client #}
+            <div class="rounded-2xl border border-stone-200 bg-white p-6">
+
+                <h2 class="font-semibold text-stone-800">
+                    Informations du client
+                </h2>
+
+                <div class="mt-4 space-y-3 text-sm text-stone-600">
+
+                    <p>
+                        <span class="font-medium text-stone-800">Client :</span>
+                        {{ order.user ? order.user.email : 'Client inconnu' }}
+                    </p>
+
+                    <p>
+                        <span class="font-medium text-stone-800">Date :</span>
+                        {{ order.createdAt|date('d/m/Y à H:i') }}
+                    </p>
+
+                </div>
+            </div>
+
+            {# Informations du paiement #}
+            <div class="rounded-2xl border border-stone-200 bg-white p-6">
+
+                <h2 class="font-semibold text-stone-800">
+                    Informations du paiement
+                </h2>
+
+                {% if payment %}
+
+                    {% set paymentStatus = payment.status|lower %}
+
+                    <div class="mt-4 space-y-3 text-sm text-stone-600">
+
+                        <p>
+                            <span class="font-medium text-stone-800">Méthode :</span>
+                            {{ paymentMethodLabels[payment.method]|default(payment.method) }}
+                        </p>
+
+                        <p>
+                            <span class="font-medium text-stone-800">Statut :</span>
+
+                            {% if paymentStatus == 'paid' %}
+                                <span class="font-medium text-emerald-700">
+                                    {{ paymentStatusLabels[paymentStatus] }}
+                                </span>
+                            {% elseif paymentStatus == 'failed' %}
+                                <span class="font-medium text-red-700">
+                                    {{ paymentStatusLabels[paymentStatus] }}
+                                </span>
+                            {% else %}
+                                <span class="font-medium text-amber-700">
+                                    {{ paymentStatusLabels[paymentStatus]|default(payment.status|capitalize) }}
+                                </span>
+                            {% endif %}
+                        </p>
+
+                        <p>
+                            <span class="font-medium text-stone-800">Montant enregistré :</span>
+                            {{ payment.amount|number_format(0, ',', ' ') }} Ar
+                        </p>
+
+                        {% if payment.transactionReference %}
+                            <p>
+                                <span class="font-medium text-stone-800">
+                                    Référence de transaction :
+                                </span>
+                                {{ payment.transactionReference }}
+                            </p>
+                        {% endif %}
+
+                    </div>
+
+                {% else %}
+
+                    <p class="mt-4 text-sm text-stone-500">
+                        Aucun paiement enregistré.
+                    </p>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    
+        {# Historique et validation des paiements #}
+        <div class="rounded-2xl border border-stone-200 bg-white p-6">
+
+            <div>
+                <h2 class="font-semibold text-stone-800">
+                    Historique des paiements
+                </h2>
+
+                <p class="mt-1 text-sm text-stone-500">
+                    Consultez les paiements et confirmez les règlements en espèces reçus.
+                </p>
+            </div>
+
+            {# Résumé financier #}
+            <div class="mt-5 grid gap-4 sm:grid-cols-2">
+
+                <div class="rounded-xl bg-emerald-50 p-4">
+                    <p class="text-sm text-emerald-700">
+                        Montant encaissé
+                    </p>
+
+                    <p class="mt-2 text-xl font-bold text-emerald-800">
+                        {{ paidAmount|number_format(0, ',', ' ') }} Ar
+                    </p>
+                </div>
+
+                <div class="rounded-xl bg-[#F5F0E8] p-4">
+                    <p class="text-sm text-stone-600">
+                        Solde restant
+                    </p>
+
+                    <p class="mt-2 text-xl font-bold text-[#8A6848]">
+                        {{ remainingAmount|number_format(0, ',', ' ') }} Ar
+                    </p>
+                </div>
+
+            </div>
+
+            {# Liste des paiements #}
+            <div class="mt-6 space-y-4">
+
+                {% for currentPayment in payments %}
+
+                    {% set methodLabels = {
+                        'mobile_money_demo': 'Acompte Mobile Money',
+                        'mobile_money_balance': 'Solde Mobile Money',
+                        'cash_balance': 'Solde en espèces',
+                        'cash_on_delivery': 'Paiement à la livraison'
+                    } %}
+
+                    <div class="rounded-xl border border-stone-200 p-4">
+
+                        <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+
+                            <div>
+                                <p class="font-semibold text-stone-800">
+                                    {{ methodLabels[currentPayment.method]|default(currentPayment.method) }}
+                                </p>
+
+                                <p class="mt-1 text-xs text-stone-500">
+                                    Référence :
+                                    {{ currentPayment.transactionReference ?: 'Non renseignée' }}
+                                </p>
+
+                                <p class="mt-1 text-xs text-stone-400">
+                                    Créé le :
+                                    {{ currentPayment.createdAt|date('d/m/Y à H:i') }}
+                                </p>
+
+                                {% if currentPayment.paidAt %}
+                                    <p class="mt-1 text-xs text-emerald-700">
+                                        Confirmé le :
+                                        {{ currentPayment.paidAt|date('d/m/Y à H:i') }}
+                                    </p>
+                                {% endif %}
+                            </div>
+
+                            <div class="sm:text-right">
+
+                                <p class="text-lg font-bold text-stone-800">
+                                    {{ currentPayment.amount|number_format(0, ',', ' ') }} Ar
+                                </p>
+
+                                {% if currentPayment.status == 'paid' %}
+
+                                    <span class="mt-1 inline-flex rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
+                                        Payé
+                                    </span>
+
+                                {% elseif currentPayment.status == 'failed' %}
+
+                                    <span class="mt-1 inline-flex rounded-full bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700">
+                                        Échoué
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="mt-1 inline-flex rounded-full bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700">
+                                        En attente
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+                        {# Confirmation du paiement cash #}
+                        {% if currentPayment.method == 'cash_balance'
+                            and currentPayment.status == 'pending'
+                        %}
+
+                            <div class="mt-4 border-t border-stone-100 pt-4">
+
+                                <p class="text-sm leading-6 text-stone-600">
+                                    Le client a demandé un règlement en espèces.
+                                    Vérifiez que le livreur a réellement reçu le montant
+                                    avant de confirmer ce paiement.
+                                </p>
+
+                                <form
+                                    method="POST"
+                                    action="{{ path('admin_orders_confirm_cash_payment', {
+                                        orderNumber: order.orderNumber,
+                                        paymentId: currentPayment.id
+                                    }) }}"
+                                    class="mt-4"
+                                    onsubmit="return confirm('Confirmer que le montant en espèces a bien été reçu ?');"
+                                >
+
+                                    <input
+                                        type="hidden"
+                                        name="_token"
+                                        value="{{ csrf_token('confirm_cash_balance_' ~ currentPayment.id) }}"
+                                    >
+
+                                    <button
+                                        type="submit"
+                                        class="w-full rounded-xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800 sm:w-auto"
+                                    >
+                                        Confirmer la réception du paiement
+                                    </button>
+
+                                </form>
+
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+                {% else %}
+
+                    <p class="rounded-xl bg-stone-50 p-4 text-sm text-stone-500">
+                        Aucun paiement enregistré.
+                    </p>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+
+        {# Modification du statut de la commande #}
+        <div class="rounded-2xl border border-stone-200 bg-white p-6">
+
+            <div>
+                <h2 class="font-semibold text-stone-800">
+                    Gestion du statut
+                </h2>
+
+                <p class="mt-1 text-sm text-stone-500">
+                    Modifiez l'état de traitement de cette commande.
+                </p>
+            </div>
+
+            <form
+                method="POST"
+                action="{{ path('admin_orders_update_status', {
+                orderNumber: order.orderNumber
+            }) }}"
+                class="mt-5 flex flex-col gap-4 sm:flex-row sm:items-end"
+            >
+
+                <input
+                    type="hidden"
+                    name="_token"
+                    value="{{ csrf_token('update_order_status_' ~ order.orderNumber) }}"
+                >
+
+                <div class="flex-1">
+
+                    <label
+                        for="status"
+                        class="mb-2 block text-sm font-medium text-stone-700"
+                    >
+                        Nouveau statut
+                    </label>
+
+                    <select
+                        id="status"
+                        name="status"
+                        required
+                        class="w-full rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm outline-none transition focus:border-[#B08D67] focus:bg-white"
+                    >
+
+                        <option value="pending" {{ status == 'pending' ? 'selected' : '' }}>
+                            En attente
+                        </option>
+
+                        <option value="confirmed" {{ status == 'confirmed' ? 'selected' : '' }}>
+                            Confirmée
+                        </option>
+
+                        <option value="processing" {{ status == 'processing' ? 'selected' : '' }}>
+                            En préparation
+                        </option>
+
+                        <option value="shipped" {{ status == 'shipped' ? 'selected' : '' }}>
+                            Expédiée
+                        </option>
+
+                        <option value="delivered" {{ status == 'delivered' ? 'selected' : '' }}>
+                            Livrée
+                        </option>
+
+                        <option value="cancelled" {{ status == 'cancelled' ? 'selected' : '' }}>
+                            Annulée
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <button
+                    type="submit"
+                    class="rounded-xl bg-[#292524] px-6 py-3 text-sm font-medium text-white transition hover:bg-[#B08D67]"
+                >
+                    Enregistrer le statut
+                </button>
+
+            </form>
+
+        </div>
+
+        {# Produits commandés #}
+        <div class="overflow-hidden rounded-2xl border border-stone-200 bg-white">
+
+            <div class="border-b border-stone-100 p-6">
+
+                <h2 class="font-semibold text-stone-800">
+                    Produits commandés
+                </h2>
+
+                <p class="mt-1 text-sm text-stone-500">
+                    Liste des articles inclus dans cette commande.
+                </p>
+
+            </div>
+
+            <div class="divide-y divide-stone-100">
+
+                {% for item in order.orderItems %}
+
+                    {% set product = item.product %}
+                    {% set productImage = product.mainImage %}
+
+                    {% set matchingColorImage = null %}
+                    {% set primaryImage = null %}
+                    {% set firstImage = null %}
+
+                    {# Rechercher une image correspondant à la couleur commandée #}
+                    {% for image in product.images %}
+
+                        {% if firstImage is null %}
+                            {% set firstImage = image.imagePath %}
+                        {% endif %}
+
+                        {% if image.isPrimary %}
+                            {% set primaryImage = image.imagePath %}
+                        {% endif %}
+
+                        {% if item.variant and item.variant.color and image.color %}
+                            {% if image.color|trim|lower == item.variant.color|trim|lower %}
+                                {% set matchingColorImage = image.imagePath %}
+                            {% endif %}
+                        {% endif %}
+
+                    {% endfor %}
+
+                    {# Choisir l'image selon la priorité #}
+                    {% if matchingColorImage %}
+                        {% set productImage = matchingColorImage %}
+                    {% elseif primaryImage %}
+                        {% set productImage = primaryImage %}
+                    {% elseif firstImage %}
+                        {% set productImage = firstImage %}
+                    {% endif %}
+
+                    <div class="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+
+                        <div class="flex items-center gap-4">
+
+                            {# Image du produit #}
+                            {% if productImage %}
+
+                                <img
+                                    src="{{ asset(productImage) }}"
+                                    alt="{{ product.name }}"
+                                    class="h-20 w-20 shrink-0 rounded-xl border border-stone-200 bg-stone-50 object-cover"
+                                >
+
+                            {% else %}
+
+                                <div class="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-stone-100 text-xs text-stone-400">
+                                    Sans image
+                                </div>
+
+                            {% endif %}
+
+                            <div>
+
+                                <p class="font-medium text-stone-800">
+                                    {{ product.name }}
+                                </p>
+
+                                {% if item.variant %}
+
+                                    <p class="mt-1 text-sm text-stone-500">
+
+                                        {% if item.variant.color %}
+                                            Couleur : {{ item.variant.color }}
+                                        {% endif %}
+
+                                        {% if item.variant.size %}
+                                            | Taille : {{ item.variant.size }}
+                                        {% endif %}
+
+                                    </p>
+
+                                {% endif %}
+
+                                <p class="mt-1 text-sm text-stone-500">
+                                    Quantité : {{ item.quantity }}
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                        {# Prix du produit #}
+                        <div class="text-sm sm:text-right">
+
+                            <p class="text-stone-500">
+                                {{ item.unitPrice|number_format(0, ',', ' ') }} Ar / unité
+                            </p>
+
+                            <p class="mt-1 font-semibold text-stone-800">
+                                {{ (item.unitPrice * item.quantity)|number_format(0, ',', ' ') }} Ar
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                {% else %}
+
+                    <p class="p-6 text-sm text-stone-500">
+                        Aucun produit dans cette commande.
+                    </p>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+        {# Récapitulatif financier #}
+        <div class="ml-auto max-w-md rounded-2xl border border-stone-200 bg-white p-6">
+
+            <h2 class="font-semibold text-stone-800">
+                Récapitulatif de la commande
+            </h2>
+
+            <div class="mt-5 space-y-3 text-sm">
+
+                <div class="flex justify-between text-stone-600">
+                    <span>Sous-total</span>
+
+                    <span>
+                        {{ subtotal|number_format(0, ',', ' ') }} Ar
+                    </span>
+                </div>
+
+                <div class="flex justify-between text-stone-600">
+                    <span>Frais de livraison</span>
+
+                    <span>
+                        {{ deliveryFee|number_format(0, ',', ' ') }} Ar
+                    </span>
+                </div>
+
+                <div class="flex justify-between border-t border-stone-100 pt-4 font-semibold text-stone-800">
+                    <span>Total</span>
+
+                    <span>
+                        {{ order.totalAmount|number_format(0, ',', ' ') }} Ar
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+{% endblock %}

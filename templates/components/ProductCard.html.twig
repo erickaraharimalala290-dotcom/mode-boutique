@@ -1,0 +1,98 @@
+<article class="group relative overflow-hidden rounded-2xl border border-stone-200/80 bg-white shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-xl">
+
+    {# Image du produit #}
+    <div class="relative aspect-[4/5] overflow-hidden bg-stone-100">
+
+        {% if image is not empty %}
+            <img
+                src="{{ image }}"
+                alt="{{ name }}"
+                loading="lazy"
+                class="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+            >
+        {% else %}
+            <div class="flex h-full items-center justify-center text-sm text-stone-500">
+                Image du produit
+            </div>
+        {% endif %}
+
+        {# Dégradé discret au survol #}
+        <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"></div>
+
+        {# Badge existant : Nouveau ou En vedette #}
+        {% if badge %}
+            <span class="absolute left-3 top-3 rounded-full bg-stone-900 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-white shadow-sm">
+                {{ badge }}
+            </span>
+        {% endif %}
+
+        {# Badge de réduction #}
+        {% if discountBadge|default('') %}
+            <span class="absolute left-3 {% if badge %}top-12{% else %}top-3{% endif %} rounded-full bg-[#B08D67] px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-white shadow-sm">
+                {{ discountBadge }}
+            </span>
+        {% endif %}
+
+        {# Formulaire d'ajout aux favoris #}
+        <form
+            method="post"
+            action="{{ path('app_favorite_add', {id: productId}) }}"
+            class="absolute right-3 top-3"
+        >
+            {# Protection CSRF #}
+            <input
+                type="hidden"
+                name="_token"
+                value="{{ csrf_token('favorite_add_' ~ productId) }}"
+            >
+
+            <button
+                type="submit"
+                class="flex h-10 w-10 items-center justify-center rounded-full border border-stone-200/70 bg-white/95 text-stone-700 shadow-sm backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-stone-900 hover:text-white"
+                aria-label="Ajouter {{ name }} aux favoris"
+            >
+                {{ ux_icon('lucide:heart', {class: 'h-5 w-5'}) }}
+            </button>
+        </form>
+
+    </div>
+
+    {# Informations du produit #}
+    <div class="space-y-3 p-4 sm:p-5">
+
+        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">
+            {{ category }}
+        </p>
+
+        <h3 class="line-clamp-2 min-h-12 font-serif text-lg font-semibold leading-snug text-stone-900 transition-colors duration-300 group-hover:text-stone-600">
+            <a href="{{ href }}">
+                {{ name }}
+            </a>
+        </h3>
+
+        {# Prix actuel et ancien prix #}
+        <div class="flex flex-wrap items-center gap-2">
+            <span class="text-base font-bold text-stone-900">
+                {{ price }}
+            </span>
+
+            {% if oldPrice %}
+                <del class="text-sm text-stone-400">
+                    {{ oldPrice }}
+                </del>
+            {% endif %}
+        </div>
+
+        {# Bouton Voir le produit #}
+        <div class="border-t border-stone-100 pt-3">
+            <twig:Button
+                label="Voir le produit"
+                variant="outline"
+                size="sm"
+                href="{{ href }}"
+            />
+        </div>
+
+    </div>
+
+</article>

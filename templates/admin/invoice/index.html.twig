@@ -1,0 +1,252 @@
+{% extends 'layouts/admin-layout.html.twig' %}
+
+{% block title %}Gestion des factures | ModeBoutique{% endblock %}
+
+{% block admin_content %}
+
+    <div class="space-y-8">
+
+        {# En-tête de la page #}
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.25em] text-[#B08D67]">
+                Boutique
+            </p>
+
+            <h1 class="mt-2 text-2xl font-semibold text-stone-800 sm:text-3xl">
+                Gestion des factures
+            </h1>
+
+            <p class="mt-2 text-sm text-stone-500">
+                Consultez les factures générées pour les commandes de vos clients.
+            </p>
+        </div>
+
+        {# Statistiques #}
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+
+            <div class="rounded-2xl border border-stone-200 bg-white p-5">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm text-stone-500">Total des factures</p>
+
+                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F5F0E8] text-xl text-[#B08D67]">
+                        ▤
+                    </span>
+                </div>
+
+                <p class="mt-4 text-3xl font-semibold text-stone-800">
+                    {{ stats.total }}
+                </p>
+
+                <p class="mt-2 text-xs text-stone-400">
+                    Toutes les factures enregistrées
+                </p>
+            </div>
+
+            <div class="rounded-2xl border border-stone-200 bg-white p-5">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm text-stone-500">Montant total facturé</p>
+
+                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-xl text-emerald-600">
+                        Ar
+                    </span>
+                </div>
+
+                <p class="mt-4 text-2xl font-semibold text-stone-800">
+                    {{ stats.amount|number_format(0, ',', ' ') }} Ar
+                </p>
+
+                <p class="mt-2 text-xs text-stone-400">
+                    Montant total des commandes associées aux factures
+                </p>
+            </div>
+
+        </div>
+
+        {# Tableau des factures #}
+        <div class="overflow-hidden rounded-2xl border border-stone-200 bg-white">
+
+            {# Recherche #}
+            <div class="border-b border-stone-100 p-5 sm:p-6">
+
+                <div>
+                    <h2 class="font-semibold text-stone-800">
+                        Toutes les factures
+                    </h2>
+
+                    <p class="mt-1 text-sm text-stone-500">
+                        Recherchez une facture, une commande ou un client.
+                    </p>
+                </div>
+
+                <div class="mt-5">
+                    <input
+                        id="invoice-search"
+                        type="search"
+                        placeholder="Rechercher une référence ou un client..."
+                        class="w-full rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm outline-none transition focus:border-[#B08D67] focus:bg-white"
+                    >
+                </div>
+            </div>
+
+            {# Liste des factures #}
+            <div class="overflow-x-auto">
+
+                <table class="w-full min-w-[900px] text-left text-sm">
+
+                    <thead class="bg-stone-50 text-xs uppercase tracking-wider text-stone-500">
+                        <tr>
+                            <th class="px-6 py-4 font-medium">N° Facture</th>
+                            <th class="px-6 py-4 font-medium">Commande</th>
+                            <th class="px-6 py-4 font-medium">Client</th>
+                            <th class="px-6 py-4 font-medium">Date d'émission</th>
+                            <th class="px-6 py-4 font-medium">Montant</th>
+                            <th class="px-6 py-4 text-right font-medium">Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody class="divide-y divide-stone-100" id="invoices-table">
+
+                        {% for invoice in invoices %}
+
+                            <tr
+                                class="invoice-row transition hover:bg-[#F5F0E8]/40"
+                                data-reference="{{ invoice.invoiceNumber|lower }}"
+                                data-order="{{ invoice.orderNumber|lower }}"
+                                data-client="{{ invoice.client|lower }}"
+                            >
+
+                                {# Référence de la facture #}
+                                <td class="px-6 py-5">
+                                    <a
+                                        href="{{ path('admin_invoices_show', {
+                                        invoiceNumber: invoice.invoiceNumber
+                                        }) }}"
+                                        class="break-all font-semibold text-[#B08D67] transition hover:text-stone-900 hover:underline"
+                                    >
+                                        {{ invoice.invoiceNumber }}
+                                    </a>
+
+                                    <p class="mt-1 text-xs text-stone-400">
+                                        ModeBoutique
+                                    </p>
+                                </td>
+
+                                {# Référence de la commande #}
+                                <td class="whitespace-nowrap px-6 py-5">
+                                    <span class="font-medium text-stone-700">
+                                        {{ invoice.orderNumber }}
+                                    </span>
+                                </td>
+
+                                {# Informations du client #}
+                                <td class="px-6 py-5">
+                                    <p class="font-medium text-stone-800">
+                                        {{ invoice.client }}
+                                    </p>
+                                </td>
+
+                                {# Date d'émission #}
+                                <td class="whitespace-nowrap px-6 py-5 text-stone-500">
+                                    {{ invoice.issuedAt ? invoice.issuedAt|date('d/m/Y à H:i') : '—' }}
+                                </td>
+
+                                {# Montant de la facture #}
+                                <td class="whitespace-nowrap px-6 py-5 font-semibold text-stone-800">
+                                    {{ invoice.total|number_format(0, ',', ' ') }} Ar
+                                </td>
+
+                                {# Action : consulter la facture #}
+                                <td class="px-6 py-5 text-right">
+                                    <a
+                                        href="{{ path('admin_invoices_show', {
+                                        invoiceNumber: invoice.invoiceNumber
+                                        }) }}"
+                                        class="inline-flex items-center whitespace-nowrap rounded-lg border border-stone-200 px-3 py-2 text-xs font-medium text-stone-600 transition hover:border-[#B08D67] hover:text-[#B08D67]"
+                                    >
+                                        Voir la facture
+                                        <span class="ml-1">→</span>
+                                    </a>
+                                </td>
+
+                            </tr>
+
+                        {% else %}
+
+                            <tr>
+                                <td colspan="6" class="px-6 py-12 text-center">
+                                    <p class="font-medium text-stone-700">
+                                        Aucune facture enregistrée
+                                    </p>
+
+                                    <p class="mt-2 text-sm text-stone-500">
+                                        Les nouvelles factures apparaîtront ici après la validation des commandes.
+                                    </p>
+                                </td>
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            {# Message lorsque la recherche ne donne aucun résultat #}
+            <div id="invoices-empty" class="hidden px-6 py-12 text-center">
+                <p class="font-medium text-stone-700">
+                    Aucune facture trouvée
+                </p>
+
+                <p class="mt-2 text-sm text-stone-500">
+                    Essayez une autre recherche.
+                </p>
+            </div>
+
+            {# Pied du tableau #}
+            <div class="border-t border-stone-100 px-6 py-4">
+                <p class="text-xs text-stone-400">
+                    {{ stats.total }} facture(s) enregistrée(s).
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+
+    {# Recherche des factures #}
+    <script>
+        const invoiceSearch = document.getElementById("invoice-search");
+        const invoiceRows = document.querySelectorAll(".invoice-row");
+        const invoicesEmpty = document.getElementById("invoices-empty");
+
+        invoiceSearch.addEventListener("input", function () {
+            const search = this.value.toLowerCase().trim();
+
+            let visibleCount = 0;
+
+            invoiceRows.forEach((row) => {
+                const reference = row.dataset.reference;
+                const order = row.dataset.order;
+                const client = row.dataset.client;
+
+                const visible =
+                    reference.includes(search) ||
+                    order.includes(search) ||
+                    client.includes(search);
+
+                row.classList.toggle("hidden", !visible);
+
+                if (visible) {
+                    visibleCount++;
+                }
+            });
+
+            invoicesEmpty.classList.toggle(
+                "hidden",
+                visibleCount > 0 || invoiceRows.length === 0,
+            );
+        });
+    </script>
+
+{% endblock %}

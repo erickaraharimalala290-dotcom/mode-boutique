@@ -1,0 +1,46 @@
+{% extends 'layouts/auth-layout.html.twig' %}
+
+{% block title %}Vérifiez votre e-mail | ModeBoutique{% endblock %}
+
+{% block body %}
+<div class="min-h-screen flex items-center justify-center bg-cream px-4 py-12">
+    <div class="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-lg">
+
+        <a href="{{ path('home') }}" class="mb-6 block text-2xl font-bold text-ink">
+            Mode<span class="text-brand">Boutique</span>
+        </a>
+
+        <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-cream text-brand">
+            <span class="text-3xl">✉</span>
+        </div>
+
+        <h1 class="mb-4 text-2xl font-semibold text-ink">
+            Vérifiez votre e-mail
+        </h1>
+
+        <p class="mb-4 text-sm leading-6 text-gray-600">
+            Si un compte correspond à cette adresse e-mail, un message contenant
+            un lien de réinitialisation vient d'être envoyé.
+        </p>
+
+        <p class="mb-6 text-sm text-gray-600">
+            Ce lien expirera dans
+            {{ resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle', 'fr') }}.
+        </p>
+
+        <p class="mb-6 text-sm text-gray-600">
+            Vous n'avez rien reçu ? Vérifiez votre dossier spam ou réessayez.
+        </p>
+
+        <a href="{{ path('app_forgot_password_request') }}"
+           class="block w-full rounded-xl bg-brand px-5 py-3 font-semibold text-white transition hover:opacity-90">
+            Réessayer
+        </a>
+
+        <a href="{{ path('app_login') }}"
+           class="mt-5 inline-block text-sm font-medium text-brand hover:underline">
+            Retour à la connexion
+        </a>
+    </div>
+</div>
+{% endblock %}

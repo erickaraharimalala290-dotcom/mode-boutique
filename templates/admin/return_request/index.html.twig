@@ -1,0 +1,433 @@
+{% extends 'layouts/admin-layout.html.twig' %}
+
+{% block title %}Gestion des échanges | ModeBoutique{% endblock %}
+
+{% block admin_content %}
+
+    <div class="space-y-8">
+
+        {# En-tête de la page #}
+        <div class="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+            <div>
+                <p class="text-xs font-bold uppercase tracking-[0.2em] text-[#B08D67]">
+                    Service après-vente
+                </p>
+
+                <h1 class="mt-2 text-2xl font-bold tracking-tight text-[#292524] sm:text-3xl">
+                    Gestion des échanges
+                </h1>
+
+                <p class="mt-2 max-w-2xl text-sm leading-6 text-[#78716C]">
+                    Consultez les demandes d'échange, validez les changements de produits et suivez leur traitement.
+                </p>
+            </div>
+
+            <div class="inline-flex items-center gap-2 self-start rounded-full border border-[#E7DED2] bg-white px-4 py-2 text-xs font-semibold text-[#57534E] sm:self-auto">
+                <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                Gestion des échanges active
+            </div>
+        </div>
+
+        {# Messages flash #}
+        {% for message in app.flashes('success') %}
+            <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                {{ message }}
+            </div>
+        {% endfor %}
+
+        {% for message in app.flashes('error') %}
+            <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {{ message }}
+            </div>
+        {% endfor %}
+
+        {# Cartes statistiques #}
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+
+            {# Total #}
+            <div class="rounded-2xl border border-[#E7DED2] bg-white p-5 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm font-medium text-[#78716C]">Total échanges</p>
+                    <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-[#F5F0E8] text-xl text-[#B08D67]">
+                        ▤
+                    </span>
+                </div>
+                <p class="mt-5 text-3xl font-bold text-[#292524]">
+                    {{ stats.total }}
+                </p>
+                <p class="mt-1 text-xs text-[#A8A29E]">Demandes enregistrées</p>
+            </div>
+
+            {# En attente #}
+            <div class="rounded-2xl border border-[#E7DED2] bg-white p-5 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm font-medium text-[#78716C]">En attente</p>
+                    <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-xl text-amber-600">
+                        ◷
+                    </span>
+                </div>
+                <p class="mt-5 text-3xl font-bold text-amber-600">
+                    {{ stats.pending }}
+                </p>
+                <p class="mt-1 text-xs text-[#A8A29E]">À examiner</p>
+            </div>
+
+            {# Approuvées #}
+            <div class="rounded-2xl border border-[#E7DED2] bg-white p-5 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm font-medium text-[#78716C]">Approuvées</p>
+                    <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-xl text-blue-600">
+                        ✓
+                    </span>
+                </div>
+                <p class="mt-5 text-3xl font-bold text-blue-700">
+                    {{ stats.approved }}
+                </p>
+                <p class="mt-1 text-xs text-[#A8A29E]">Demandes validées</p>
+            </div>
+
+            {# Articles reçus #}
+            <div class="rounded-2xl border border-[#E7DED2] bg-white p-5 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm font-medium text-[#78716C]">Articles reçus</p>
+                    <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50 text-xl text-violet-600">
+                        ↩
+                    </span>
+                </div>
+                <p class="mt-5 text-3xl font-bold text-violet-700">
+                    {{ stats.received }}
+                </p>
+                <p class="mt-1 text-xs text-[#A8A29E]">Articles à traiter</p>
+            </div>
+
+            {# Refusées #}
+            <div class="rounded-2xl border border-[#E7DED2] bg-white p-5 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm font-medium text-[#78716C]">Refusées</p>
+                    <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-xl text-red-600">
+                        ×
+                    </span>
+                </div>
+                <p class="mt-5 text-3xl font-bold text-red-600">
+                    {{ stats.rejected }}
+                </p>
+                <p class="mt-1 text-xs text-[#A8A29E]">Demandes refusées</p>
+            </div>
+
+            {# Terminées #}
+            <div class="rounded-2xl border border-[#E7DED2] bg-white p-5 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm font-medium text-[#78716C]">Terminées</p>
+                    <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-xl text-emerald-600">
+                        ✓
+                    </span>
+                </div>
+                <p class="mt-5 text-3xl font-bold text-emerald-700">
+                    {{ stats.completed }}
+                </p>
+                <p class="mt-1 text-xs text-[#A8A29E]">Échanges effectués</p>
+            </div>
+
+        </div>
+
+        {# Résumé des échanges #}
+        <div class="overflow-hidden rounded-2xl bg-[#292524] p-6 text-white shadow-sm sm:p-7">
+            <div class="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+
+                <div class="flex items-start gap-4">
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/10 text-2xl text-[#D6B995]">
+                        ↩
+                    </div>
+
+                    <div>
+                        <p class="text-sm font-semibold text-white">
+                            Suivi des échanges
+                        </p>
+                        <p class="mt-1 max-w-xl text-sm leading-6 text-stone-300">
+                            Examinez chaque demande, vérifiez les articles et validez les échanges selon les conditions de votre boutique.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="border-t border-white/10 pt-5 sm:border-l sm:border-t-0 sm:pl-8 sm:pt-0">
+                    <p class="text-xs font-medium text-stone-400">
+                        Demandes à examiner
+                    </p>
+                    <p class="mt-2 text-2xl font-bold text-[#D6B995]">
+                        {{ stats.pending }}
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+        {# Tableau des demandes #}
+        <section class="overflow-hidden rounded-2xl border border-[#E7DED2] bg-white shadow-sm">
+
+            <div class="flex flex-col gap-3 border-b border-[#F0EBE4] px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                <div>
+                    <h2 class="text-lg font-bold text-[#292524]">
+                        Toutes les demandes d'échange
+                    </h2>
+                    <p class="mt-1 text-sm text-[#78716C]">
+                        Consultez les articles concernés et gérez le traitement des échanges.
+                    </p>
+                </div>
+
+                <span class="inline-flex w-fit items-center rounded-full bg-[#F5F0E8] px-3 py-1.5 text-xs font-semibold text-[#8A6848]">
+                    {{ stats.total }} demande(s)
+                </span>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[1250px] text-left text-sm">
+
+                    <thead class="bg-[#FAF8F5] text-[11px] font-bold uppercase tracking-wider text-[#78716C]">
+                        <tr>
+                            <th class="px-6 py-4">Référence</th>
+                            <th class="px-6 py-4">Commande</th>
+                            <th class="px-6 py-4">Article</th>
+                            <th class="px-6 py-4">Type</th>
+                            <th class="px-6 py-4">Motif</th>
+                            <th class="px-6 py-4">Date</th>
+                            <th class="px-6 py-4">Statut</th>
+                            <th class="px-6 py-4">Gestion</th>
+                        </tr>
+                    </thead>
+
+                    <tbody class="divide-y divide-[#F0EBE4]">
+
+                        {% for returnRequest in returnRequests %}
+
+                            {% set item = returnRequest.orderItem %}
+                            {% set order = item.customerOrder %}
+
+                            <tr class="align-top transition hover:bg-[#FAF8F5]">
+
+                                {# Référence de la demande #}
+                                <td class="px-6 py-5">
+                                    <p class="font-bold text-[#292524]">
+                                        {{ returnRequest.requestNumber }}
+                                    </p>
+                                    <p class="mt-1 text-xs text-[#A8A29E]">
+                                        Quantité : {{ returnRequest.quantity }}
+                                    </p>
+                                </td>
+
+                                {# Référence de commande #}
+                                <td class="px-6 py-5">
+                                    <p class="font-semibold text-[#292524]">
+                                        {{ order.orderNumber }}
+                                    </p>
+                                    <p class="mt-1 text-xs text-[#A8A29E]">
+                                        {{ order.createdAt|date('d/m/Y') }}
+                                    </p>
+                                </td>
+
+                                {# Article concerné #}
+                                <td class="max-w-xs px-6 py-5">
+                                    <p class="font-semibold text-[#292524]">
+                                        {{ item.product.name }}
+                                    </p>
+
+                                    {% if item.variant %}
+                                        <p class="mt-1 text-xs text-[#78716C]">
+                                            {% if item.variant.color %}
+                                                Couleur : {{ item.variant.color }}
+                                            {% endif %}
+
+                                            {% if item.variant.size %}
+                                                · Taille : {{ item.variant.size }}
+                                            {% endif %}
+                                        </p>
+                                    {% endif %}
+
+                                    {% if returnRequest.replacementVariant %}
+                                        <p class="mt-2 text-xs font-semibold text-blue-700">
+                                            Nouveau choix :
+                                            {{ returnRequest.replacementProduct.name }}
+                                        </p>
+                                        <p class="mt-1 text-xs text-[#78716C]">
+                                            {% if returnRequest.replacementVariant.color %}
+                                                {{ returnRequest.replacementVariant.color }}
+                                            {% endif %}
+                                            {% if returnRequest.replacementVariant.size %}
+                                                · {{ returnRequest.replacementVariant.size }}
+                                            {% endif %}
+                                        </p>
+                                    {% endif %}
+                                </td>
+
+                                {# Type de demande #}
+                                <td class="px-6 py-5">
+                                    <span class="inline-flex whitespace-nowrap rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700">
+                                        Échange
+                                    </span>
+                                </td>
+
+                                {# Motif #}
+                                <td class="max-w-[180px] px-6 py-5">
+                                    <p class="font-medium text-[#57534E]">
+                                        {{ returnRequest.reason }}
+                                    </p>
+
+                                    {% if returnRequest.description %}
+                                        <p class="mt-1 line-clamp-2 text-xs leading-5 text-[#A8A29E]">
+                                            {{ returnRequest.description }}
+                                        </p>
+                                    {% endif %}
+                                </td>
+
+                                {# Date de la demande #}
+                                <td class="whitespace-nowrap px-6 py-5 text-xs text-[#78716C]">
+                                    {{ returnRequest.requestedAt|date('d/m/Y H:i') }}
+                                </td>
+
+                                {# Statut #}
+                                <td class="px-6 py-5">
+                                    {% if returnRequest.status == 'pending' %}
+                                        <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700">
+                                            <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+                                            En attente
+                                        </span>
+
+                                    {% elseif returnRequest.status == 'approved' %}
+                                        <span class="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700">
+                                            <span class="h-1.5 w-1.5 rounded-full bg-blue-500"></span>
+                                            Approuvée
+                                        </span>
+
+                                    {% elseif returnRequest.status == 'received' %}
+                                        <span class="inline-flex items-center gap-1.5 rounded-full bg-violet-50 px-3 py-1.5 text-xs font-semibold text-violet-700">
+                                            <span class="h-1.5 w-1.5 rounded-full bg-violet-500"></span>
+                                            Article reçu
+                                        </span>
+
+                                    {% elseif returnRequest.status == 'rejected' %}
+                                        <span class="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700">
+                                            <span class="h-1.5 w-1.5 rounded-full bg-red-500"></span>
+                                            Refusée
+                                        </span>
+
+                                    {% elseif returnRequest.status == 'completed' %}
+                                        <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
+                                            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                                            Terminée
+                                        </span>
+
+                                    {% else %}
+                                        <span class="rounded-full bg-stone-100 px-3 py-1.5 text-xs text-stone-600">
+                                            {{ returnRequest.status }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                {# Formulaire de traitement #}
+                                <td class="px-4 py-5 align-top">
+                                    <details class="group w-56">
+                                        <summary class="flex cursor-pointer list-none items-center justify-center gap-2 rounded-lg bg-[#292524] px-3 py-2.5 text-xs font-semibold text-white transition hover:bg-[#44403C]">
+                                            <span>Traiter la demande</span>
+                                            <span class="transition group-open:rotate-180">⌄</span>
+                                        </summary>
+
+                                        <form
+                                            method="POST"
+                                            action="{{ path('admin_return_requests_update', {id: returnRequest.id}) }}"
+                                            class="mt-3 space-y-2 rounded-xl border border-[#E7DED2] bg-[#FAF8F5] p-3"
+                                        >
+                                            <input
+                                                type="hidden"
+                                                name="_token"
+                                                value="{{ csrf_token('update_return_request_' ~ returnRequest.id) }}"
+                                            >
+
+                                            <div>
+                                                <label class="mb-1 block text-[11px] font-semibold text-[#57534E]">
+                                                    Décision
+                                                </label>
+
+                                                <select
+                                                    name="status"
+                                                    required
+                                                    class="w-full min-w-0 rounded-lg border border-[#E7DED2] bg-white px-3 py-2 text-xs text-[#292524] outline-none focus:border-[#B08D67]"
+                                                >
+                                                    {% if returnRequest.status == 'pending' %}
+                                                        <option value="pending" selected>En attente</option>
+                                                        <option value="approved">Approuvée</option>
+                                                        <option value="rejected">Refusée</option>
+
+                                                    {% elseif returnRequest.status == 'approved' %}
+                                                        <option value="approved" selected>Approuvée</option>
+                                                        <option value="received">Article reçu et vérifié</option>
+
+                                                    {% elseif returnRequest.status == 'received' %}
+                                                        <option value="received" selected>Article reçu et vérifié</option>
+                                                        <option value="completed">Terminée</option>
+
+                                                    {% elseif returnRequest.status == 'rejected' %}
+                                                        <option value="rejected" selected>Refusée</option>
+
+                                                    {% elseif returnRequest.status == 'completed' %}
+                                                        <option value="completed" selected>Terminée</option>
+                                                    {% endif %}
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label class="mb-1 block text-[11px] font-semibold text-[#57534E]">
+                                                    Note administrative
+                                                </label>
+
+                                                <textarea
+                                                    name="adminNote"
+                                                    rows="3"
+                                                    placeholder="Ajouter une note..."
+                                                    class="w-full min-w-0 rounded-lg border border-[#E7DED2] bg-white px-3 py-2 text-xs text-[#292524] outline-none focus:border-[#B08D67]"
+                                                >{{ returnRequest.adminNote }}</textarea>
+                                            </div>
+
+                                            <button
+                                                type="submit"
+                                                class="w-full rounded-lg bg-[#B08D67] px-3 py-2.5 text-xs font-semibold text-white transition hover:bg-[#96734F]"
+                                            >
+                                                Enregistrer
+                                            </button>
+                                        </form>
+                                    </details>
+                                </td>
+
+                            </tr>
+
+                        {% else %}
+                            <tr>
+                                <td colspan="8" class="px-6 py-16 text-center">
+                                    <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#F5F0E8] text-2xl text-[#B08D67]">
+                                        ↩
+                                    </div>
+
+                                    <p class="mt-4 font-semibold text-[#292524]">
+                                        Aucune demande d'échange
+                                    </p>
+
+                                    <p class="mt-2 text-sm text-[#A8A29E]">
+                                        Les demandes d'échange apparaîtront ici.
+                                    </p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="border-t border-[#F0EBE4] bg-[#FAF8F5] px-5 py-3 sm:px-6">
+                <p class="text-xs text-[#A8A29E]">
+                    Chaque décision et note administrative est enregistrée individuellement pour assurer le suivi des échanges.
+                </p>
+            </div>
+
+        </section>
+
+    </div>
+
+{% endblock %}

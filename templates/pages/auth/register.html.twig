@@ -1,0 +1,222 @@
+
+{% extends 'layouts/auth-layout.html.twig' %}
+
+{% block title %}Créer un compte | ModeBoutique{% endblock %}
+
+{% block body %}
+    <section class="min-h-screen bg-cream px-4 py-12 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-6xl">
+
+            {# Retour vers l'accueil #}
+            <div class="mb-8">
+                <a
+                    href="{{ path('home') }}"
+                    class="inline-flex items-center gap-2 text-sm font-medium text-ink-soft transition hover:text-brand"
+                >
+                    <span aria-hidden="true">&larr;</span>
+                    Retour à l'accueil
+                </a>
+            </div>
+
+            <div class="grid overflow-hidden rounded-3xl border border-beige bg-white shadow-sm lg:grid-cols-2">
+
+            
+                {# Partie présentation avec image de fond #}
+                <div class="relative hidden min-h-[650px] flex-col justify-between overflow-hidden p-10 text-white lg:flex xl:p-14">
+
+                    {# Image de fond #}
+                    <img
+                        src="{{ asset('images/products/robe-soirée-marron.jpg') }}"
+                        alt="Collection ModeBoutique"
+                        class="absolute inset-0 h-full w-full object-cover object-center"
+                    >
+
+                    {# Voile léger pour garder le texte lisible #}
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#292524]/85 via-[#292524]/25 to-[#B08D67]/10"></div>
+
+                    {# Contenu au-dessus de l'image #}
+                    <div class="relative z-10">
+                        <a
+                            href="{{ path('home') }}"
+                            class="inline-block text-2xl font-bold tracking-wide"
+                        >
+                            Mode<span class="text-[#D6B58A]">Boutique</span>
+                        </a>
+
+                        <p class="mt-3 text-sm leading-6 text-white/90">
+                            Votre boutique de mode, simplement.
+                        </p>
+                    </div>
+
+                    <div class="relative z-10 py-12">
+                        <span class="mb-4 inline-block rounded-full border border-white/40 bg-white/15 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] backdrop-blur-sm">
+                            Bienvenue chez ModeBoutique
+                        </span>
+
+                        <h1 class="max-w-md text-4xl font-bold leading-tight xl:text-5xl">
+                            Votre style commence ici.
+                        </h1>
+
+                        <p class="mt-6 max-w-md text-base leading-7 text-white/90">
+                            Découvrez des vêtements, des chaussures et des accessoires
+                            sélectionnés pour révéler votre style au quotidien.
+                        </p>
+                    </div>
+
+                    <div class="relative z-10 flex items-center justify-between gap-4 border-t border-white/30 pt-5">
+                        <p class="text-sm text-white/90">
+                            ModeBoutique — La mode pour tous.
+                        </p>
+                        <span class="text-xl text-[#D6B58A]" aria-hidden="true">✦</span>
+                    </div>
+
+                </div>
+
+
+                {# Formulaire d'inscription #}
+                <div class="p-6 sm:p-10 xl:p-14">
+
+                    <div class="mb-8">
+                        <p class="mb-2 text-sm font-semibold uppercase tracking-wider text-brand">
+                            Rejoignez-nous
+                        </p>
+
+                        <h2 class="text-3xl font-bold text-ink">
+                            Créer un compte
+                        </h2>
+
+                        <p class="mt-3 text-sm leading-6 text-ink-soft">
+                            Remplissez le formulaire ci-dessous pour créer votre compte ModeBoutique.
+                        </p>
+                    </div>
+
+                    {# Messages de confirmation et erreurs #}
+                    {% for message in app.flashes('success') %}
+                        <div
+                            role="status"
+                            class="mb-5 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-800"
+                        >
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+
+                    {% for message in app.flashes('verify_email_error') %}
+                        <div
+                            role="alert"
+                            class="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+                        >
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+
+                    {# {% if form_errors(registrationForm) %}
+                        <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-6 text-sm font-medium">
+                            {{ form_errors(registrationForm) }}
+                        </div>
+                    {% endif %} #}
+
+                    {{ form_start(registrationForm) }}
+
+                        {# Erreurs générales du formulaire #}
+                        {{ form_errors(registrationForm) }}
+
+                        {# Prénom #}
+                        <div class="mb-4">
+                            {{ form_label(registrationForm.firstname) }}
+                            {{ form_widget(registrationForm.firstname) }}
+
+                            <div class="mt-1 text-sm text-red-600">
+                                {{ form_errors(registrationForm.firstname) }}
+                            </div>
+                        </div>
+
+                        {# Nom #}
+                        <div class="mb-4">
+                            {{ form_label(registrationForm.lastname) }}
+                            {{ form_widget(registrationForm.lastname) }}
+
+                            <div class="mt-1 text-sm text-red-600">
+                                {{ form_errors(registrationForm.lastname) }}
+                            </div>
+                        </div>
+
+                        {# Adresse e-mail #}
+                        <div class="mb-4">
+                            {{ form_label(registrationForm.email) }}
+                            {{ form_widget(registrationForm.email) }}
+
+                            <div class="mt-1 text-sm text-red-600">
+                                {{ form_errors(registrationForm.email) }}
+                            </div>
+                        </div>
+
+                        {# Mot de passe #}
+                        <div class="mb-4">
+                            {{ form_label(registrationForm.plainPassword.first) }}
+                            {{ form_widget(registrationForm.plainPassword.first) }}
+
+                            <div class="mt-1 text-sm text-red-600">
+                                {{ form_errors(registrationForm.plainPassword.first) }}
+                            </div>
+                        </div>
+
+                        {# Confirmation du mot de passe #}
+                        <div class="mb-4">
+                            {{ form_label(registrationForm.plainPassword.second) }}
+                            {{ form_widget(registrationForm.plainPassword.second) }}
+
+                            <div class="mt-1 text-sm text-red-600">
+                                {{ form_errors(registrationForm.plainPassword.second) }}
+                            </div>
+
+                            {# Erreur si les deux mots de passe sont différents #}
+                            <div class="mt-1 text-sm text-red-600">
+                                {{ form_errors(registrationForm.plainPassword) }}
+                            </div>
+                        </div>
+
+                        {# Conditions d'utilisation #}
+                        <div class="mb-4">
+                            <div class="flex items-center gap-2">
+                                {{ form_widget(registrationForm.agreeTerms) }}
+                                {{ form_label(registrationForm.agreeTerms) }}
+                            </div>
+
+                            <div class="mt-1 text-sm text-red-600">
+                                {{ form_errors(registrationForm.agreeTerms) }}
+                            </div>
+                        </div>
+
+                        {# Bouton d'inscription #}
+                        <div class="mt-6">
+                            {{ form_widget(registrationForm.Submit, {
+                                attr: {
+                                    class: 'w-full rounded-xl bg-brand px-4 py-3 font-semibold text-white transition hover:opacity-90'
+                                }
+                            }) }}
+                        </div>
+
+                    {{ form_end(registrationForm) }}
+
+
+                    {# Lien vers la connexion #}
+                    <p class="mt-7 text-center text-sm text-ink-soft">
+                        Vous avez déjà un compte ?
+                        <a
+                            href="{{ path('app_login') }}"
+                            class="font-semibold text-brand underline-offset-4 transition hover:text-brand-dark hover:underline"
+                        >
+                            Se connecter
+                        </a>
+                    </p>
+
+                    <p class="mt-6 text-center text-xs leading-5 text-ink-soft">
+                        En créant votre compte, vous acceptez les conditions d'utilisation
+                        de ModeBoutique.
+                    </p>
+                
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

@@ -1,0 +1,160 @@
+{% extends 'layouts/auth-layout.html.twig' %}
+
+{% block title %}Mon profil | ModeBoutique{% endblock %}
+
+{% block body %}
+    <section class="min-h-screen bg-cream px-4 py-8 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-7xl">
+
+            <header class="mb-8 flex flex-wrap items-center justify-between gap-4">
+                <div>
+                    <a href="{{ path('home') }}" class="text-2xl font-bold text-ink">
+                        Mode<span class="text-brand">Boutique</span>
+                    </a>
+                    <p class="mt-1 text-sm text-ink-soft">Mon espace client / Mon profil</p>
+                </div>
+
+                <a
+                    href="{{ path('app_account') }}"
+                    class="rounded-full border border-beige bg-white px-5 py-3 text-sm font-semibold text-ink hover:border-brand hover:text-brand"
+                >
+                    ← Retour au Tableau de bord
+                </a>
+            </header>
+
+            <div class="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)]">
+
+                {# Navigation commune #}
+                {% include 'pages/account/_sidebar.html.twig' with {
+                activePage: 'profile'
+            } %}
+
+                {# Informations du client #}
+                <main class="min-w-0 space-y-6">
+
+                    <section class="rounded-3xl border border-beige bg-gradient-to-br from-[#FBF7F1] to-[#E8DCCB] p-7 sm:p-9">
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-dark">
+                            Mon compte
+                        </p>
+
+                        <h1 class="mt-3 text-3xl font-bold text-ink">
+                            Informations personnelles
+                        </h1>
+
+                        <p class="mt-3 max-w-xl text-sm leading-7 text-ink-soft">
+                            Consultez les informations associées à votre compte ModeBoutique.
+                        </p>
+                    </section>
+
+                    <section class="rounded-3xl border border-beige bg-white p-6 shadow-sm sm:p-8">
+
+                        <div class="flex flex-col gap-5 border-b border-beige pb-6 sm:flex-row sm:items-center">
+
+                            <div class="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full border-4 border-brand-light bg-cream text-2xl font-bold text-brand">
+                                {% if app.user and app.user.profilePicture %}
+                                    <img
+                                        src="{{ asset('uploads/profile/' ~ app.user.profilePicture) }}"
+                                        alt="Photo de profil"
+                                        class="h-full w-full object-cover"
+                                    >
+                                {% else %}
+                                    {% if app.user %}
+                                        {{ app.user.firstname|default('M')|first|upper }}{{ app.user.lastname|default('B')|first|upper }}
+                                    {% else %}
+                                        MB
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+
+                            <div class="flex-1">
+                                <h2 class="text-xl font-bold text-ink">
+                                    {% if app.user %}
+                                        {{ app.user.firstname|default('Prénom') }}
+                                        {{ app.user.lastname|default('Nom') }}
+                                    {% else %}
+                                        Client de démonstration
+                                    {% endif %}
+                                </h2>
+
+                                <p class="mt-2 text-sm text-ink-soft">
+                                    {% if app.user %}
+                                        {{ app.user.email }}
+                                    {% else %}
+                                        client@example.com
+                                    {% endif %}
+                                </p>
+
+                                <span class="mt-3 inline-flex rounded-full bg-brand-light px-3 py-1.5 text-xs font-medium text-brand">
+                                    Mon compte ModeBoutique
+                                </span>
+                            </div>
+
+                            <a
+                                href="{{ path('app_account_profile_edit') }}"
+                                class="inline-flex items-center justify-center gap-2 self-start rounded-full bg-brand px-5 py-3 text-sm font-semibold text-white transition hover:bg-brand-dark"
+                            >
+                                <span aria-hidden="true">✎</span>
+                                Modifier mon profil
+                            </a>
+                        </div>
+
+                        <div class="mt-6">
+                            <h3 class="mb-5 font-bold text-ink">Mes coordonnées</h3>
+
+                            <dl class="grid gap-4 sm:grid-cols-2">
+
+                                <div class="rounded-2xl border border-beige bg-cream p-5">
+                                    <dt class="text-sm text-ink-soft">Prénom</dt>
+                                    <dd class="mt-2 font-semibold text-ink">
+                                        {% if app.user %}
+                                            {{ app.user.firstname|default('Non renseigné') }}
+                                        {% else %}
+                                            Prénom de démonstration
+                                        {% endif %}
+                                    </dd>
+                                </div>
+
+                                <div class="rounded-2xl border border-beige bg-cream p-5">
+                                    <dt class="text-sm text-ink-soft">Nom</dt>
+                                    <dd class="mt-2 font-semibold text-ink">
+                                        {% if app.user %}
+                                            {{ app.user.lastname|default('Non renseigné') }}
+                                        {% else %}
+                                            Nom de démonstration
+                                        {% endif %}
+                                    </dd>
+                                </div>
+
+                                <div class="rounded-2xl border border-beige bg-cream p-5 sm:col-span-2">
+                                    <dt class="text-sm text-ink-soft">Adresse e-mail</dt>
+                                    <dd class="mt-2 break-all font-semibold text-ink">
+                                        {% if app.user %}
+                                            {{ app.user.email }}
+                                        {% else %}
+                                            client@example.com
+                                        {% endif %}
+                                    </dd>
+                                </div>
+
+                            </dl>
+                        </div>
+
+                        <div class="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-beige pt-6">
+                            <p class="text-sm text-ink-soft">
+                                Vous souhaitez changer vos informations ?
+                            </p>
+
+                            <a
+                                href="{{ path('app_account_profile_edit') }}"
+                                class="text-sm font-semibold text-brand hover:text-brand-dark"
+                            >
+                                Modifier mes informations →
+                            </a>
+                        </div>
+                    </section>
+
+                </main>
+            </div>
+        </div>
+    </section>
+{% endblock %}

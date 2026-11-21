@@ -1,0 +1,365 @@
+{% extends 'layouts/base.html.twig' %}
+
+{% block title %}Boutique - ModeBoutique{% endblock %}
+
+{% block body %}
+
+    <section class="bg-cream py-12 sm:py-16">
+        <div class="container-page">
+            <h1 class="font-serif text-3xl font-bold text-ink sm:text-5xl">
+                Tous les produits
+            </h1>
+
+            <p class="mt-4 max-w-2xl text-sm leading-6 text-ink-soft sm:text-base">
+                Vêtements, chaussures et accessoires : trouvez vos pièces préférées parmi nos collections Femme et Homme.
+            </p>
+
+            <div class="mt-6 flex flex-wrap gap-3">
+                <a
+                    href="{{ path('app_category', {genre: 'femme'}) }}"
+                    class="rounded-full bg-white px-5 py-3 text-sm font-semibold text-ink transition hover:bg-brand hover:text-white"
+                >
+                    Collection Femme
+                </a>
+
+                <a
+                    href="{{ path('app_category', {genre: 'homme'}) }}"
+                    class="rounded-full bg-white px-5 py-3 text-sm font-semibold text-ink transition hover:bg-brand hover:text-white"
+                >
+                    Collection Homme
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="bg-white py-10 sm:py-14">
+        <div class="container-page">
+
+            {# En-tête, recherche et tri #}
+            <div class="flex flex-col gap-4 border-b border-stone-200 pb-6 md:flex-row md:items-center md:justify-between">
+                <div>
+                    <h2 class="font-serif text-2xl font-bold text-ink sm:text-3xl">
+                        {% if currentSubcategory|default(null) %}
+                            Collection {{ currentSubcategory|replace({'-': ' '})|title }}
+                        {% elseif currentType|default(null) %}
+                            {{ currentType == 'vetements' ? 'Vêtements' : (currentType == 'chaussures' ? 'Chaussures' : 'Accessoires') }}
+                        {% elseif currentGenre|default(null) %}
+                            Collection {{ currentGenre|capitalize }}
+                        {% else %}
+                            Tous les produits
+                        {% endif %}
+                    </h2>
+
+                    <p class="mt-2 text-sm text-ink-soft">
+                        Découvrez notre sélection du moment.
+                    </p>
+                </div>
+
+                <div class="flex flex-col gap-3 sm:flex-row">
+                    <label class="sr-only" for="recherche-produit">
+                        Rechercher un produit
+                    </label>
+
+                    <input
+                        id="recherche-produit"
+                        type="search"
+                        placeholder="Rechercher un produit..."
+                        class="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm text-ink outline-none transition placeholder:text-stone-400 focus:border-brand focus:ring-2 focus:ring-brand/20 sm:w-64"
+                    >
+
+                    <label class="sr-only" for="tri-produits">
+                        Trier les produits
+                    </label>
+
+                    <select
+                        id="tri-produits"
+                        class="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 sm:w-52"
+                    >
+                        <option value="">Trier les produits</option>
+                        <option value="recent">Nouveautés</option>
+                        <option value="prix-croissant">Prix croissant</option>
+                        <option value="prix-decroissant">Prix décroissant</option>
+                        <option value="popularite">Popularité</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-4">
+
+                {# Filtres #}
+                <aside class="h-fit rounded-2xl border border-stone-200 bg-cream p-5 sm:p-6">
+                    <h3 class="font-serif text-xl font-bold text-ink">
+                        Filtrer les produits
+                    </h3>
+
+                    <div class="mt-6">
+                        <h4 class="text-sm font-semibold text-ink">Collection</h4>
+
+                        <div class="mt-3 space-y-3 text-sm text-ink-soft">
+                            <label class="flex items-center gap-3">
+                                <input
+                                    type="checkbox"
+                                    data-filter-group="genre"
+                                    value="femme"
+                                    {% if currentGenre|default('') == 'femme' %}checked{% endif %}
+                                    class="size-4 accent-brand"
+                                >
+                                Femme
+                            </label>
+
+                            <label class="flex items-center gap-3">
+                                <input
+                                    type="checkbox"
+                                    data-filter-group="genre"
+                                    value="homme"
+                                    {% if currentGenre|default('') == 'homme' %}checked{% endif %}
+                                    class="size-4 accent-brand"
+                                >
+                                Homme
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="my-6 border-t border-stone-200"></div>
+
+                    <div>
+                        <h4 class="text-sm font-semibold text-ink">Catégories</h4>
+
+                        <div class="mt-3 space-y-3 text-sm text-ink-soft">
+                            <label class="flex items-center gap-3">
+                                <input
+                                    type="checkbox"
+                                    data-filter-group="type"
+                                    value="vetements"
+                                    {% if currentType|default('') == 'vetements' %}checked{% endif %}
+                                    class="size-4 accent-brand"
+                                >
+                                Vêtements
+                            </label>
+
+                            <label class="flex items-center gap-3">
+                                <input
+                                    type="checkbox"
+                                    data-filter-group="type"
+                                    value="chaussures"
+                                    {% if currentType|default('') == 'chaussures' %}checked{% endif %}
+                                    class="size-4 accent-brand"
+                                >
+                                Chaussures
+                            </label>
+
+                            <label class="flex items-center gap-3">
+                                <input
+                                    type="checkbox"
+                                    data-filter-group="type"
+                                    value="accessoires"
+                                    {% if currentType|default('') == 'accessoires' %}checked{% endif %}
+                                    class="size-4 accent-brand"
+                                >
+                                Accessoires
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="my-6 border-t border-stone-200"></div>
+
+                    <div>
+                        <h4 class="text-sm font-semibold text-ink">Budget</h4>
+
+                        <div class="mt-3 space-y-3 text-sm text-ink-soft">
+                            <label class="flex items-center gap-3">
+                                <input type="radio" name="prix" value="moins-50000" class="size-4 accent-brand">
+                                Moins de 50 000 Ar
+                            </label>
+
+                            <label class="flex items-center gap-3">
+                                <input type="radio" name="prix" value="50000-100000" class="size-4 accent-brand">
+                                50 000 à 100 000 Ar
+                            </label>
+
+                            <label class="flex items-center gap-3">
+                                <input type="radio" name="prix" value="plus-100000" class="size-4 accent-brand">
+                                Plus de 100 000 Ar
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="my-6 border-t border-stone-200"></div>
+
+                    <div>
+                        <h4 class="text-sm font-semibold text-ink">Disponibilité</h4>
+
+                        <label class="mt-3 flex items-center gap-3 text-sm text-ink-soft">
+                            <input id="filtre-promo" type="checkbox" class="size-4 accent-brand">
+                            En promotion
+                        </label>
+                    </div>
+
+                    <button
+                        type="button"
+                        id="reset-filtres"
+                        data-reset-url="{{ path('app_shop') }}"
+                        class="mt-7 w-full rounded-xl border border-brand px-4 py-3 text-sm font-semibold text-brand transition hover:bg-brand hover:text-white"
+                    >
+                        Réinitialiser les filtres
+                    </button>
+                </aside>
+
+                {# Liste des produits #}
+                <div class="lg:col-span-3">
+                    <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
+                        <p id="nombre-produits" aria-live="polite" class="text-sm text-ink-soft">
+                            Chargement des produits...
+                        </p>
+
+                        <span class="rounded-full bg-brand-light px-3 py-1.5 text-xs font-semibold text-brand">
+                            Collection ModeBoutique
+                        </span>
+                    </div>
+
+                    <div
+                        id="grille-produits"
+                        data-genre="{{ currentGenre|default('') }}"
+                        data-type="{{ currentType|default('') }}"
+                        data-subcategory="{{ currentSubcategory|default('') }}"
+                        class="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3"
+                    >
+                        {% for product in products %}
+
+                            {# Hiérarchie des catégories #}
+                            {% set category = product.category %}
+                            {% set parentCategory = category ? category.parent : null %}
+                            {% set grandParentCategory = parentCategory ? parentCategory.parent : null %}
+
+                            {% set leafSlug = category ? category.slug|lower : '' %}
+                            {% set categoryPath = '' %}
+
+                            {% if category %}
+                                {% set categoryPath = category.slug|lower ~ ' ' ~ category.name|lower %}
+                            {% endif %}
+
+                            {% if parentCategory %}
+                                {% set categoryPath = categoryPath ~ ' ' ~ parentCategory.slug|lower ~ ' ' ~ parentCategory.name|lower %}
+                            {% endif %}
+
+                            {% if grandParentCategory %}
+                                {% set categoryPath = categoryPath ~ ' ' ~ grandParentCategory.slug|lower ~ ' ' ~ grandParentCategory.name|lower %}
+                            {% endif %}
+
+                            {% set genreKey = '' %}
+                            {% set typeKey = '' %}
+                            {% set subcategoryKey = '' %}
+
+                            {# Genre : Femme ou Homme #}
+                            {% if 'femme' in categoryPath %}
+                                {% set genreKey = 'femme' %}
+                            {% elseif 'homme' in categoryPath %}
+                                {% set genreKey = 'homme' %}
+                            {% endif %}
+
+                            {# Type de catégorie #}
+                            {% if 'vetement' in categoryPath or 'vêtement' in categoryPath %}
+                                {% set typeKey = 'vetements' %}
+                            {% elseif 'chauss' in categoryPath %}
+                                {% set typeKey = 'chaussures' %}
+                            {% elseif 'accessoir' in categoryPath %}
+                                {% set typeKey = 'accessoires' %}
+                            {% endif %}
+
+                            {# Sous-catégorie : conserver le slug de la catégorie feuille #}
+                            {% if category and parentCategory %}
+                                {% if leafSlug not in ['femme', 'homme', 'vetements', 'vêtements', 'chaussures', 'accessoires'] %}
+                                    {% set subcategoryKey = leafSlug %}
+                                {% endif %}
+                            {% endif %}
+
+                            {# Image du produit #}
+                            {# Image du produit : utiliser le même chemin que dans l'administration #}
+                            {% if product.mainImage %}
+                                {% set imageUrl = asset(product.mainImage) %}
+                            {% else %}
+                                {% set imageUrl = asset('images/products/sac-beige.jpg') %}
+                            {% endif %}
+
+                            {# Libellé de catégorie #}
+                            {% set categoryLabel = category ? category.name : 'Sans catégorie' %}
+
+                            {% if category and parentCategory %}
+                                {% if grandParentCategory %}
+                                    {% set categoryLabel = grandParentCategory.name ~ ' · ' ~ parentCategory.name ~ ' · ' ~ category.name %}
+                                {% else %}
+                                    {% set categoryLabel = parentCategory.name ~ ' · ' ~ category.name %}
+                                {% endif %}
+                            {% endif %}
+
+                            
+                            {# Badge produit #}
+                            {% set productBadge = '' %}
+
+                            {% if productPricing[product.id].hasPromotion or productPricing[product.id].oldPrice is not null %}
+                                {% set productBadge = 'Promotion' %}
+                            {% elseif product.createdAt and product.createdAt > date('-30 days') %}
+                                {% set productBadge = 'Nouveau' %}
+                            {% endif %}
+
+                            <div
+                                data-product
+                                data-name="{{ product.name|lower }}"
+                                data-brand="{{ product.brand|default('')|lower }}"
+                                data-category="{{ category ? category.name|lower : '' }}"
+                                data-genre="{{ genreKey }}"
+                                data-type="{{ typeKey }}"
+                                data-subcategory="{{ subcategoryKey }}"
+                                data-price="{{ productPricing[product.id].price }}"
+                                data-promo="{{ productPricing[product.id].oldPrice is not null ? 'true' : 'false' }}"
+                                data-date="{{ product.createdAt ? product.createdAt|date('U') : 0 }}"
+                                data-popularity="{{ product.orderItems|length }}"
+                            >
+                                <twig:ProductCard
+                                    productId="{{ product.id }}"
+                                    name="{{ product.name }}"
+                                    category="{{ categoryLabel }}"
+                                    price="{{ productPricing[product.id].price|number_format(0, ',', ' ') ~ ' Ar' }}"
+                                    oldPrice="{{ productPricing[product.id].oldPrice is not null ? (productPricing[product.id].oldPrice|number_format(0, ',', ' ') ~ ' Ar') : '' }}"
+                                    discountBadge="{{ productPricing[product.id].discountBadge|default('') }}"
+                                    badge="{{ productBadge }}"
+                                    image="{{ imageUrl }}"
+                                    href="{{ path('app_product_detail', {slug: product.slug}) }}"
+                                />
+                            </div>
+
+
+                        {% else %}
+
+                            <div class="rounded-2xl border border-stone-200 bg-cream p-8 text-center sm:col-span-2 xl:col-span-3">
+                                <p class="font-semibold text-ink">
+                                    Aucun produit publié
+                                </p>
+                                <p class="mt-2 text-sm text-ink-soft">
+                                    Les produits disponibles apparaîtront ici dès leur publication.
+                                </p>
+                            </div>
+
+                        {% endfor %}
+                    </div>
+
+                    <p
+                        id="aucun-produit"
+                        class="mt-8 hidden rounded-xl bg-cream p-6 text-center text-sm text-ink-soft"
+                    >
+                        Aucun produit ne correspond à votre recherche.
+                    </p>
+
+                    <nav
+                        id="pagination-produits"
+                        class="mt-10 flex flex-wrap items-center justify-center gap-2"
+                        aria-label="Pagination des produits"
+                    ></nav>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="{{ asset('js/shop.js') }}" defer></script>
+
+{% endblock %}

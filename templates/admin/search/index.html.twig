@@ -1,0 +1,180 @@
+{% extends 'layouts/admin-layout.html.twig' %}
+
+{% block title %}Recherche | Administration{% endblock %}
+
+{% block admin_content %}
+
+    <div class="mb-8">
+        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#A8794F]">
+            Administration
+        </p>
+
+        <h1 class="mt-2 font-serif text-3xl font-bold text-[#292524]">
+            Résultats de recherche
+        </h1>
+
+        <p class="mt-2 text-sm text-stone-500">
+            Résultats pour :
+            <span class="font-semibold text-[#8C6038]">{{ query }}</span>
+        </p>
+    </div>
+
+    {% set totalResults = products|length + categories|length + orders|length + clients|length + variants|length %}
+
+    {% if query is empty %}
+
+        <div class="rounded-2xl border border-[#E8DED3] bg-white p-10 text-center shadow-sm">
+            <p class="text-lg font-semibold text-[#292524]">
+                Que recherchez-vous ?
+            </p>
+            <p class="mt-2 text-sm text-stone-500">
+                Saisissez un nom, une référence ou un numéro de commande dans la barre de recherche.
+            </p>
+        </div>
+
+    {% elseif totalResults == 0 %}
+
+        <div class="rounded-2xl border border-[#E8DED3] bg-white p-10 text-center shadow-sm">
+            <p class="text-lg font-semibold text-[#292524]">
+                Aucun résultat trouvé
+            </p>
+            <p class="mt-2 text-sm text-stone-500">
+                Aucun élément ne correspond à « {{ query }} ».
+            </p>
+        </div>
+
+    {% else %}
+
+        <p class="mb-6 text-sm text-stone-500">
+            {{ totalResults }} résultat(s) trouvé(s).
+        </p>
+
+        <div class="space-y-6">
+
+            {# Produits #}
+            {% if products is not empty %}
+                <section class="rounded-2xl border border-[#E8DED3] bg-white p-6 shadow-sm">
+                    <h2 class="mb-4 font-serif text-xl font-bold text-[#292524]">
+                        Produits
+                        <span class="text-sm font-normal text-stone-400">({{ products|length }})</span>
+                    </h2>
+
+                    <div class="divide-y divide-[#F0E7DE]">
+                        {% for product in products %}
+                            <a href="{{ path('admin_products_edit', {id: product.id}) }}"
+                               class="flex items-center justify-between gap-4 py-4 transition hover:bg-[#FCFAF7]">
+                                <div>
+                                    <p class="font-medium text-[#292524]">{{ product.name }}</p>
+                                    <p class="mt-1 text-xs text-stone-500">
+                                        {{ product.brand ?? 'Sans marque' }}
+                                    </p>
+                                </div>
+                                <span class="text-sm text-[#A8794F]">Voir →</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </section>
+            {% endif %}
+
+            {# Catégories #}
+            {% if categories is not empty %}
+                <section class="rounded-2xl border border-[#E8DED3] bg-white p-6 shadow-sm">
+                    <h2 class="mb-4 font-serif text-xl font-bold text-[#292524]">
+                        Catégories
+                        <span class="text-sm font-normal text-stone-400">({{ categories|length }})</span>
+                    </h2>
+
+                    <div class="divide-y divide-[#F0E7DE]">
+                        {% for category in categories %}
+                            <a href="{{ path('admin_categories_edit', {id: category.id}) }}"
+                               class="flex items-center justify-between gap-4 py-4 transition hover:bg-[#FCFAF7]">
+                                <p class="font-medium text-[#292524]">{{ category.name }}</p>
+                                <span class="text-sm text-[#A8794F]">Voir →</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </section>
+            {% endif %}
+
+            {# Commandes #}
+            {% if orders is not empty %}
+                <section class="rounded-2xl border border-[#E8DED3] bg-white p-6 shadow-sm">
+                    <h2 class="mb-4 font-serif text-xl font-bold text-[#292524]">
+                        Commandes
+                        <span class="text-sm font-normal text-stone-400">({{ orders|length }})</span>
+                    </h2>
+
+                    <div class="divide-y divide-[#F0E7DE]">
+                        {% for order in orders %}
+                            <a href="{{ path('admin_orders_show', {orderNumber: order.orderNumber}) }}"
+                               class="flex items-center justify-between gap-4 py-4 transition hover:bg-[#FCFAF7]">
+                                <div>
+                                    <p class="font-medium text-[#292524]">{{ order.orderNumber }}</p>
+                                    <p class="mt-1 text-xs text-stone-500">
+                                        {{ order.createdAt|date('d/m/Y') }}
+                                    </p>
+                                </div>
+                                <span class="text-sm text-[#A8794F]">Voir →</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </section>
+            {% endif %}
+
+            {# Clients #}
+            {% if clients is not empty %}
+                <section class="rounded-2xl border border-[#E8DED3] bg-white p-6 shadow-sm">
+                    <h2 class="mb-4 font-serif text-xl font-bold text-[#292524]">
+                        Clients
+                        <span class="text-sm font-normal text-stone-400">({{ clients|length }})</span>
+                    </h2>
+
+                    <div class="divide-y divide-[#F0E7DE]">
+                        {% for client in clients %}
+                            <a href="{{ path('admin_customers_index') }}"
+                               class="flex items-center justify-between gap-4 py-4 transition hover:bg-[#FCFAF7]">
+                                <div>
+                                    <p class="font-medium text-[#292524]">
+                                        {{ client.firstname }} {{ client.lastname }}
+                                    </p>
+                                    <p class="mt-1 text-xs text-stone-500">{{ client.email }}</p>
+                                </div>
+                                <span class="text-sm text-[#A8794F]">Voir la liste →</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </section>
+            {% endif %}
+
+            {# Stock #}
+            {% if variants is not empty %}
+                <section class="rounded-2xl border border-[#E8DED3] bg-white p-6 shadow-sm">
+                    <h2 class="mb-4 font-serif text-xl font-bold text-[#292524]">
+                        Stock et variantes
+                        <span class="text-sm font-normal text-stone-400">({{ variants|length }})</span>
+                    </h2>
+
+                    <div class="divide-y divide-[#F0E7DE]">
+                        {% for variant in variants %}
+                            <a href="{{ path('admin_stock_reapprovisionner', {id: variant.id}) }}"
+                               class="flex items-center justify-between gap-4 py-4 transition hover:bg-[#FCFAF7]">
+                                <div>
+                                    <p class="font-medium text-[#292524]">{{ variant.product.name }}</p>
+                                    <p class="mt-1 text-xs text-stone-500">
+                                        Réf. {{ variant.sku }}
+                                        · {{ variant.color ?? 'Sans couleur' }}
+                                        · {{ variant.size ?? 'Sans taille' }}
+                                    </p>
+                                </div>
+                                <span class="text-sm text-[#A8794F]">Voir →</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </section>
+            {% endif %}
+
+        </div>
+
+    {% endif %}
+
+{% endblock %}

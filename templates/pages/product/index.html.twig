@@ -1,0 +1,636 @@
+{% extends 'layouts/base.html.twig' %}
+
+{% block title %}{{ product.name }} | ModeBoutique{% endblock %}
+
+{% block body %}
+
+    {# Images récupérées depuis la base de données. #}
+    {% set colorImages = product.colorImages|default({}) %}
+    {% set initialColor = product.colors|default([])|first %}
+    {% set initialImage = colorImages[initialColor]|default(product.image)|default('') %}
+
+    <main
+        id="product-detail"
+        class="min-h-screen bg-white text-slate-700"
+        data-variants="{{ product.variants|json_encode|e('html_attr') }}"
+    >
+
+        {# Fil d'Ariane #}
+        <div class="border-b border-slate-200 bg-[#F5EBDD]/60">
+            <div class="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+                <nav class="flex flex-wrap items-center gap-2 text-sm text-slate-500">
+                    <a href="{{ path('home') }}" class="hover:text-slate-800">
+                        Accueil
+                    </a>
+                    <span>/</span>
+                    <a href="{{ path('app_shop') }}" class="hover:text-slate-800">
+                        Boutique
+                    </a>
+                    <span>/</span>
+                    <span class="font-medium text-slate-800">
+                        {{ product.name }}
+                    </span>
+                </nav>
+            </div>
+        </div>
+
+        <section class="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+            {# Messages de confirmation et d'erreur #}
+            {% for message in app.flashes('success') %}
+                <div class="mb-6 rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-sm text-green-800">
+                    {{ message }}
+                </div>
+            {% endfor %}
+
+            {% for message in app.flashes('error') %}
+                <div class="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-800">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            
+            <div class="grid grid-cols-1 items-start gap-8 md:grid-cols-2 md:gap-12">
+
+                {# Image principale #}
+                <div class="min-w-0">
+                    <div class="relative overflow-hidden rounded-2xl bg-[#F5EBDD]">
+                        {# Badge existant du produit #}
+                        {% if product.badge %}
+                            <span class="absolute left-4 top-4 rounded-full bg-stone-900 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-white shadow-sm">
+                                {{ product.badge }}
+                            </span>
+                        {% endif %}
+
+                        {# Badge de réduction #}
+                        {% if product.discountBadge %}
+                            <span class="absolute left-4 {% if product.badge %}top-14{% else %}top-4{% endif %} rounded-full bg-[#B08D67] px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-white shadow-sm">
+                                {{ product.discountBadge }}
+                            </span>
+                        {% endif %}
+                        <img
+                            id="product-main-image"
+                            src="{{ initialImage }}"
+                            alt="{{ product.name }}{% if initialColor %} - {{ initialColor }}{% endif %}"
+                            class="aspect-[4/5] w-full object-cover object-center transition-opacity duration-300"
+                        >
+                    </div>
+
+                    <p id="selected-image-caption" class="mt-3 text-center text-sm text-slate-500">
+                        {{ product.name }}{% if initialColor %} — {{ initialColor }}{% endif %}
+                    </p>
+                </div>
+
+                {# Informations produit #}
+                <div class="min-w-0">
+
+                    <p class="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
+                        {{ product.category }}
+                    </p>
+
+                    <h1 class="mt-3 text-3xl font-semibold tracking-tight text-slate-800 sm:text-4xl">
+                        {{ product.name }}
+                    </h1>
+
+                    {% if product.brand %}
+                        <p class="mt-3 text-sm text-slate-500">
+                            Marque :
+                            <span class="font-semibold text-slate-700">
+                                {{ product.brand }}
+                            </span>
+                        </p>
+                    {% endif %}
+
+                    {# Prix actuel et ancien prix #}
+                    <div class="mt-6 flex flex-wrap items-center gap-3">
+                        <span class="text-2xl font-bold text-slate-800 sm:text-3xl">
+                            {{ product.price }}
+                        </span>
+
+                        {% if product.oldPrice %}
+                            <span class="text-base text-slate-400 line-through">
+                                {{ product.oldPrice }}
+                            </span>
+                        {% endif %}
+                    </div>
+                    <div class="my-7 border-t border-slate-200"></div>
+
+                    {# Description #}
+                    <div>
+                        <h2 class="text-lg font-semibold text-slate-800">
+                            Description
+                        </h2>
+                        <p class="mt-3 text-sm leading-7 text-slate-600 sm:text-base">
+                            {{ product.description }}
+                        </p>
+                    </div>
+
+                    {# Choix de couleur et changement de photo #}
+                    {% if product.colors is defined and product.colors is not empty %}
+                        <div class="mt-7">
+                            <h2 class="text-sm font-semibold text-slate-800">
+                                Couleur :
+                                <span id="selected-color-name" class="font-normal text-slate-500">
+                                    {{ initialColor }}
+                                </span>
+                            </h2>
+
+                            <div class="mt-3 flex flex-wrap gap-3">
+                                {% for color in product.colors %}
+                                    {% set swatch = '#171717' %}
+
+                                    {% if color == 'Beige' %}
+                                        {% set swatch = '#D8C3A5' %}
+                                    {% elseif color == 'Bordeaux' %}
+                                        {% set swatch = '#7F1D1D' %}
+                                    {% elseif color == 'Blanc' %}
+                                        {% set swatch = '#FFFFFF' %}
+                                    {% elseif color == 'Bleu' %}
+                                        {% set swatch = '#2563EB' %}
+                                    {% elseif color == 'Marron' %}
+                                        {% set swatch = '#795548' %}
+                                    {% elseif color == 'Gris' %}
+                                        {% set swatch = '#9CA3AF' %}
+                                    {% elseif color == 'Noir' %}
+                                        {% set swatch = '#000000' %}
+                                    {% elseif color == 'Vert' %}
+                                        {% set swatch = '#16A34A' %}
+                                    {% elseif color == 'Rouge' %}
+                                        {% set swatch = '#DC2626' %}
+                                    {% elseif color == 'Rose' %}
+                                        {% set swatch = '#F472B6' %}
+                                    {% elseif color == 'Violet' %}
+                                        {% set swatch = '#7C3AED' %}
+                                    {% elseif color == 'Grenat' %}
+                                        {% set swatch = '#7F1D1D' %}
+                                    {% elseif color == 'Doré' %}
+                                        {% set swatch = '#FFD700' %}
+                                    {% elseif color == 'Argenté' %}
+                                        {% set swatch = '#C0C0C0' %}
+                                    {% elseif color == 'Bleu marine' %}
+                                        {% set swatch = '#1E3A8A' %}
+                                    {% endif %}
+
+                                    <button
+                                        type="button"
+                                        class="color-option group flex flex-col items-center gap-2 rounded-xl border border-transparent p-2 transition hover:bg-[#F5EBDD] focus:outline-none focus:ring-2 focus:ring-slate-500 {% if loop.first %}border-slate-700 bg-[#F5EBDD]{% endif %}"
+                                        data-color="{{ color }}"
+                                        data-image="{{ colorImages[color]|default(product.image)|default('') }}"
+                                        aria-label="Choisir la couleur {{ color }}"
+                                        aria-pressed="{{ loop.first ? 'true' : 'false' }}"
+                                    >
+                                        <span
+                                            class="color-swatch h-9 w-9 rounded-full border border-slate-400 shadow-sm"
+                                            style="background-color: {{ swatch }};"
+                                        ></span>
+
+                                        <span class="text-xs text-slate-600">
+                                            {{ color }}
+                                        </span>
+                                    </button>
+                                {% endfor %}
+                            </div>
+
+                            <p class="mt-2 text-xs text-slate-400">
+                                Sélectionnez une couleur pour afficher son image.
+                            </p>
+                        </div>
+                    {% endif %}
+
+                    {# Tailles des vêtements #}
+                    {% if product.variantType == 'size' %}
+                        <div class="mt-7">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <h2 class="text-sm font-semibold text-slate-800">
+                                    Taille
+                                </h2>
+                                <span class="text-sm text-slate-500">
+                                    Guide des tailles
+                                </span>
+                            </div>
+
+                            <div class="mt-3 flex flex-wrap gap-2">
+                                {% for size in product.sizes %}
+                                    <button
+                                        type="button"
+                                        class="variant-option rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-700 hover:bg-[#F5EBDD] focus:ring-2 focus:ring-slate-500"
+                                        data-size="{{ size }}"
+                                        aria-pressed="false"
+                                    >
+                                        {{ size }}
+                                    </button>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {# Pointures des chaussures #}
+                    {% if product.variantType == 'shoe_size' %}
+                        <div class="mt-7">
+                            <h2 class="text-sm font-semibold text-slate-800">
+                                Pointure
+                            </h2>
+
+                            <div class="mt-3 flex flex-wrap gap-2">
+                                {% for size in product.sizes %}
+                                    <button
+                                        type="button"
+                                        class="variant-option rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-700 hover:bg-[#F5EBDD] focus:ring-2 focus:ring-slate-500"
+                                        data-size="{{ size }}"
+                                        aria-pressed="false"
+                                    >
+                                        {{ size }}
+                                    </button>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {# Disponibilité du produit selon la variante sélectionnée #}
+                    <div class="mt-7">
+                        <p class="text-sm font-semibold text-slate-800">
+                            Disponibilité :
+                        </p>
+
+                        <p
+                            id="stock-message"
+                            class="mt-2 text-sm font-medium text-slate-500"
+                            aria-live="polite"
+                        >
+                            Vérification du stock...
+                        </p>
+                    </div>
+
+                    {# Quantité #}
+                    <div class="mt-7">
+                        <label for="quantity" class="block text-sm font-semibold text-slate-800">
+                            Quantité
+                        </label>
+                        <input
+                            id="quantity"
+                            name="quantity"
+                            type="number"
+                            min="1"
+                            max="0"
+                            value="1"
+                            disabled
+                            class="mt-3 w-24 rounded-lg border border-slate-300 px-3 py-3 text-center outline-none focus:border-slate-600 focus:ring-2 focus:ring-slate-200 disabled:cursor-not-allowed disabled:bg-slate-100"
+                        >
+                    </div>
+
+                    {# Boutons de démonstration #}
+                    
+                    {# Boutons d'achat et favoris #}
+                    <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+
+                        {# Formulaire d'ajout au panier #}
+                        <form
+                            id="add-to-cart-form"
+                            method="post"
+                            data-url-template="{{ path('app_cart_add', {id: 0}) }}"
+                            class="flex-1"
+                        >
+                            {# Protection CSRF #}
+                            <input
+                                type="hidden"
+                                name="_token"
+                                value="{{ csrf_token('cart_add') }}"
+                            >
+
+                            {# Quantité choisie par le client #}
+                            <input
+                                type="hidden"
+                                name="quantity"
+                                id="cart-form-quantity"
+                                value="1"
+                            >
+
+                            <button
+                                id="add-to-cart-button"
+                                type="button"
+                                disabled
+                                class="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-slate-700 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500"
+                            >
+                                Ajouter au panier
+                            </button>
+                        </form>
+
+                        {# Formulaire d'ajout aux favoris #}
+                        <form
+                            method="post"
+                            action="{{ path('app_favorite_add', {id: product.id}) }}"
+                        >
+                            <input
+                                type="hidden"
+                                name="_token"
+                                value="{{ csrf_token('favorite_add_' ~ product.id) }}"
+                            >
+
+                            <button
+                                type="submit"
+                                class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition hover:bg-[#F5EBDD] focus:ring-2 focus:ring-slate-500"
+                            >
+                                ♡ Favoris
+                            </button>
+                        </form>
+
+                    </div>
+
+
+                    {# Informations complémentaires #}
+                    <div class="mt-8 space-y-4 rounded-2xl border border-slate-200 bg-[#F5EBDD]/60 p-5">
+                        <div>
+                            <p class="text-sm font-semibold text-slate-800">
+                                Style et élégance
+                            </p>
+                            <p class="mt-1 text-sm text-slate-600">
+                                Découvrez un article adapté à votre style.
+                            </p>
+                        </div>
+
+                        <div>
+                            <p class="text-sm font-semibold text-slate-800">
+                                Informations de livraison
+                            </p>
+                            <p class="mt-1 text-sm text-slate-600">
+                                Les informations seront présentées lors de la commande.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            {# ================= AVIS ET COMMENTAIRES ================= #}
+            <section class="mt-14 border-t border-slate-200 pt-10 sm:mt-16 sm:pt-14">
+
+                {# En-tête des avis #}
+                <div class="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
+                            Votre expérience compte
+                        </p>
+
+                        <h2 class="mt-2 text-2xl font-semibold text-slate-800 sm:text-3xl">
+                            Avis et commentaires
+                        </h2>
+
+                        <p class="mt-2 text-sm text-slate-500">
+                            Découvrez les avis sur {{ product.name }}.
+                        </p>
+                    </div>
+
+                    <a
+                        href="#form-avis"
+                        class="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                    >
+                        Écrire un avis
+                    </a>
+                </div>
+
+                
+                {# Résumé dynamique des notes #}
+                <div class="mt-8 grid grid-cols-1 gap-5 rounded-2xl border border-slate-200 bg-[#F5EBDD]/50 p-6 sm:grid-cols-3 sm:items-center">
+
+                    <div>
+                        <p class="text-4xl font-bold text-slate-800">
+                            {{ averageRating|number_format(1, ',', ' ') }}<span class="text-lg">/5</span>
+                        </p>
+
+                        <div
+                            class="mt-2 flex gap-1 text-xl text-[#B08D67]"
+                            aria-label="Note moyenne de {{ averageRating|number_format(1, ',', ' ') }} sur 5"
+                        >
+                            {% for star in 1..5 %}
+                                {{ star <= averageRating ? '★' : '☆' }}
+                            {% endfor %}
+                        </div>
+
+                        <p class="mt-2 text-xs text-slate-500">
+                            {% if reviewsCount > 0 %}
+                                {{ reviewsCount }} avis client{{ reviewsCount > 1 ? 's' : '' }}
+                            {% else %}
+                                Aucun avis pour le moment
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <p class="text-sm leading-6 text-slate-600">
+                            {% if reviewsCount > 0 %}
+                                Note moyenne calculée à partir des avis enregistrés sur ce produit.
+                            {% else %}
+                                Soyez le premier client à donner votre avis sur ce produit.
+                            {% endif %}
+                        </p>
+                    </div>
+
+                </div>
+
+
+                
+                {# Liste dynamique des avis clients #}
+                <div class="mt-8 space-y-5">
+
+                    {% for review in reviews %}
+
+                        <article class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
+
+                            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+
+                                <div class="flex items-start gap-3">
+
+                                    
+                                    
+                                    <div class="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#F5EBDD] font-semibold text-slate-700">
+
+                                        {% if review.user.profilePicture %}
+                                            <img
+                                                src="{{ asset('uploads/profile/' ~ review.user.profilePicture) }}"
+                                                alt="Photo de profil de {{ review.user.firstname }}"
+                                                class="h-full w-full object-cover"
+                                            >
+                                        {% else %}
+                                            {{ review.user.firstname|slice(0, 1)|upper }}{{ review.user.lastname|slice(0, 1)|upper }}
+                                        {% endif %}
+
+                                    </div>
+
+
+                                    <div>
+                                        <h3 class="font-semibold text-slate-800">
+                                            {{ review.user.firstname }} {{ review.user.lastname }}
+                                        </h3>
+
+                                        <div
+                                            class="mt-1 flex gap-1 text-sm text-[#B08D67]"
+                                            aria-label="{{ review.rating }} étoiles sur 5"
+                                        >
+                                            {% for star in 1..5 %}
+                                                {{ star <= review.rating ? '★' : '☆' }}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <span class="text-xs text-slate-400">
+                                    {{ review.createdAt|date('d/m/Y') }}
+                                </span>
+
+                            </div>
+
+                            {% if review.comment %}
+                                <p class="mt-4 text-sm leading-7 text-slate-600">
+                                    {{ review.comment|nl2br }}
+                                </p>
+                            {% else %}
+                                <p class="mt-4 text-sm italic text-slate-400">
+                                    Aucun commentaire ajouté.
+                                </p>
+                            {% endif %}
+
+                        </article>
+
+                    {% else %}
+
+                        <div class="rounded-2xl border border-dashed border-slate-300 bg-[#F5EBDD]/30 px-6 py-12 text-center">
+
+                            <div class="text-4xl text-[#B08D67]">
+                                ☆
+                            </div>
+
+                            <h3 class="mt-4 text-lg font-semibold text-slate-800">
+                                Aucun avis pour le moment
+                            </h3>
+
+                            <p class="mt-2 text-sm text-slate-500">
+                                Soyez le premier client à partager votre expérience sur ce produit.
+                            </p>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+               
+                {# Formulaire d'avis #}
+                <div id="form-avis" class="mt-10 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+
+                    <div class="border-b border-slate-200 bg-[#F5EBDD]/50 px-5 py-5 sm:px-7">
+                        <h3 class="text-xl font-semibold text-slate-800">
+                            Donnez votre avis
+                        </h3>
+
+                        <p class="mt-2 text-sm leading-6 text-slate-500">
+                            Partagez votre expérience pour aider les autres clients.
+                        </p>
+                    </div>
+
+                    {% if app.user %}
+
+                        <form
+                            method="post"
+                            action="{{ path('app_review_add', {slug: slug}) }}"
+                            class="space-y-6 p-5 sm:p-7"
+                        >
+
+                            {# Protection CSRF #}
+                            <input
+                                type="hidden"
+                                name="_token"
+                                value="{{ csrf_token('review_add_' ~ product.id) }}"
+                            >
+
+                            <div>
+                                <p class="mb-3 text-sm font-semibold text-slate-800">
+                                    Votre note <span class="text-red-500">*</span>
+                                </p>
+
+                                <div class="flex flex-wrap gap-2">
+                                    {% for rating in [1, 2, 3, 4, 5] %}
+                                        <label class="cursor-pointer">
+                                            <input
+                                                type="radio"
+                                                name="rating"
+                                                value="{{ rating }}"
+                                                required
+                                                class="peer sr-only"
+                                            >
+
+                                            <span class="inline-flex min-h-11 items-center justify-center gap-1 rounded-xl border border-slate-200 px-3 text-sm text-slate-600 transition hover:border-[#B08D67] peer-checked:border-[#B08D67] peer-checked:bg-[#F5EBDD] peer-checked:text-slate-800">
+                                                <span class="text-lg text-[#B08D67]">★</span>
+                                                {{ rating }}
+                                            </span>
+                                        </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <div>
+                                <label
+                                    for="review-comment"
+                                    class="mb-2 block text-sm font-semibold text-slate-800"
+                                >
+                                    Votre commentaire <span class="text-red-500">*</span>
+                                </label>
+
+                                <textarea
+                    id="review-comment"
+                    name="comment"
+                    rows="5"
+                    required
+                    maxlength="2000"
+                    placeholder="Qu'avez-vous pensé de ce produit ?"
+                    class="w-full resize-y rounded-xl border border-slate-300 px-4 py-3 text-sm leading-6 outline-none transition focus:border-slate-600 focus:ring-2 focus:ring-slate-200"
+                ></textarea>
+                            </div>
+
+                            <button
+                                type="submit"
+                                class="w-full rounded-xl bg-slate-700 px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-slate-800 sm:w-auto"
+                            >
+                                Envoyer mon avis
+                            </button>
+
+                        </form>
+
+                    {% else %}
+
+                        <div class="p-6 text-center">
+                            <p class="text-sm text-slate-600">
+                                Vous devez être connecté pour laisser un avis.
+                            </p>
+
+                            <a
+                                href="{{ path('app_login') }}"
+                                class="mt-4 inline-flex items-center justify-center rounded-xl bg-slate-700 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                            >
+                                Se connecter
+                            </a>
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+
+            </section>
+
+            {# Retour à la boutique #}
+            <div class="pt-10">
+                <a
+                    href="{{ path('app_shop') }}"
+                    class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-700 hover:bg-[#F5EBDD] focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
+                >
+                    <span aria-hidden="true">←</span>
+                    Retour à la boutique
+                </a>
+            </div>
+        </section>
+    </main>
+
+    {# JavaScript : changement d'image et gestion du stock #}
+    <script src="{{ asset('js/product.js') }}" defer></script>
+
+{% endblock %}

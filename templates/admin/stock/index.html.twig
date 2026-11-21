@@ -1,0 +1,337 @@
+{% extends 'layouts/admin-layout.html.twig' %}
+
+{% block title %}Gestion du stock | ModeBoutique{% endblock %}
+
+{% block admin_content %}
+
+<div class="space-y-8">
+
+    {# En-tête de la page #}
+    <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <div>
+            <p class="text-xs font-bold uppercase tracking-[0.22em] text-[#B08D67]">
+                Catalogue & inventaire
+            </p>
+
+            <h1 class="mt-2 text-2xl font-bold tracking-tight text-[#292524] sm:text-3xl">
+                Gestion du stock
+            </h1>
+
+            <p class="mt-2 max-w-2xl text-sm leading-6 text-stone-500">
+                Suivez les quantités disponibles, contrôlez les niveaux de stock
+                et gérez facilement les réapprovisionnements.
+            </p>
+        </div>
+
+        <div class="flex items-center gap-2 self-start rounded-xl border border-stone-200 bg-white px-4 py-2.5 sm:self-auto">
+            <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+            <span class="text-xs font-semibold text-stone-600">Inventaire actualisé</span>
+        </div>
+    </div>
+
+    {# Messages de confirmation #}
+    {% for message in app.flashes('success') %}
+        <div class="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-700">
+            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 font-bold">
+                ✓
+            </span>
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    {# Cartes statistiques #}
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+
+        <div class="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+            <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-stone-500">Produits référencés</p>
+                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-[#F5F0E8] text-xl text-[#B08D67]">
+                    ◈
+                </span>
+            </div>
+            <p class="mt-5 text-3xl font-bold text-[#292524]">{{ stats.products }}</p>
+            <p class="mt-1 text-xs text-stone-400">Produits avec variantes actives</p>
+        </div>
+
+        <div class="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+            <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-stone-500">Unités en stock</p>
+                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-xl text-blue-600">
+                    ▤
+                </span>
+            </div>
+            <p class="mt-5 text-3xl font-bold text-[#292524]">{{ stats.units }}</p>
+            <p class="mt-1 text-xs text-stone-400">Quantité totale disponible</p>
+        </div>
+
+        <div class="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+            <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-stone-500">Stock faible</p>
+                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-xl text-amber-600">
+                    !
+                </span>
+            </div>
+            <p class="mt-5 text-3xl font-bold text-amber-600">{{ stats.low }}</p>
+            <p class="mt-1 text-xs text-stone-400">Variantes à réapprovisionner</p>
+        </div>
+
+        <div class="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+            <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-stone-500">Rupture de stock</p>
+                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-xl text-red-600">
+                    ×
+                </span>
+            </div>
+            <p class="mt-5 text-3xl font-bold text-red-600">{{ stats.out }}</p>
+            <p class="mt-1 text-xs text-stone-400">Variantes sans unité disponible</p>
+        </div>
+
+    </div>
+
+    {# Alerte de stock #}
+    {% if stats.low > 0 or stats.out > 0 %}
+        <div class="flex items-start gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-5">
+            <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-xl font-bold text-amber-600 shadow-sm">
+                !
+            </span>
+
+            <div>
+                <h2 class="font-bold text-[#292524]">
+                    Attention au niveau de stock
+                </h2>
+
+                <p class="mt-1 text-sm leading-6 text-stone-600">
+                    {{ stats.low }} variante(s) ont un stock faible et
+                    {{ stats.out }} variante(s) sont en rupture.
+                    Pensez à prévoir le réapprovisionnement.
+                </p>
+            </div>
+        </div>
+    {% endif %}
+
+    {# Tableau des variantes #}
+    <div class="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
+
+        <div class="flex flex-col justify-between gap-3 border-b border-stone-100 px-5 py-5 sm:flex-row sm:items-center sm:px-6">
+            <div>
+                <h2 class="text-lg font-bold text-[#292524]">
+                    État du stock
+                </h2>
+                <p class="mt-1 text-sm text-stone-500">
+                    Détail des quantités et des seuils d'alerte par variante.
+                </p>
+            </div>
+
+            <span class="inline-flex w-fit items-center rounded-full bg-[#F5F0E8] px-3 py-1.5 text-xs font-semibold text-[#8A6848]">
+                {{ variants|length }} variante(s)
+            </span>
+        </div>
+
+        <div class="overflow-x-auto">
+
+            <table class="w-full min-w-[1150px] text-left text-sm">
+
+                <thead class="bg-[#F5F0E8] text-[11px] uppercase tracking-wider text-stone-600">
+                    <tr>
+                        <th class="w-[27%] px-6 py-4 font-bold">Produit</th>
+                        <th class="w-[15%] px-5 py-4 font-bold">Variante</th>
+                        <th class="w-[12%] px-5 py-4 font-bold">Référence</th>
+                        <th class="w-[12%] px-5 py-4 text-center font-bold">Quantité</th>
+                        <th class="w-[10%] px-5 py-4 text-center font-bold">Seuil</th>
+                        <th class="w-[12%] px-5 py-4 font-bold">Statut</th>
+                        <th class="w-[12%] px-5 py-4 text-center font-bold">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody class="divide-y divide-stone-100">
+
+                    {% for variant in variants %}
+
+                        {% set product = variant.product %}
+                        {% set quantity = variant.stockQuantity %}
+                        {% set threshold = variant.lowStockThreshold %}
+
+                        {# Recherche de l'image correspondant à la couleur #}
+                        {% set matchingImages = [] %}
+
+                        {% if variant.color %}
+                            {% set matchingImages = product.images|filter(image =>
+                                image.color and image.color|lower == variant.color|lower
+                            ) %}
+                        {% endif %}
+
+                        {% set variantImage = matchingImages|first %}
+
+                        <tr class="transition-colors duration-200 hover:bg-[#FAF8F4]">
+
+                            {# Informations du produit #}
+                            <td class="px-6 py-4">
+                                <div class="flex min-w-0 items-center gap-4">
+
+                                    {% if variantImage %}
+                                        <img
+                                            src="{{ asset(variantImage.imagePath) }}"
+                                            alt="{{ variantImage.altText ?? product.name }}"
+                                            class="h-16 w-16 shrink-0 rounded-xl border border-stone-200 bg-[#F5F0E8] object-cover"
+                                        >
+                                    {% elseif product.mainImage %}
+                                        <img
+                                            src="{{ asset(product.mainImage) }}"
+                                            alt="{{ product.name }}"
+                                            class="h-16 w-16 shrink-0 rounded-xl border border-stone-200 bg-[#F5F0E8] object-cover"
+                                        >
+                                    {% else %}
+                                        <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border border-stone-200 bg-[#F5F0E8] text-lg font-bold text-[#B08D67]">
+                                            MB
+                                        </div>
+                                    {% endif %}
+
+                                    <div class="min-w-0">
+                                        <p class="break-words font-bold text-[#292524]">
+                                            {{ product.name }}
+                                        </p>
+
+                                        <p class="mt-1 text-xs text-stone-500">
+                                            {{ product.category.name }}
+                                        </p>
+
+                                        {% if product.brand %}
+                                            <p class="mt-1 text-xs font-medium text-[#B08D67]">
+                                                {{ product.brand }}
+                                            </p>
+                                        {% endif %}
+                                    </div>
+
+                                </div>
+                            </td>
+
+                            {# Couleur et taille #}
+                            <td class="px-5 py-4">
+                                <div class="flex flex-col items-start gap-2">
+
+                                    {% if variant.color %}
+                                        <span class="rounded-lg border border-stone-200 bg-white px-3 py-1.5 text-xs font-semibold text-stone-700">
+                                            {{ variant.color }}
+                                        </span>
+                                    {% endif %}
+
+                                    {% if variant.size %}
+                                        <span class="text-xs text-stone-500">
+                                            Taille / Pointure : {{ variant.size }}
+                                        </span>
+                                    {% endif %}
+
+                                    {% if not variant.color and not variant.size %}
+                                        <span class="text-xs text-stone-400">Standard</span>
+                                    {% endif %}
+
+                                </div>
+                            </td>
+
+                            {# Référence SKU #}
+                            <td class="whitespace-nowrap px-5 py-4">
+                                <span class="rounded-lg bg-stone-50 px-2.5 py-1.5 font-mono text-xs font-medium text-stone-600">
+                                    {{ variant.sku }}
+                                </span>
+                            </td>
+
+                            {# Quantité disponible #}
+                            <td class="whitespace-nowrap px-5 py-4 text-center">
+                                <span class="inline-flex min-w-12 items-center justify-center rounded-lg px-3 py-2 text-sm font-bold
+                                    {{ quantity == 0
+                                        ? 'bg-red-50 text-red-700'
+                                        : (quantity <= threshold
+                                            ? 'bg-amber-50 text-amber-700'
+                                            : 'bg-emerald-50 text-emerald-700') }}">
+                                    {{ quantity }}
+                                </span>
+                                <p class="mt-1 text-[10px] text-stone-400">unité(s)</p>
+                            </td>
+
+                            {# Seuil d'alerte #}
+                            <td class="whitespace-nowrap px-5 py-4 text-center">
+                                <span class="text-sm font-medium text-stone-600">
+                                    {{ threshold }}
+                                </span>
+                                <p class="mt-1 text-[10px] text-stone-400">unité(s)</p>
+                            </td>
+
+                            {# Statut automatique #}
+                            <td class="whitespace-nowrap px-5 py-4">
+
+                                {% if quantity == 0 %}
+
+                                    <span class="inline-flex items-center gap-2 rounded-full bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">
+                                        <span class="h-2 w-2 rounded-full bg-red-500"></span>
+                                        Rupture
+                                    </span>
+
+                                {% elseif quantity <= threshold %}
+
+                                    <span class="inline-flex items-center gap-2 rounded-full bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700">
+                                        <span class="h-2 w-2 rounded-full bg-amber-500"></span>
+                                        Stock faible
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700">
+                                        <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                                        Disponible
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                            {# Action de réapprovisionnement #}
+                            <td class="whitespace-nowrap px-5 py-4 text-center">
+                                <a
+                                    href="{{ path('admin_stock_reapprovisionner', {id: variant.id}) }}"
+                                    class="inline-flex items-center justify-center rounded-xl bg-[#292524] px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#44403C] hover:shadow-md"
+                                >
+                                    Réapprovisionner
+                                </a>
+                            </td>
+
+                        </tr>
+
+                    {% else %}
+
+                        <tr>
+                            <td colspan="7" class="px-6 py-16 text-center">
+
+                                <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#F5F0E8] text-2xl text-[#B08D67]">
+                                    ◈
+                                </div>
+
+                                <p class="mt-4 font-bold text-stone-700">
+                                    Aucune variante disponible
+                                </p>
+
+                                <p class="mx-auto mt-2 max-w-md text-sm leading-6 text-stone-400">
+                                    Ajoutez des produits avec leurs variantes pour commencer à gérer votre stock.
+                                </p>
+
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <div class="border-t border-stone-100 bg-stone-50/70 px-6 py-4">
+            <p class="text-xs leading-5 text-stone-500">
+                Les quantités affichées proviennent directement des variantes enregistrées dans la base de données.
+            </p>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

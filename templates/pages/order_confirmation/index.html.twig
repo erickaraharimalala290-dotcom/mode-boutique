@@ -1,0 +1,433 @@
+{% extends 'layouts/base.html.twig' %}
+
+{% block title %}Confirmation de commande | ModeBoutique{% endblock %}
+
+{% block body %}
+    <section class="min-h-screen bg-cream px-4 py-12 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-4xl">
+
+            {# Logo #}
+            <div class="mb-8 text-center">
+                <a
+                    href="{{ path('home') }}"
+                    class="text-2xl font-bold tracking-tight text-ink"
+                >
+                    Mode<span class="text-brand">Boutique</span>
+                </a>
+            </div>
+
+            {# Confirmation #}
+            <div class="overflow-hidden rounded-3xl border border-beige bg-white shadow-sm">
+
+                <div class="bg-gradient-to-br from-[#FBF7F1] to-[#E8DCCB] px-6 py-10 text-center sm:px-10">
+
+                    <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-white text-4xl text-green-700 shadow-sm">
+                        ✓
+                    </div>
+
+                    <p class="mt-5 text-xs font-semibold uppercase tracking-[0.2em] text-brand-dark">
+                        Merci pour votre confiance
+                    </p>
+
+                    <h1 class="mt-3 text-3xl font-bold text-ink sm:text-4xl">
+                        Votre commande est enregistrée !
+                    </h1>
+
+                    <p class="mx-auto mt-4 max-w-xl text-sm leading-7 text-ink-soft sm:text-base">
+                        Merci d'avoir choisi ModeBoutique.
+                        Retrouvez ci-dessous le récapitulatif de votre commande.
+                    </p>
+                </div>
+
+                <div class="p-6 sm:p-10">
+
+                    {# Message de confirmation #}
+                    {% for message in app.flashes('success') %}
+                        <div
+                            role="status"
+                            class="mb-6 rounded-xl border border-green-200 bg-green-50 p-4 text-sm leading-6 text-green-800"
+                        >
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+
+                    {# Référence et date de commande #}
+                    <div class="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-beige bg-cream p-5">
+                        <div>
+                            <p class="text-xs text-ink-soft">
+                                Numéro de commande
+                            </p>
+
+                            <p class="mt-1 break-all text-lg font-bold text-ink">
+                                {{ order.orderNumber }}
+                            </p>
+                        </div>
+
+                        <div class="text-right">
+                            <p class="text-xs text-ink-soft">
+                                Date de commande
+                            </p>
+
+                            <p class="mt-1 font-semibold text-ink">
+                                {{ order.createdAt|date('d/m/Y à H:i') }}
+                            </p>
+                        </div>
+                    </div>
+
+                    {# Informations de paiement #}
+                    <div class="mt-6">
+
+                        <h2 class="text-lg font-bold text-ink">
+                            Informations de paiement
+                        </h2>
+
+                        {% for message in app.flashes('error') %}
+                            <div role="alert" class="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+
+                        {% if payment and payment.method == 'cash_on_delivery' %}
+
+                            <div class="mt-4 rounded-2xl border border-beige p-5">
+                                <p class="font-semibold text-ink">
+                                    Paiement à la livraison
+                                </p>
+
+                                <p class="mt-2 text-sm leading-6 text-ink-soft">
+                                    Vous réglerez le montant total de votre commande
+                                    à la réception de votre colis.
+                                </p>
+
+                                <p class="mt-4 text-xl font-bold text-brand">
+                                    {{ order.totalAmount|number_format(0, ',', ' ') }} Ar
+                                </p>
+                            </div>
+
+                        {% elseif payment and payment.method == 'mobile_money_demo' %}
+
+                            {% set referenceParts = payment.transactionReference|default('')|split('-') %}
+                            {% set operatorCode = referenceParts[1]|default('') %}
+
+                            {% set operatorLabels = {
+                                'MVOLA': 'MVola',
+                                'ORANGE_MONEY': 'Orange Money',
+                                'AIRTEL_MONEY': 'Airtel Money'
+                            } %}
+
+                            {% set operatorLabel = operatorLabels[operatorCode]|default('Mobile Money') %}
+
+                            <div class="mt-4 rounded-2xl border border-beige bg-white p-5 sm:p-6">
+
+                                {% if payment.status == 'paid' %}
+
+                                    <div class="flex items-start gap-3">
+                                        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-green-50 text-xl text-green-700">
+                                            ✓
+                                        </div>
+
+                                        <div>
+                                            <p class="font-semibold text-green-800">
+                                                Paiement confirmé
+                                            </p>
+
+                                            <p class="mt-1 text-sm text-ink-soft">
+                                                Votre acompte a été enregistré avec succès.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-5 space-y-3 rounded-xl bg-cream p-4">
+                                        <div class="flex justify-between gap-3 text-sm">
+                                            <span class="text-ink-soft">Opérateur</span>
+                                            <span class="font-semibold text-ink">
+                                                {{ operatorLabel }}
+                                            </span>
+                                        </div>
+
+                                        <div class="flex justify-between gap-3 text-sm">
+                                            <span class="text-ink-soft">Montant payé</span>
+                                            <span class="font-semibold text-green-700">
+                                                {{ payment.amount|number_format(0, ',', ' ') }} Ar
+                                            </span>
+                                        </div>
+
+                                        <div class="text-sm">
+                                            <p class="text-ink-soft">Référence de transaction</p>
+                                            <p class="mt-1 break-all font-semibold text-ink">
+                                                {{ payment.transactionReference }}
+                                            </p>
+                                        </div>
+
+                                        {% if payment.paidAt %}
+                                            <div class="flex justify-between gap-3 text-sm">
+                                                <span class="text-ink-soft">Date de paiement</span>
+                                                <span class="font-medium text-ink">
+                                                    {{ payment.paidAt|date('d/m/Y à H:i') }}
+                                                </span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                {% else %}
+
+                                    <div>
+                                        <p class="font-semibold text-ink">
+                                            Paiement de votre acompte
+                                        </p>
+
+                                        <p class="mt-2 text-sm leading-6 text-ink-soft">
+                                            Veuillez vérifier les informations ci-dessous
+                                            avant de confirmer votre paiement.
+                                        </p>
+                                    </div>
+
+                                    {% if payment.status == 'failed' %}
+                                        <p class="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                                            Le paiement précédent n'a pas abouti.
+                                            Vous pouvez effectuer une nouvelle tentative.
+                                        </p>
+                                    {% endif %}
+
+                                    <div class="mt-5 space-y-4 rounded-xl bg-cream p-4">
+
+                                        <div class="flex justify-between gap-3 text-sm">
+                                            <span class="text-ink-soft">Opérateur</span>
+                                            <span class="font-semibold text-ink">
+                                                {{ operatorLabel }}
+                                            </span>
+                                        </div>
+
+                                        <div class="flex justify-between gap-3 text-sm">
+                                            <span class="text-ink-soft">Numéro de téléphone</span>
+                                            <span class="font-semibold text-ink">
+                                                {{ order.address.phone }}
+                                            </span>
+                                        </div>
+
+                                        <div class="flex justify-between gap-3 border-t border-beige pt-4">
+                                            <span class="font-medium text-ink">
+                                                Montant de l'acompte (50 %)
+                                            </span>
+
+                                            <span class="text-xl font-bold text-brand">
+                                                {{ payment.amount|number_format(0, ',', ' ') }} Ar
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <form
+                                        method="POST"
+                                        action="{{ path('app_order_payment_simulate', {
+                                            orderNumber: order.orderNumber
+                                        }) }}"
+                                        class="mt-5"
+                                    >
+                                        <input
+                                            type="hidden"
+                                            name="_token"
+                                            value="{{ csrf_token('simulate_payment_' ~ order.orderNumber) }}"
+                                        >
+
+                                        {# Le traitement du paiement est effectué côté serveur. #}
+                                        <input
+                                            type="hidden"
+                                            name="simulationResult"
+                                            value="success"
+                                        >
+
+                                        <button
+                                            type="submit"
+                                            class="flex w-full items-center justify-center gap-2 rounded-xl bg-brand px-5 py-4 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-dark"
+                                        >
+                                            <span>Payer mon acompte</span>
+                                            <span>→</span>
+                                        </button>
+                                    </form>
+
+                                    <p class="mt-3 text-center text-xs text-ink-soft">
+                                        Acompte de 50 % de votre commande.
+                                    </p>
+
+                                {% endif %}
+
+                            </div>
+
+                        {% else %}
+
+                            <p class="mt-4 rounded-xl border border-beige p-5 text-sm text-ink-soft">
+                                Les informations de paiement ne sont pas disponibles.
+                            </p>
+
+                        {% endif %}
+
+                    </div>
+
+                    {# Récapitulatif des produits #}
+                    <div class="mt-8">
+                        <h2 class="text-lg font-bold text-ink">
+                            Récapitulatif des articles
+                        </h2>
+
+                        <div class="mt-4 divide-y divide-beige">
+
+                            {% for item in order.orderItems %}
+                                {% set product = item.product %}
+                                {% set variant = item.variant %}
+
+                                {# Rechercher l'image correspondant à la couleur commandée. #}
+                                {% set matchingColorImages = [] %}
+
+                                {% if variant and variant.color %}
+                                    {% set matchingColorImages = product.images|filter(image =>
+                                        image.color
+                                        and image.color|trim|lower == variant.color|trim|lower
+                                    ) %}
+                                {% endif %}
+
+                                {# Rechercher une image principale en secours. #}
+                                {% set primaryImage = null %}
+                                {% set firstImage = null %}
+
+                                {% for image in product.images %}
+                                    {% if firstImage is null %}
+                                        {% set firstImage = image %}
+                                    {% endif %}
+
+                                    {% if image.isPrimary %}
+                                        {% set primaryImage = image %}
+                                    {% endif %}
+                                {% endfor %}
+
+                                {# Définir l'image à afficher selon la priorité. #}
+                                {% set displayImage = null %}
+
+                                {% if matchingColorImages is not empty %}
+                                    {% set displayImage = matchingColorImages|first %}
+                                {% elseif primaryImage is not null %}
+                                    {% set displayImage = primaryImage %}
+                                {% elseif firstImage is not null %}
+                                    {% set displayImage = firstImage %}
+                                {% endif %}
+
+                                <div class="flex gap-4 py-5">
+
+                                    {# Image correspondant à la variante commandée #}
+                                    <div class="h-24 w-20 shrink-0 overflow-hidden rounded-xl bg-cream">
+                                        {% if displayImage %}
+                                            <img
+                                                src="{{ asset(displayImage.imagePath) }}"
+                                                alt="{{ displayImage.altText ?? product.name }}"
+                                                class="h-full w-full object-cover"
+                                            >
+                                        {% elseif product.mainImage %}
+                                            <img
+                                                src="{{ asset(product.mainImage) }}"
+                                                alt="{{ product.name }}"
+                                                class="h-full w-full object-cover"
+                                            >
+                                        {% else %}
+                                            <div class="flex h-full w-full items-center justify-center text-2xl">
+                                                👕
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="min-w-0 flex-1">
+                                        <h3 class="font-semibold text-ink">
+                                            {{ product.name }}
+                                        </h3>
+
+                                        {% if variant %}
+                                            <p class="mt-1 text-sm text-ink-soft">
+                                                {% if variant.size %}
+                                                    Taille : {{ variant.size }}
+                                                {% endif %}
+
+                                                {% if variant.size and variant.color %}
+                                                    ·
+                                                {% endif %}
+
+                                                {% if variant.color %}
+                                                    Couleur : {{ variant.color }}
+                                                {% endif %}
+                                            </p>
+                                        {% endif %}
+
+                                        <p class="mt-3 text-sm text-ink-soft">
+                                            Quantité : {{ item.quantity }}
+                                        </p>
+
+                                        <p class="mt-1 text-xs text-ink-soft">
+                                            Prix unitaire :
+                                            {{ item.unitPrice|number_format(0, ',', ' ') }} Ar
+                                        </p>
+                                    </div>
+
+                                    <p class="whitespace-nowrap text-sm font-semibold text-ink">
+                                        {{ (item.unitPrice * item.quantity)|number_format(0, ',', ' ') }} Ar
+                                    </p>
+                                </div>
+
+                            {% else %}
+                                <p class="py-5 text-sm text-ink-soft">
+                                    Aucun article trouvé dans cette commande.
+                                </p>
+                            {% endfor %}
+
+                        </div>
+                    </div>
+
+                    {# Total de la commande #}
+                    <div class="mt-5 space-y-3 border-t border-beige pt-5">
+
+                        <div class="flex justify-between gap-4 text-sm text-ink-soft">
+                            <span>Sous-total</span>
+                            <span>
+                                {{ subtotal|number_format(0, ',', ' ') }} Ar
+                            </span>
+                        </div>
+
+                        <div class="flex justify-between gap-4 text-sm text-ink-soft">
+                            <span>Livraison</span>
+                            <span>
+                                {{ deliveryFee|number_format(0, ',', ' ') }} Ar
+                            </span>
+                        </div>
+
+                        <div class="flex items-center justify-between gap-4 border-t border-beige pt-4">
+                            <span class="font-bold text-ink">
+                                Total
+                            </span>
+
+                            <span class="text-2xl font-bold text-brand">
+                                {{ order.totalAmount|number_format(0, ',', ' ') }} Ar
+                            </span>
+                        </div>
+
+                    </div>
+
+                    {# Actions #}
+                    <div class="mt-8 grid gap-3 sm:grid-cols-2">
+
+                        <a
+                            href="{{ path('app_account') }}"
+                            class="inline-flex items-center justify-center rounded-full bg-brand px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-brand-dark"
+                        >
+                            Mon espace client
+                        </a>
+
+                        <a
+                            href="{{ path('app_shop') }}"
+                            class="inline-flex items-center justify-center rounded-full border border-brand px-6 py-3.5 text-sm font-semibold text-brand transition hover:bg-brand hover:text-white"
+                        >
+                            Continuer mes achats
+                        </a>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

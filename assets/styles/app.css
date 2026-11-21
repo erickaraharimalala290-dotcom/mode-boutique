@@ -1,0 +1,111 @@
+/* ============================================================
+   ModeBoutique — Feuille de styles principale
+   Tailwind CSS v4 — Configuration via @theme
+   Palette : Noir charbon + Beige doré + Blanc cassé
+   ============================================================ */
+
+@import "tailwindcss";
+
+/* ------------------------------------------------------------
+   1. Identité visuelle ModeBoutique
+   ------------------------------------------------------------ */
+@theme {
+  /* Palette principale */
+  --color-sky: #F5F0E8;
+  --color-brand: #A77C52;
+  --color-brand-dark: #86613F;
+  --color-brand-light: #FAF6F0;
+  --color-beige: #E8DCCB;
+  --color-cream: #F5F0E8;
+  --color-ink: #292524;
+  --color-ink-soft: #57534E;
+
+  /* Typographie */
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: "Playfair Display", Georgia, "Times New Roman", serif;
+}
+
+/* ------------------------------------------------------------
+   2. Styles de base globaux
+   ------------------------------------------------------------ */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: #FFFFFF;
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-serif);
+    color: var(--color-ink);
+    letter-spacing: -0.01em;
+  }
+
+  /* Focus visible pour l'accessibilité au clavier */
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+}
+
+/* ------------------------------------------------------------
+   3. Classes utilitaires réutilisables
+   ------------------------------------------------------------ */
+@layer components {
+
+  /* Conteneur centré standard */
+  .container-page {
+    width: 100%;
+    max-width: 80rem;
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .container-page {
+      padding-inline: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container-page {
+      padding-inline: 2rem;
+    }
+  }
+
+  /* Lien avec soulignement animé */
+  .link-underline {
+    position: relative;
+    color: var(--color-brand);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .link-underline:hover {
+    color: var(--color-brand-dark);
+  }
+
+  .link-underline::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 0;
+    height: 1px;
+    background-color: currentColor;
+    transition: width 0.25s ease;
+  }
+
+  .link-underline:hover::after {
+    width: 100%;
+  }
+}

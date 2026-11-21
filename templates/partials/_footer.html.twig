@@ -1,0 +1,124 @@
+<footer class="border-t border-stone-200 bg-[#F8F3EE]">
+    <div class="container-page px-5 py-12 sm:py-14">
+
+        <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+
+            {# Présentation — logo mitovy amin'ny navbar #}
+            <div>
+                <a
+                    href="{{ path('home') }}"
+                    class="inline-flex items-center gap-2"
+                    aria-label="ModeBoutique - Accueil"
+                >
+                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand font-serif text-lg font-bold text-white">
+                        M
+                    </span>
+                    <span class="flex flex-col leading-tight">
+                        <span class="font-serif text-xl font-semibold text-ink">Mode</span>
+                        <span class="pl-1 text-sm text-brand">Boutique</span>
+                    </span>
+                </a>
+
+                <p class="mt-4 max-w-xs text-sm leading-7 text-ink-soft">
+                    Votre destination mode pour découvrir des vêtements,
+                    chaussures et accessoires qui vous ressemblent.
+                </p>
+            </div>
+
+            {# Navigation #}
+            <div>
+                <h3 class="font-semibold text-ink">Navigation</h3>
+
+                <ul class="mt-4 space-y-3 text-sm">
+                    <li>
+                        <a href="{{ path('home') }}" class="text-ink-soft transition hover:text-brand">
+                            Accueil
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ path('app_category') }}" class="text-ink-soft transition hover:text-brand">
+                            Catégories
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ path('app_shop') }}" class="text-ink-soft transition hover:text-brand">
+                            Boutique
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ path('app_about') }}" class="text-ink-soft transition hover:text-brand">
+                            À propos
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ path('app_contact') }}" class="text-ink-soft transition hover:text-brand">
+                            Contact
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            {# Aide et services #}
+            <div>
+                <h3 class="font-semibold text-ink">Besoin d'aide ?</h3>
+
+                <ul class="mt-4 space-y-3 text-sm">
+                    <li>
+                        <a href="{{ path('app_delivery_info') }}" class="text-ink-soft transition hover:text-brand">
+                            Livraison
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ path('app_return_info') }}" class="text-ink-soft transition hover:text-brand">
+                            Politique de retour
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ path('app_faq') }}" class="text-ink-soft transition hover:text-brand">
+                            Questions fréquentes
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ path('app_cgv') }}" class="text-ink-soft transition hover:text-brand">
+                            Conditions générales de vente
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ path('app_privacy') }}" class="text-ink-soft transition hover:text-brand">
+                            Politique de confidentialité
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            {# Contact #}
+            <div>
+                <h3 class="font-semibold text-ink">Contact</h3>
+
+                <p class="mt-4 text-sm leading-7 text-ink-soft">
+                    Une question sur un article ou une commande ?
+                    Nous sommes là pour vous aider.
+                </p>
+
+                <a
+                    href="{{ path('app_contact') }}"
+                    class="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-brand transition hover:gap-3"
+                >
+                    Nous contacter
+                    <span aria-hidden="true">→</span>
+                </a>
+            </div>
+
+        </div>
+
+        {# Copyright #}
+        <div class="mt-10 flex flex-col gap-3 border-t border-stone-200 pt-6 text-sm text-ink-soft sm:flex-row sm:items-center sm:justify-between">
+            <p>
+                &copy; {{ "now"|date("Y") }} ModeBoutique.
+                Tous droits réservés.
+            </p>
+            <p>Le style qui vous ressemble.</p>
+        </div>
+
+    </div>
+</footer>

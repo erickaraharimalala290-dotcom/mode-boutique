@@ -1,0 +1,353 @@
+{% extends 'layouts/base.html.twig' %}
+
+{% block title %}Mon panier | ModeBoutique{% endblock %}
+
+{% block body %}
+
+    {# ==========================================================
+   SECTION 1 : EN-TÊTE DU PANIER
+   ========================================================== #}
+    <section class="bg-cream px-5 py-12 sm:px-8 md:py-16">
+        <div class="mx-auto max-w-7xl">
+            <h1 class="text-3xl font-bold text-ink sm:text-4xl">
+                Mon panier
+            </h1>
+
+            <p class="mt-4 max-w-2xl leading-7 text-ink-soft">
+                Retrouvez vos articles préférés et préparez votre prochaine
+                commande en toute simplicité.
+            </p>
+        </div>
+    </section>
+
+    <section class="bg-white px-5 py-12 sm:px-8 md:py-16">
+        <div class="mx-auto max-w-7xl">
+
+            {# Messages de confirmation et d'erreur #}
+            {% for message in app.flashes('success') %}
+                <div class="mb-5 rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-sm text-green-800">
+                    {{ message }}
+                </div>
+            {% endfor %}
+
+            {% for message in app.flashes('error') %}
+                <div class="mb-5 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-800">
+                    {{ message }}
+                </div>
+            {% endfor %}
+
+            {# ==========================================================
+           SECTION 2 : PANIER VIDE
+           ========================================================== #}
+            {% if items is empty %}
+
+                <div class="rounded-3xl border border-beige bg-cream px-6 py-16 text-center">
+
+                    <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-beige text-4xl">
+                        ♡
+                    </div>
+
+                    <h2 class="mt-6 text-2xl font-bold text-ink">
+                        Votre panier est vide
+                    </h2>
+
+                    <p class="mx-auto mt-3 max-w-md leading-7 text-ink-soft">
+                        Vous n'avez pas encore ajouté d'articles à votre panier.
+                        Découvrez notre collection et trouvez votre prochain coup de cœur.
+                    </p>
+
+                    <a
+                        href="{{ path('app_shop') }}"
+                        class="mt-7 inline-flex items-center justify-center rounded-full bg-ink px-6 py-3 font-semibold text-white transition hover:bg-stone-700"
+                    >
+                        Découvrir la boutique
+                    </a>
+
+                </div>
+
+            {% else %}
+
+                {# ==========================================================
+               SECTION 3 : CONTENU DU PANIER
+               ========================================================== #}
+                <div class="grid items-start gap-8 lg:grid-cols-3">
+
+                    {# Liste des articles #}
+                    <div class="space-y-5 lg:col-span-2">
+
+                        <div class="flex items-center justify-between border-b border-beige pb-4">
+                            <h2 class="text-xl font-bold text-ink">
+                                Vos articles
+                            </h2>
+
+                            <span class="text-sm text-ink-soft">
+                                {{ cartCount }} article{{ cartCount > 1 ? 's' : '' }}
+                            </span>
+                        </div>
+
+                        {% for item in items %}
+
+                            {% set product = item.product %}
+                            {% set variant = item.variant %}
+
+                            {# ==================================================
+                           ARTICLE DU PANIER
+                           ================================================== #}
+                            <article class="flex flex-col gap-4 border-b border-beige pb-6 sm:flex-row sm:gap-6">
+                            
+                                {# Image du produit selon la couleur sélectionnée #}
+                                {% set matchingImages = [] %}
+
+                                {% if variant and variant.color %}
+                                    {% set matchingImages = product.images|filter(image =>
+                                        image.color and image.color|lower == variant.color|lower
+                                    ) %}
+                                {% endif %}
+
+                                {% set variantImage = matchingImages|first %}
+
+                                <a
+                                    href="{{ path('app_product_detail', {slug: product.slug}) }}"
+                                    class="h-36 w-32 shrink-0 overflow-hidden rounded-xl bg-cream sm:h-40 sm:w-36"
+                                >
+                                    {% if variantImage %}
+                                        <img
+                                            src="{{ asset(variantImage.imagePath) }}"
+                                            alt="{{ variantImage.altText|default(product.name ~ ' - ' ~ variant.color) }}"
+                                            class="h-full w-full object-cover transition duration-300 hover:scale-105"
+                                        >
+                                    {% elseif product.mainImage %}
+                                        <img
+                                            src="{{ asset(product.mainImage) }}"
+                                            alt="{{ product.name }}"
+                                            class="h-full w-full object-cover transition duration-300 hover:scale-105"
+                                        >
+                                    {% else %}
+                                        <div class="flex h-full w-full items-center justify-center text-sm text-ink-soft">
+                                            Image indisponible
+                                        </div>
+                                    {% endif %}
+                                </a>
+
+
+                                {# Informations du produit #}
+                                <div class="flex min-w-0 flex-1 flex-col justify-between gap-4">
+
+                                    <div>
+
+                                        <div class="flex items-start justify-between gap-3">
+
+                                            <div>
+                                                <p class="text-xs uppercase tracking-wider text-brand">
+                                                    {{ product.category.name }}
+                                                </p>
+
+                                                <h3 class="mt-2 font-semibold text-ink">
+                                                    {{ product.name }}
+                                                </h3>
+                                            </div>
+
+                                            {# Supprimer l'article #}
+                                            <form
+                                                method="post"
+                                                action="{{ path('app_cart_remove', {id: item.id}) }}"
+                                            >
+                                                <input
+                                                    type="hidden"
+                                                    name="_token"
+                                                    value="{{ csrf_token('cart_remove_' ~ item.id) }}"
+                                                >
+
+                                                <input type="hidden" name="return_to" value="public">
+
+                                                <button
+                                                    type="submit"
+                                                    class="shrink-0 text-sm text-ink-soft transition hover:text-red-700"
+                                                    aria-label="Supprimer {{ product.name }}"
+                                                >
+                                                    <span aria-hidden="true" class="text-xl">×</span>
+                                                </button>
+                                            </form>
+
+                                        </div>
+
+                                        {# Informations de la variante #}
+                                        {% if variant %}
+                                            {% if variant.color %}
+                                                <p class="mt-2 text-sm text-ink-soft">
+                                                    Couleur : {{ variant.color }}
+                                                </p>
+                                            {% endif %}
+
+                                            {% if variant.size %}
+                                                <p class="mt-1 text-sm text-ink-soft">
+                                                    Taille / Pointure : {{ variant.size }}
+                                                </p>
+                                            {% endif %}
+                                        {% endif %}
+
+                                        <p class="mt-2 text-sm text-ink-soft">
+                                            Prix unitaire :
+                                            <span class="font-medium text-ink">
+                                                {{ item.unitPrice|number_format(0, ',', ' ') }} Ar
+                                            </span>
+                                        </p>
+
+                                    </div>
+
+                                    {# Quantité et prix total de l'article #}
+                                    <div class="flex flex-wrap items-end justify-between gap-4">
+
+                                        <form
+                                            method="post"
+                                            action="{{ path('app_cart_update_quantity', {id: item.id}) }}"
+                                            class="flex flex-wrap items-end gap-3"
+                                        >
+                                            <input
+                                                type="hidden"
+                                                name="_token"
+                                                value="{{ csrf_token('cart_update_' ~ item.id) }}"
+                                            >
+
+                                            <input type="hidden" name="return_to" value="public">
+
+                                            <div>
+                                                <label
+                                                    for="quantity-{{ item.id }}"
+                                                    class="mb-2 block text-xs font-semibold text-ink"
+                                                >
+                                                    Quantité
+                                                </label>
+
+                                                <input
+                                                    id="quantity-{{ item.id }}"
+                                                    type="number"
+                                                    name="quantity"
+                                                    min="1"
+                                                    {% if variant %}
+                                                    max="{{ variant.stockQuantity }}"
+                                                    {% endif %}
+                                                    value="{{ item.quantity }}"
+                                                    required
+                                                    class="w-20 rounded-lg border border-beige bg-white px-3 py-2 text-center text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-beige"
+                                                >
+                                            </div>
+
+                                            <button
+                                                type="submit"
+                                                class="rounded-lg border border-beige px-3 py-2 text-xs font-semibold text-ink transition hover:bg-cream"
+                                            >
+                                                Mettre à jour
+                                            </button>
+
+                                        </form>
+
+                                        <p class="item-total font-bold text-ink">
+                                            {{ (item.unitPrice * item.quantity)|number_format(0, ',', ' ') }} Ar
+                                        </p>
+
+                                    </div>
+
+                                </div>
+                            </article>
+
+                        {% endfor %}
+
+                        {# Retour à la boutique #}
+                        <a
+                            href="{{ path('app_shop') }}"
+                            class="inline-flex items-center gap-2 pt-2 text-sm font-semibold text-ink transition hover:text-brand"
+                        >
+                            <span aria-hidden="true">←</span>
+                            Continuer mes achats
+                        </a>
+
+                    </div>
+
+                    {# ==========================================================
+                   SECTION 4 : RÉSUMÉ DE LA COMMANDE
+                   ========================================================== #}
+                    <aside class="rounded-2xl border border-beige bg-cream p-6 sm:p-7 lg:sticky lg:top-24">
+
+                        <h2 class="text-xl font-bold text-ink">
+                            Résumé de la commande
+                        </h2>
+
+                        <div class="mt-6 space-y-4">
+
+                            <div class="flex items-center justify-between gap-4 text-sm">
+                                <span class="text-ink-soft">
+                                    Nombre d'articles
+                                </span>
+
+                                <span class="font-semibold text-ink">
+                                    {{ cartCount }}
+                                </span>
+                            </div>
+
+                            <div class="flex items-center justify-between gap-4 text-sm">
+                                <span class="text-ink-soft">
+                                    Sous-total
+                                </span>
+
+                                <span class="font-semibold text-ink">
+                                    {{ subtotal|number_format(0, ',', ' ') }} Ar
+                                </span>
+                            </div>
+
+                            <div class="flex items-center justify-between gap-4 text-sm">
+                                <span class="text-ink-soft">
+                                    Livraison
+                                </span>
+
+                                <span class="text-right text-ink-soft">
+                                    À confirmer
+                                </span>
+                            </div>
+
+                            <p class="text-xs leading-5 text-ink-soft">
+                                Les frais de livraison seront précisés avant la validation
+                                définitive de la commande.
+                            </p>
+
+                            <div class="border-t border-beige pt-4">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="font-semibold text-ink">
+                                        Total provisoire
+                                    </span>
+
+                                    <span class="text-xl font-bold text-ink">
+                                        {{ subtotal|number_format(0, ',', ' ') }} Ar
+                                    </span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <button
+                            type="button"
+                            onclick="window.location.href='{{ path('app_checkout') }}'"
+                            class="mt-7 inline-flex w-full items-center justify-center rounded-full bg-ink px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-stone-700 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
+                        >
+                            Passer la commande →
+                        </button>
+
+                        <p class="mt-4 text-center text-xs leading-5 text-ink-soft">
+                            Vérifiez vos articles et vos informations avant de confirmer votre commande.
+                        </p>
+
+                        <div class="mt-6 flex items-center justify-center gap-2 border-t border-beige pt-5 text-xs text-ink-soft">
+                            <span aria-hidden="true">♧</span>
+                            <span>Shopping simple et pratique</span>
+                        </div>
+
+                    </aside>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+    </section>
+
+{% endblock %}

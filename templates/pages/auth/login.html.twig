@@ -1,0 +1,262 @@
+{% extends 'layouts/auth-layout.html.twig' %}
+
+{% block title %}Connexion | ModeBoutique{% endblock %}
+
+{% block body %}
+    <section class="min-h-screen bg-cream px-4 py-12 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-6xl">
+
+            {# Retour vers l'accueil #}
+            <div class="mb-8">
+                <a
+                    href="{{ path('home') }}"
+                    class="inline-flex items-center gap-2 text-sm font-medium text-ink-soft transition hover:text-brand"
+                >
+                    <span aria-hidden="true">&larr;</span>
+                    Retour à l'accueil
+                </a>
+            </div>
+
+            <div class="grid overflow-hidden rounded-3xl border border-beige bg-white shadow-sm lg:grid-cols-2">
+
+                {# Partie gauche : image de mode #}
+                <div class="relative hidden min-h-[650px] flex-col justify-between overflow-hidden p-10 text-white lg:flex xl:p-14">
+
+                    <img
+                        src="{{ asset('images/products/robe-fleurie-long.jpg') }}"
+                        alt="Collection élégante ModeBoutique"
+                        class="absolute inset-0 h-full w-full object-cover object-center"
+                    >
+
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#292524]/85 via-[#292524]/25 to-[#B08D67]/10"></div>
+
+                    <div class="relative z-10">
+                        <a
+                            href="{{ path('home') }}"
+                            class="text-2xl font-bold tracking-wide"
+                        >
+                            Mode<span class="text-[#D6B58A]">Boutique</span>
+                        </a>
+
+                        <p class="mt-3 text-sm text-white/90">
+                            Votre boutique de mode, simplement.
+                        </p>
+                    </div>
+
+                    <div class="relative z-10 py-12">
+                        <span class="mb-4 inline-block rounded-full border border-white/40 bg-white/15 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] backdrop-blur-sm">
+                            Heureux de vous retrouver
+                        </span>
+
+                        <h1 class="max-w-md text-4xl font-bold leading-tight xl:text-5xl">
+                            Votre style vous attend.
+                        </h1>
+
+                        <p class="mt-6 max-w-md leading-7 text-white/90">
+                            Retrouvez vos articles préférés et découvrez
+                            les nouveautés de votre boutique ModeBoutique.
+                        </p>
+                    </div>
+
+                    <div class="relative z-10 flex items-center justify-between gap-4 border-t border-white/30 pt-5">
+                        <p class="text-sm text-white/90">
+                            ModeBoutique — La mode pour tous.
+                        </p>
+                        <span class="text-xl text-[#D6B58A]" aria-hidden="true">✦</span>
+                    </div>
+                </div>
+
+                {# Partie droite : formulaire de connexion #}
+                <div class="flex items-center p-6 sm:p-10 xl:p-14">
+                    <div class="w-full">
+
+                        <div class="mb-8">
+                            <p class="mb-2 text-sm font-semibold uppercase tracking-wider text-brand">
+                                Bon retour parmi nous
+                            </p>
+
+                            <h2 class="text-3xl font-bold text-ink">
+                                Se connecter
+                            </h2>
+
+                            <p class="mt-3 text-sm leading-6 text-ink-soft">
+                                Connectez-vous à votre compte pour retrouver
+                                votre espace personnel.
+                            </p>
+                        </div>
+
+                        {# Message de connexion : compte désactivé ou identifiants incorrects #}
+                        {% if app.session.has('login_error_message') %}
+                            <div
+                                role="alert"
+                                class="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+                            >
+                                {{ app.session.get('login_error_message') }}
+                            </div>
+
+                            {% do app.session.remove('login_error_message') %}
+                        {% endif %}
+
+                        {# Messages flash de succès #}
+                        {% for message in app.flashes('success') %}
+                            <div
+                                role="status"
+                                class="mb-5 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-800"
+                            >
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+
+                        {# Erreur de vérification de l'adresse e-mail #}
+                        {% for message in app.flashes('verify_email_error') %}
+                            <div
+                                role="alert"
+                                class="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+                            >
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+
+                        {# Erreur de connexion Symfony #}
+                        {% if error %}
+                            <div
+                                role="alert"
+                                class="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+                            >
+                                {{ error.messageKey|trans(error.messageData, 'security') }}
+                            </div>
+                        {% endif %}
+
+                        {# Utilisateur déjà connecté #}
+                        {% if app.user %}
+                            <div class="mb-5 rounded-xl border border-beige bg-cream p-4 text-sm text-ink">
+                                Vous êtes connecté en tant que
+                                <strong>{{ app.user.userIdentifier }}</strong>.
+
+                                <a
+                                    href="{{ logout_path() }}"
+                                    class="ml-1 font-semibold text-brand underline"
+                                >
+                                    Se déconnecter
+                                </a>
+                            </div>
+                        {% endif %}
+
+                        <form method="post" class="space-y-5" novalidate>
+
+                            {# Adresse e-mail #}
+                            <div>
+                                <label
+                                    for="username"
+                                    class="mb-2 block text-sm font-semibold text-ink"
+                                >
+                                    Adresse e-mail
+                                </label>
+
+                                <input
+                                    type="email"
+                                    value="{{ last_username }}"
+                                    name="_username"
+                                    id="username"
+                                    placeholder="exemple@email.com"
+                                    class="w-full rounded-xl border border-beige bg-white px-4 py-3 text-ink placeholder:text-ink-soft focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
+                                    autocomplete="email"
+                                    required
+                                    autofocus
+                                >
+
+                                {% for message in app.flashes('login_email_error') %}
+                                    <p class="mt-2 text-sm text-red-600">
+                                        {{ message }}
+                                    </p>
+                                {% endfor %}
+                            </div>
+
+                            {# Mot de passe #}
+                            <div>
+                                <label
+                                    for="password"
+                                    class="mb-2 block text-sm font-semibold text-ink"
+                                >
+                                    Mot de passe
+                                </label>
+
+                                <input
+                                    type="password"
+                                    name="_password"
+                                    id="password"
+                                    placeholder="Votre mot de passe"
+                                    class="w-full rounded-xl border border-beige bg-white px-4 py-3 text-ink placeholder:text-ink-soft focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
+                                    autocomplete="current-password"
+                                    required
+                                >
+
+                                {% for message in app.flashes('login_password_error') %}
+                                    <p class="mt-2 text-sm text-red-600">
+                                        {{ message }}
+                                    </p>
+                                {% endfor %}
+                            </div>
+
+                            <div class="flex justify-end">
+                                <a
+                                    href="{{ path('app_forgot_password_request') }}"
+                                    class="text-sm font-medium text-brand transition hover:text-brand-dark hover:underline"
+                                >
+                                    Mot de passe oublié ?
+                                </a>
+                            </div>
+
+                            {# Protection CSRF #}
+                            <input
+                                type="hidden"
+                                name="_csrf_token"
+                                data-controller="csrf-protection"
+                                value="{{ csrf_token('authenticate') }}"
+                            >
+
+                            {# Bouton de connexion #}
+                            <button
+                                type="submit"
+                                class="w-full rounded-full bg-brand px-6 py-3.5 font-semibold text-white transition hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
+                            >
+                                Se connecter
+                            </button>
+                        </form>
+
+                       
+                        {# Lien pour renvoyer l'e-mail de confirmation #}
+                        <p class="mt-5 text-center text-sm text-ink-soft">
+                            Vous n'avez pas reçu l'e-mail de confirmation ?
+
+                            <a
+                                href="{{ path('app_resend_verification') }}"
+                                class="font-semibold text-brand underline-offset-4 transition hover:text-brand-dark hover:underline"
+                            >
+                                Renvoyer l'e-mail
+                            </a>
+                        </p>
+
+                        {# Lien vers l'inscription #}
+                        <p class="mt-4 text-center text-sm text-ink-soft">
+                            Vous n'avez pas encore de compte ?
+
+                            <a
+                                href="{{ path('app_register') }}"
+                                class="font-semibold text-brand underline-offset-4 transition hover:text-brand-dark hover:underline"
+                            >
+                                Créer un compte
+                            </a>
+                        </p>
+
+
+                        <p class="mt-6 text-center text-xs leading-5 text-ink-soft">
+                            Heureux de vous retrouver chez ModeBoutique.
+                        </p>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
