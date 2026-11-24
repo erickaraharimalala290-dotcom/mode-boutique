@@ -8,6 +8,7 @@ use App\Repository\UserRepository;
 use App\Security\EmailVerifier;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -86,14 +87,14 @@ class RegistrationController extends AbstractController
                     )
             );
 
-            // Informer le client qu'il doit vérifier son e-mail
-            $this->addFlash(
-                'success',
-                'Votre compte a été créé. Consultez votre boîte e-mail pour confirmer votre adresse avant de vous connecter.'
+            // Mémoriser l'utilisateur en attente de confirmation dans la session.
+            $request->getSession()->set(
+                'pending_verification_user_id',
+                $user->getId()
             );
 
-            // Rediriger vers la page de connexion
-            return $this->redirectToRoute('app_login');
+            // Afficher la page d'attente de confirmation de l'adresse e-mail.
+            return $this->redirectToRoute('app_registration_pending');
         }
 
         return $this->render(
@@ -103,6 +104,78 @@ class RegistrationController extends AbstractController
 
             ]
         );
+    }
+
+    /**
+     * Affiche la page d'attente après la création du compte.
+     */
+    #[Route(
+        '/inscription/confirmation',
+        name: 'app_registration_pending',
+        methods: ['GET']
+    )]
+    public function registrationPending(
+        Request $request,
+        UserRepository $userRepository
+    ): Response {
+        // Récupérer l'identifiant du compte en attente dans la session.
+        $userId = $request->getSession()->get('pending_verification_user_id');
+
+        if (null === $userId) {
+            return $this->redirectToRoute('app_register');
+        }
+
+        $user = $userRepository->find($userId);
+
+        if (null === $user) {
+            return $this->redirectToRoute('app_register');
+        }
+
+        // Rediriger vers la connexion si l'adresse est déjà confirmée.
+        if ($user->isVerified()) {
+            $request->getSession()->remove('pending_verification_user_id');
+
+            return $this->redirectToRoute('app_login');
+        }
+
+        return $this->render(
+            'pages/auth/registration_pending.html.twig',
+            [
+                'email' => $user->getEmail(),
+            ]
+        );
+    }
+
+    /**
+     * Vérifie automatiquement si l'adresse e-mail a été confirmée.
+     */
+    #[Route(
+        '/inscription/statut-verification',
+        name: 'app_registration_status',
+        methods: ['GET']
+    )]
+    public function registrationStatus(
+        Request $request,
+        UserRepository $userRepository
+    ): JsonResponse {
+        // Récupérer le compte associé à la session actuelle.
+        $userId = $request->getSession()->get('pending_verification_user_id');
+
+        if (null === $userId) {
+            return new JsonResponse(['verified' => false]);
+        }
+
+        $user = $userRepository->find($userId);
+
+        // Retourner uniquement le statut de vérification.
+        $response = new JsonResponse([
+            'verified' => null !== $user && $user->isVerified(),
+        ]);
+
+        // Empêcher la mise en cache de ce statut.
+        $response->headers->set('Cache-Control', 'no-store, private');
+
+        return $response;
     }
 
     #[Route('/verify/email', name: 'app_verify_email')]

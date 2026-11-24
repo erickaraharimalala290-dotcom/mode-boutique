@@ -1,29 +1,154 @@
-<h1>Bonjour,</h1>
+{% set resetUrl = 'https://modeboutique.hopesdomaine.top' ~ path('app_reset_password', {token: resetToken.token}) %}
 
-<p>
-    Vous avez demandé la réinitialisation du mot de passe de votre compte ModeBoutique.
-</p>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Réinitialisation de votre mot de passe - ModeBoutique</title>
+</head>
 
-<p>
-    Cliquez sur le lien ci-dessous pour choisir un nouveau mot de passe :
-</p>
+<body style="margin: 0; padding: 0; background-color: #F5F0E8; font-family: Arial, Helvetica, sans-serif; color: #292524;">
 
-<p>
-    <a href="{{ url('app_reset_password', {token: resetToken.token}) }}">
-        Réinitialiser mon mot de passe
-    </a>
-</p>
+    {# Texte d'aperçu affiché dans certaines messageries #}
+    <div style="display: none; max-height: 0; overflow: hidden; opacity: 0;">
+        Réinitialisez votre mot de passe ModeBoutique en toute simplicité.
+    </div>
 
-<p>
-    Ce lien expirera dans
-    {{ resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle', 'fr') }}.
-</p>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
+           style="background-color: #F5F0E8; padding: 40px 15px;">
 
-<p>
-    Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet e-mail.
-</p>
+        <tr>
+            <td align="center">
 
-<p>
-    Cordialement,<br>
-    L'équipe ModeBoutique
-</p>
+                {# Conteneur principal de l'e-mail #}
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
+                       style="max-width: 600px; background-color: #FFFFFF; border-radius: 12px; overflow: hidden;">
+
+                    {# En-tête #}
+                    <tr>
+                        <td align="center" style="background-color: #292524; padding: 35px 20px;">
+
+                            <h1 style="margin: 0; color: #FFFFFF; font-size: 28px; letter-spacing: 2px;">
+                                Mode<span style="color: #D6B58A;">Boutique</span>
+                            </h1>
+
+                            <p style="margin: 12px 0 0; color: #E7DED2; font-size: 13px; letter-spacing: 1px;">
+                                L'ÉLÉGANCE AU QUOTIDIEN
+                            </p>
+
+                        </td>
+                    </tr>
+
+                    {# Contenu principal #}
+                    <tr>
+                        <td style="padding: 40px 35px 30px;">
+
+                            {# Icône de réinitialisation #}
+                            <div style="margin: 0 auto 25px; width: 70px; height: 70px; line-height: 70px; text-align: center; border-radius: 50%; background-color: #F5F0E8; font-size: 32px;">
+                                <span style="color: #B08D67;">&#128274;</span>
+                            </div>
+
+                            <h2 style="margin: 0 0 22px; color: #292524; font-size: 23px; text-align: center;">
+                                Réinitialisation de votre mot de passe
+                            </h2>
+
+                            <p style="font-size: 15px; line-height: 1.8; color: #57534E;">
+                                Bonjour,
+                            </p>
+
+                            <p style="font-size: 15px; line-height: 1.8; color: #57534E;">
+                                Vous avez demandé la réinitialisation du mot de passe
+                                de votre compte <strong style="color: #292524;">ModeBoutique</strong>.
+                            </p>
+
+                            <p style="font-size: 15px; line-height: 1.8; color: #57534E;">
+                                Pour choisir un nouveau mot de passe et retrouver
+                                l'accès à votre compte, veuillez cliquer sur le
+                                bouton ci-dessous :
+                            </p>
+
+                            {# Bouton de réinitialisation #}
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0"
+                                   align="center" style="margin: 30px auto;">
+
+                                <tr>
+                                    <td align="center" bgcolor="#B08D67" style="border-radius: 7px;">
+
+                                        <a href="{{ resetUrl }}"
+                                           style="display: inline-block; padding: 15px 30px; color: #FFFFFF; text-decoration: none; font-size: 14px; font-weight: bold; letter-spacing: 0.5px;">
+                                            RÉINITIALISER MON MOT DE PASSE
+                                        </a>
+
+                                    </td>
+                                </tr>
+
+                            </table>
+
+                            {# Durée de validité du lien #}
+                            <div style="margin: 25px 0; padding: 18px; background-color: #F5F0E8; border-radius: 9px; text-align: center;">
+
+                                <p style="margin: 0; font-size: 13px; line-height: 1.7; color: #57534E;">
+                                    <strong style="color: #292524;">Attention :</strong>
+                                    ce lien de réinitialisation est valable pendant
+                                </p>
+
+                                <p style="margin: 8px 0 0; color: #B08D67; font-size: 15px; font-weight: bold;">
+                                    {{ resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle', 'fr') }}
+                                </p>
+
+                            </div>
+
+                            <hr style="border: none; border-top: 1px solid #E7DED2; margin: 30px 0;">
+
+                            {# Précaution de sécurité #}
+                            <p style="font-size: 13px; line-height: 1.7; color: #78716C;">
+                                Si vous n'êtes pas à l'origine de cette demande,
+                                vous pouvez simplement ignorer cet e-mail.
+                                Votre mot de passe actuel restera inchangé.
+                            </p>
+
+                            <p style="font-size: 14px; line-height: 1.7; color: #57534E; margin-top: 25px;">
+                                Cordialement,<br>
+                                <strong style="color: #292524;">L'équipe ModeBoutique</strong>
+                            </p>
+
+                            {# Lien de secours si le bouton ne fonctionne pas #}
+                            <p style="margin-top: 25px; font-size: 12px; line-height: 1.7; color: #A8A29E;">
+                                Si le bouton ne fonctionne pas, copiez et collez ce lien
+                                dans votre navigateur :
+                            </p>
+
+                            <p style="font-size: 12px; line-height: 1.7; word-break: break-all;">
+                                <a href="{{ resetUrl }}" style="color: #B08D67;">
+                                    {{ resetUrl }}
+                                </a>
+                            </p>
+
+                        </td>
+                    </tr>
+
+                    {# Pied de page #}
+                    <tr>
+                        <td align="center" style="background-color: #F5F0E8; padding: 22px 20px;">
+
+                            <p style="margin: 0; font-size: 12px; color: #78716C;">
+                                © {{ "now"|date("Y") }} ModeBoutique. Tous droits réservés.
+                            </p>
+
+                            <p style="margin: 8px 0 0; font-size: 12px; color: #A8A29E;">
+                                Merci de faire confiance à ModeBoutique.
+                            </p>
+
+                        </td>
+                    </tr>
+
+                </table>
+
+            </td>
+        </tr>
+
+    </table>
+
+</body>
+</html>

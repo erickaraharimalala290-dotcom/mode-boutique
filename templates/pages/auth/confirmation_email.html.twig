@@ -1,28 +1,119 @@
 
-<h1>Bienvenue chez ModeBoutique !</h1>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmation de votre adresse e-mail - ModeBoutique</title>
+</head>
 
-<p>
-    Nous vous remercions pour votre inscription sur ModeBoutique.
-</p>
+<body style="margin: 0; padding: 0; background-color: #F5F0E8; font-family: Arial, Helvetica, sans-serif; color: #292524;">
 
-<p>
-    Pour confirmer votre adresse e-mail et activer votre compte,
-    veuillez cliquer sur le lien ci-dessous :
-</p>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
+           style="background-color: #F5F0E8; padding: 40px 15px;">
 
-<p>
-    <a href="{{ signedUrl|raw }}">Confirmer mon adresse e-mail</a>
-</p>
+        <tr>
+            <td align="center">
 
-<p>
-    Ce lien de confirmation est valable pendant une heure.
-</p>
+                <!-- Conteneur principal de l'e-mail -->
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
+                       style="max-width: 600px; background-color: #FFFFFF; border-radius: 12px; overflow: hidden;">
 
-<p>
-    Si vous n'êtes pas à l'origine de cette inscription,
-    vous pouvez ignorer cet e-mail.
-</p>
+                    <!-- En-tête -->
+                    <tr>
+                        <td align="center"
+                            style="background-color: #292524; padding: 35px 20px;">
 
-<p>
-    À bientôt sur ModeBoutique !
-</p>
+                            <h1 style="margin: 0; color: #FFFFFF; font-size: 28px; letter-spacing: 2px;">
+                                Mode<span style="color: #B08D67;">Boutique</span>
+                            </h1>
+
+                            <p style="margin: 12px 0 0; color: #E7DED2; font-size: 13px; letter-spacing: 1px;">
+                                L'ÉLÉGANCE AU QUOTIDIEN
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Contenu -->
+                    <tr>
+                        <td style="padding: 40px 35px 30px;">
+
+                            <h2 style="margin: 0 0 20px; color: #292524; font-size: 23px; text-align: center;">
+                                Bienvenue chez ModeBoutique !
+                            </h2>
+
+                            <p style="font-size: 15px; line-height: 1.8; color: #57534E;">
+                                Bonjour,
+                            </p>
+
+                            <p style="font-size: 15px; line-height: 1.8; color: #57534E;">
+                                Nous vous remercions pour votre inscription sur
+                                <strong style="color: #292524;">ModeBoutique</strong>.
+                                Nous sommes ravis de vous accueillir parmi nous !
+                            </p>
+
+                            <p style="font-size: 15px; line-height: 1.8; color: #57534E;">
+                                Pour confirmer votre adresse e-mail et activer votre compte,
+                                veuillez cliquer sur le bouton ci-dessous :
+                            </p>
+
+                            <!-- Bouton de confirmation -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0"
+                                   align="center" style="margin: 30px auto;">
+
+                                <tr>
+                                    <td align="center" bgcolor="#B08D67"
+                                        style="border-radius: 7px;">
+
+                                        <a href="{{ signedUrl|raw }}"
+                                           style="display: inline-block; padding: 15px 30px; color: #FFFFFF; text-decoration: none; font-size: 14px; font-weight: bold; letter-spacing: 0.5px;">
+                                            CONFIRMER MON ADRESSE E-MAIL
+                                        </a>
+
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p style="font-size: 13px; line-height: 1.7; color: #78716C; text-align: center;">
+                                Ce lien de confirmation est valable pendant
+                                <strong>une heure</strong>.
+                            </p>
+
+                            <hr style="border: none; border-top: 1px solid #E7DED2; margin: 30px 0;">
+
+                            <p style="font-size: 13px; line-height: 1.7; color: #78716C;">
+                                Si vous n'êtes pas à l'origine de cette inscription,
+                                vous pouvez simplement ignorer cet e-mail.
+                            </p>
+
+                            <p style="margin-top: 25px; font-size: 14px; color: #57534E;">
+                                À bientôt sur <strong style="color: #292524;">ModeBoutique</strong> !
+                            </p>
+
+                        </td>
+                    </tr>
+
+                    <!-- Pied de page -->
+                    <tr>
+                        <td align="center"
+                            style="background-color: #F5F0E8; padding: 22px 20px;">
+
+                            <p style="margin: 0; font-size: 12px; color: #78716C;">
+                                © {{ "now"|date("Y") }} ModeBoutique. Tous droits réservés.
+                            </p>
+
+                            <p style="margin: 8px 0 0; font-size: 12px; color: #A8A29E;">
+                                Merci de faire confiance à ModeBoutique.
+                            </p>
+
+                        </td>
+                    </tr>
+
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>
