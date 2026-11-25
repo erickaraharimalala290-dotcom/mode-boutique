@@ -1,57 +1,32 @@
 {# Navigation commune de l'espace client #}
 <aside class="h-fit rounded-3xl border border-beige bg-white p-4 shadow-sm">
 
-    {# En-tête du compte #}
-    <div class="border-b border-beige pb-5 text-center">
-        <div class="mx-auto flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-2 border-brand-light bg-brand-light text-2xl font-bold text-brand">
-            {% if app.user and app.user.profilePicture %}
-                <img
-                    src="{{ asset('uploads/profile/' ~ app.user.profilePicture) }}"
-                    alt="Photo de profil"
-                    class="h-full w-full object-cover"
-                >
-            {% elseif app.user %}
-                {{ app.user.firstname|default('M')|first|upper }}{{ app.user.lastname|default('B')|first|upper }}
-            {% else %}
-                MB
-            {% endif %}
-        </div>
+    {# Bouton toggle visible uniquement sur mobile #}
+    <button
+        type="button"
+        id="account-menu-toggle"
+        aria-expanded="false"
+        aria-controls="account-menu-content"
+        class="flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold text-ink transition hover:bg-cream lg:hidden"
+    >
+        <span class="flex items-center gap-3">
+            <span class="text-xl" aria-hidden="true">☰</span>
+            Mon espace client
+        </span>
 
-        <h2 class="mt-3 font-bold text-ink">
-            {% if app.user %}
-                {{ app.user.firstname|default('Mon') }}
-                {{ app.user.lastname|default('compte') }}
-            {% else %}
-                Mon espace
-            {% endif %}
-        </h2>
+        <span id="account-menu-arrow" class="text-lg transition-transform duration-300" aria-hidden="true">
+            ▾
+        </span>
+    </button>
 
-        <p class="mt-1 text-xs text-ink-soft">Espace personnel</p>
-    </div>
+    {# Contenu du sidebar #}
+    <div id="account-menu-content" class="hidden lg:block">
 
-    <p class="mb-4 mt-5 px-3 text-xs font-semibold uppercase tracking-wider text-ink-soft">
-        Mon compte
-    </p>
+        {# En-tête du compte #}
+        <div class="border-b border-beige pb-5 text-center">
 
-    <nav class="space-y-2" aria-label="Navigation du compte">
+            <div class="mx-auto flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-2 border-brand-light bg-brand-light text-2xl font-bold text-brand">
 
-        {# Tableau de bord #}
-        <a
-            href="{{ path('app_account') }}"
-            {% if activePage|default('') == 'dashboard' %}aria-current="page"{% endif %}
-            class="block rounded-xl px-4 py-3 text-sm transition {{ activePage|default('') == 'dashboard' ? 'bg-brand-light font-semibold text-brand' : 'text-ink-soft hover:bg-cream hover:text-brand' }}"
-        >
-            <span class="mr-2" aria-hidden="true">▦</span>
-            Tableau de bord
-        </a>
-
-        {# Profil #}
-        <a
-            href="{{ path('app_account_profile') }}"
-            {% if activePage|default('') == 'profile' %}aria-current="page"{% endif %}
-            class="block rounded-xl px-4 py-3 text-sm transition {{ activePage|default('') == 'profile' ? 'bg-brand-light font-semibold text-brand' : 'text-ink-soft hover:bg-cream hover:text-brand' }}"
-        >
-            <span class="mr-2 inline-flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full border border-brand-light bg-cream align-middle text-xs font-bold text-brand">
                 {% if app.user and app.user.profilePicture %}
                     <img
                         src="{{ asset('uploads/profile/' ~ app.user.profilePicture) }}"
@@ -63,92 +38,163 @@
                 {% else %}
                     MB
                 {% endif %}
-            </span>
 
-            Mon profil
-        </a>
+            </div>
 
-        {# Sécurité #}
-        <a
-            href="{{ path('app_account_security') }}"
-            {% if activePage|default('') == 'security' %}aria-current="page"{% endif %}
-            class="block rounded-xl px-4 py-3 text-sm transition {{ activePage|default('') == 'security' ? 'bg-brand-light font-semibold text-brand' : 'text-ink-soft hover:bg-cream hover:text-brand' }}"
-        >
-            <span class="mr-2" aria-hidden="true">♧</span>
-            Sécurité
-        </a>
+            <h2 class="mt-3 font-bold text-ink">
+                {% if app.user %}
+                    {{ app.user.firstname|default('Mon') }}
+                    {{ app.user.lastname|default('compte') }}
+                {% else %}
+                    Mon espace
+                {% endif %}
+            </h2>
 
-        {# Commandes #}
-        <a
-            href="{{ path('app_account_orders') }}"
-            {% if activePage|default('') == 'orders' %}aria-current="page"{% endif %}
-            class="block rounded-xl px-4 py-3 text-sm transition {{ activePage|default('') == 'orders' ? 'bg-brand-light font-semibold text-brand' : 'text-ink-soft hover:bg-cream hover:text-brand' }}"
-        >
-            <span class="mr-2" aria-hidden="true">▤</span>
-            Mes commandes
-        </a>
+            <p class="mt-1 text-xs text-ink-soft">Espace personnel</p>
+        </div>
 
-        {# Messages : afficher le nombre de réponses non lues #}
-        {% set unreadCount = unread_messages_count() %}
+        <p class="mb-4 mt-5 px-3 text-xs font-semibold uppercase tracking-wider text-ink-soft">
+            Mon compte
+        </p>
 
-        <a
-            href="{{ path('app_account_messages') }}"
-            {% if activePage|default('') == 'messages' %}aria-current="page"{% endif %}
-            class="flex items-center justify-between rounded-xl px-4 py-3 text-sm transition {{ activePage|default('') == 'messages' ? 'bg-brand-light font-semibold text-brand' : 'text-ink-soft hover:bg-cream hover:text-brand' }}"
-        >
-            <span>
-                <span class="mr-2" aria-hidden="true">✉</span>
-                Mes messages
-            </span>
+        <nav class="space-y-2" aria-label="Navigation du compte">
 
-            {# Garder le badge dans le DOM pour permettre son actualisation automatique #}
-            <span
-                data-notification-count="messages"
-                class="{{ unreadCount > 0 ? 'inline-flex' : 'hidden' }} h-6 min-w-6 items-center justify-center rounded-full bg-red-600 px-2 text-xs font-bold text-white"
+            {# Tableau de bord #}
+            <a
+                href="{{ path('app_account') }}"
+                {% if activePage|default('') == 'dashboard' %}aria-current="page"{% endif %}
+                class="block rounded-xl px-4 py-3 text-sm transition {{ activePage|default('') == 'dashboard' ? 'bg-brand-light font-semibold text-brand' : 'text-ink-soft hover:bg-cream hover:text-brand' }}"
             >
-                {{ unreadCount }}
-            </span>
-        </a>
+                <span class="mr-2" aria-hidden="true">▦</span>
+                Tableau de bord
+            </a>
 
-        {# Favoris #}
-        <a
-            href="{{ path('app_account_favorites') }}"
-            {% if activePage|default('') == 'favorites' %}aria-current="page"{% endif %}
-            class="block rounded-xl px-4 py-3 text-sm transition {{ activePage|default('') == 'favorites' ? 'bg-brand-light font-semibold text-brand' : 'text-ink-soft hover:bg-cream hover:text-brand' }}"
-        >
-            <span class="mr-2" aria-hidden="true">♡</span>
-            Mes favoris
-        </a>
+            {# Profil #}
+            <a
+                href="{{ path('app_account_profile') }}"
+                {% if activePage|default('') == 'profile' %}aria-current="page"{% endif %}
+                class="block rounded-xl px-4 py-3 text-sm transition {{ activePage|default('') == 'profile' ? 'bg-brand-light font-semibold text-brand' : 'text-ink-soft hover:bg-cream hover:text-brand' }}"
+            >
+                <span class="mr-2 inline-flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full border border-brand-light bg-cream align-middle text-xs font-bold text-brand">
+                    {% if app.user and app.user.profilePicture %}
+                        <img
+                            src="{{ asset('uploads/profile/' ~ app.user.profilePicture) }}"
+                            alt="Photo de profil"
+                            class="h-full w-full object-cover"
+                        >
+                    {% elseif app.user %}
+                        {{ app.user.firstname|default('M')|first|upper }}{{ app.user.lastname|default('B')|first|upper }}
+                    {% else %}
+                        MB
+                    {% endif %}
+                </span>
 
-        {# Panier #}
-        <a
-            href="{{ path('app_account_cart') }}"
-            {% if activePage|default('') == 'cart' %}aria-current="page"{% endif %}
-            class="block rounded-xl px-4 py-3 text-sm transition {{ activePage|default('') == 'cart' ? 'bg-brand-light font-semibold text-brand' : 'text-ink-soft hover:bg-cream hover:text-brand' }}"
-        >
-            <span class="mr-2" aria-hidden="true">🛒</span>
-            Mon panier
-        </a>
+                Mon profil
+            </a>
 
-        {# Retour vers la boutique #}
-        <a
-            href="{{ path('home') }}"
-            class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-stone-600 transition hover:bg-[#F5F0E8]"
-        >
-            <span>↗</span>
-            Voir la boutique
-        </a>
+            {# Sécurité #}
+            <a
+                href="{{ path('app_account_security') }}"
+                {% if activePage|default('') == 'security' %}aria-current="page"{% endif %}
+                class="block rounded-xl px-4 py-3 text-sm transition {{ activePage|default('') == 'security' ? 'bg-brand-light font-semibold text-brand' : 'text-ink-soft hover:bg-cream hover:text-brand' }}"
+            >
+                <span class="mr-2" aria-hidden="true">♧</span>
+                Sécurité
+            </a>
 
-        {# Déconnexion #}
-        <div class="my-3 border-t border-beige"></div>
+            {# Commandes #}
+            <a
+                href="{{ path('app_account_orders') }}"
+                {% if activePage|default('') == 'orders' %}aria-current="page"{% endif %}
+                class="block rounded-xl px-4 py-3 text-sm transition {{ activePage|default('') == 'orders' ? 'bg-brand-light font-semibold text-brand' : 'text-ink-soft hover:bg-cream hover:text-brand' }}"
+            >
+                <span class="mr-2" aria-hidden="true">▤</span>
+                Mes commandes
+            </a>
 
-        <a
-            href="{{ path('app_logout') }}"
-            class="block rounded-xl px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
-        >
-            <span class="mr-2" aria-hidden="true">↪</span>
-            Déconnexion
-        </a>
+            {# Messages : afficher le nombre de réponses non lues #}
+            {% set unreadCount = unread_messages_count() %}
 
-    </nav>
+            <a
+                href="{{ path('app_account_messages') }}"
+                {% if activePage|default('') == 'messages' %}aria-current="page"{% endif %}
+                class="flex items-center justify-between rounded-xl px-4 py-3 text-sm transition {{ activePage|default('') == 'messages' ? 'bg-brand-light font-semibold text-brand' : 'text-ink-soft hover:bg-cream hover:text-brand' }}"
+            >
+                <span>
+                    <span class="mr-2" aria-hidden="true">✉</span>
+                    Mes messages
+                </span>
+
+                <span
+                    data-notification-count="messages"
+                    class="{{ unreadCount > 0 ? 'inline-flex' : 'hidden' }} h-6 min-w-6 items-center justify-center rounded-full bg-red-600 px-2 text-xs font-bold text-white"
+                >
+                    {{ unreadCount }}
+                </span>
+            </a>
+
+            {# Favoris #}
+            <a
+                href="{{ path('app_account_favorites') }}"
+                {% if activePage|default('') == 'favorites' %}aria-current="page"{% endif %}
+                class="block rounded-xl px-4 py-3 text-sm transition {{ activePage|default('') == 'favorites' ? 'bg-brand-light font-semibold text-brand' : 'text-ink-soft hover:bg-cream hover:text-brand' }}"
+            >
+                <span class="mr-2" aria-hidden="true">♡</span>
+                Mes favoris
+            </a>
+
+            {# Panier #}
+            <a
+                href="{{ path('app_account_cart') }}"
+                {% if activePage|default('') == 'cart' %}aria-current="page"{% endif %}
+                class="block rounded-xl px-4 py-3 text-sm transition {{ activePage|default('') == 'cart' ? 'bg-brand-light font-semibold text-brand' : 'text-ink-soft hover:bg-cream hover:text-brand' }}"
+            >
+                <span class="mr-2" aria-hidden="true">🛒</span>
+                Mon panier
+            </a>
+
+            {# Retour vers la boutique #}
+            <a
+                href="{{ path('home') }}"
+                class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-stone-600 transition hover:bg-[#F5F0E8]"
+            >
+                <span>↗</span>
+                Voir la boutique
+            </a>
+
+            {# Déconnexion #}
+            <div class="my-3 border-t border-beige"></div>
+
+            <a
+                href="{{ path('app_logout') }}"
+                class="block rounded-xl px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
+            >
+                <span class="mr-2" aria-hidden="true">↪</span>
+                Déconnexion
+            </a>
+
+        </nav>
+    </div>
 </aside>
+
+{# Gestion de l'ouverture et de la fermeture du menu mobile #}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggle = document.getElementById('account-menu-toggle');
+        const content = document.getElementById('account-menu-content');
+        const arrow = document.getElementById('account-menu-arrow');
+
+        if (!toggle || !content || !arrow) {
+            return;
+        }
+
+        toggle.addEventListener('click', function () {
+            const isOpen = !content.classList.contains('hidden');
+
+            content.classList.toggle('hidden');
+            toggle.setAttribute('aria-expanded', String(!isOpen));
+
+            arrow.style.transform = !isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+        });
+    });
+</script>
