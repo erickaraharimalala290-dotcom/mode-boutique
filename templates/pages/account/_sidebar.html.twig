@@ -176,25 +176,3 @@
         </nav>
     </div>
 </aside>
-
-{# Gestion de l'ouverture et de la fermeture du menu mobile #}
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const toggle = document.getElementById('account-menu-toggle');
-        const content = document.getElementById('account-menu-content');
-        const arrow = document.getElementById('account-menu-arrow');
-
-        if (!toggle || !content || !arrow) {
-            return;
-        }
-
-        toggle.addEventListener('click', function () {
-            const isOpen = !content.classList.contains('hidden');
-
-            content.classList.toggle('hidden');
-            toggle.setAttribute('aria-expanded', String(!isOpen));
-
-            arrow.style.transform = !isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
-        });
-    });
-</script>

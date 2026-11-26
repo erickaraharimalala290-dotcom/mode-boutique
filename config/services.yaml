@@ -22,7 +22,7 @@ services:
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
         # Extension Twig pour le compteur du panier
-    App\Twig\CartExtension:
+    App\Twig\Components\CartExtension:
         autowire: true
         autoconfigure: true
         tags: ['twig.extension']
