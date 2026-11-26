@@ -8,6 +8,7 @@ use App\Entity\User;
 use App\Repository\ContactMessageRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -55,7 +56,12 @@ class MessageCrudController extends AbstractController
                     'other' => 'Autre',
                     default => $contactMessage->getSubject() ?? 'Sans sujet',
                 },
-                'date' => $contactMessage->getCreatedAt()->format('d/m/Y'),
+
+                // Afficher la date et l'heure selon le fuseau horaire de Madagascar.
+                'date' => $contactMessage->getCreatedAt()
+                    ->setTimezone(new \DateTimeZone('Indian/Antananarivo'))
+                    ->format('d/m/Y à H:i'),
+
                 'status' => $isRead ? 'Lu' : 'Non lu',
                 'isRead' => $isRead,
                 'message' => $contactMessage->getMessage(),
@@ -106,7 +112,7 @@ class MessageCrudController extends AbstractController
             return $this->redirectToRoute('admin_messages_index');
         }
 
-        // CrÃ©er une nouvelle rÃ©ponse dans la conversation.
+        // Créer une nouvelle réponse dans la conversation.
         $messageReply = new MessageReply();
         $messageReply->setContactMessage($contactMessage);
         $messageReply->setSender($admin);
@@ -156,5 +162,71 @@ class MessageCrudController extends AbstractController
 
         return $this->redirectToRoute('admin_messages_index');
     }
-}
 
+    // Marquer automatiquement le message comme lu lorsqu'un administrateur l'ouvre.
+    #[Route('/{id}/mark-read', name: 'mark_read', methods: ['POST'])]
+    public function markRead(
+        ContactMessage $contactMessage,
+        Request $request,
+        EntityManagerInterface $entityManager
+    ): JsonResponse {
+        // Vérifier le jeton CSRF pour sécuriser la requête.
+        if (!$this->isCsrfTokenValid(
+            'mark_read_' . $contactMessage->getId(),
+            $request->request->get('_token')
+        )) {
+            throw $this->createAccessDeniedException(
+                'Jeton CSRF invalide.'
+            );
+        }
+
+        // Mémoriser le statut initial pour éviter de diminuer deux fois le compteur.
+        $wasUnread = !$contactMessage->isRead();
+
+        // Enregistrer le changement uniquement si le message était non lu.
+        if ($wasUnread) {
+            $contactMessage->setIsRead(true);
+            $entityManager->flush();
+        }
+
+        return new JsonResponse([
+            'success' => true,
+            'isRead' => true,
+            'wasUnread' => $wasUnread,
+        ]);
+    }
+
+    // Supprimer un message ainsi que toutes les réponses associées.
+    #[Route('/{id}/delete', name: 'delete', methods: ['POST'])]
+    public function delete(
+        ContactMessage $contactMessage,
+        Request $request,
+        EntityManagerInterface $entityManager
+    ): Response {
+        // Vérifier le jeton CSRF avant toute suppression.
+        if (!$this->isCsrfTokenValid(
+            'delete_' . $contactMessage->getId(),
+            $request->request->get('_token')
+        )) {
+            throw $this->createAccessDeniedException(
+                'Jeton CSRF invalide.'
+            );
+        }
+
+        // Supprimer d'abord les réponses pour éviter les problèmes de clé étrangère.
+        foreach ($contactMessage->getMessageReplies() as $reply) {
+            $entityManager->remove($reply);
+        }
+
+        // Supprimer ensuite le message principal.
+        $entityManager->remove($contactMessage);
+        $entityManager->flush();
+
+        $this->addFlash(
+            'success',
+            'Le message a été supprimé avec succès.'
+        );
+
+        return $this->redirectToRoute('admin_messages_index');
+    }
+}

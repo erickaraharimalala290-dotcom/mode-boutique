@@ -171,6 +171,23 @@
                         method="post"
                         class="mt-8 space-y-6"
                     >
+                        
+                        {# Champ invisible destiné à détecter les robots #}
+                        <div
+                            aria-hidden="true"
+                            style="position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden;"
+                        >
+                            <label for="contact_website">Ne pas remplir ce champ</label>
+                            <input
+                                type="text"
+                                id="contact_website"
+                                name="website"
+                                tabindex="-1"
+                                autocomplete="off"
+                            >
+                        </div>
+
+
                         {# Protection CSRF #}
                         <input
                             type="hidden"
