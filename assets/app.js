@@ -14,6 +14,13 @@ function initAccountMenu() {
         return;
     }
 
+    // Éviter d'ajouter plusieurs fois les mêmes événements.
+    if (toggle.dataset.accountMenuInitialized === 'true') {
+        return;
+    }
+
+    toggle.dataset.accountMenuInitialized = 'true';
+
     const mobileScreen = window.matchMedia('(max-width: 1023px)');
 
     // Adapter l'affichage du menu selon la taille de l'écran.
@@ -41,10 +48,7 @@ function initAccountMenu() {
 
         content.classList.toggle('hidden');
 
-        toggle.setAttribute(
-            'aria-expanded',
-            String(!isOpen)
-        );
+        toggle.setAttribute('aria-expanded', String(!isOpen));
 
         arrow.style.transform = isOpen
             ? 'rotate(0deg)'
@@ -55,9 +59,12 @@ function initAccountMenu() {
     mobileScreen.addEventListener('change', updateMenu);
 }
 
-// Initialiser le menu lorsque le DOM est prêt.
+// Initialiser le menu lorsque le DOM classique est prêt.
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initAccountMenu);
 } else {
     initAccountMenu();
 }
+
+// Réinitialiser le menu après chaque navigation avec Symfony UX Turbo.
+document.addEventListener('turbo:load', initAccountMenu);
